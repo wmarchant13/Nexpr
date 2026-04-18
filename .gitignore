@@ -1,0 +1,35 @@
+node_modules/
+dist/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development.local
+.env.test.local
+
+# OS
+.DS_Store
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build
+.bundle/
+bun.lockb
+
+# Session files
+session.db
+sessions/
+
+# API keys and credentials
+*.key
+*.pem
+*.p12
+secrets.json
