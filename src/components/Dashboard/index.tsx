@@ -20,7 +20,6 @@ import {
   useActivities,
   useAthlete,
   useLogout,
-  useStats,
 } from "../../hooks";
 import styles from "./Dashboard.module.scss";
 
@@ -62,7 +61,6 @@ export default function Dashboard() {
   const [page, setPage] = useState(1);
   const { data: athlete, isLoading: athleteLoading } = useAthlete();
   const { data: activities, isLoading: activitiesLoading } = useActivities(page, 100);
-  useStats(athlete?.id ?? null);
   const { mutate: logout } = useLogout();
 
   const chartData = useMemo(
@@ -96,11 +94,13 @@ export default function Dashboard() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.pageTexture} aria-hidden="true" />
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.profileGroup}>
             <img src={athlete.profile} alt={athlete.firstname} className={styles.avatar} />
             <div>
+              <p className={styles.eyebrow}>Personal motion archive</p>
               <h1 className={styles.name}>
                 {athlete.firstname} {athlete.lastname}
               </h1>
@@ -114,6 +114,28 @@ export default function Dashboard() {
       </header>
 
       <main className={styles.main}>
+        <section className={styles.heroGrid}>
+          <div className={styles.heroIntro}>
+            <p className={styles.sectionKicker}>Dashboard</p>
+            <h2 className={styles.heroTitle}>Your recent movement, clearly organized.</h2>
+            <p className={styles.heroText}>
+              Review recent volume, elevation, pace, and activity patterns in one place.
+            </p>
+            <div className={styles.heroMeta}>
+              <div className={styles.heroMetaItem}>
+                <span className={styles.heroMetaLabel}>Recent entries</span>
+                <strong className={styles.heroMetaValue}>{recentActivities.length}</strong>
+              </div>
+              <div className={styles.heroMetaItem}>
+                <span className={styles.heroMetaLabel}>Athlete</span>
+                <strong className={styles.heroMetaValue}>
+                  {athlete.firstname} {athlete.lastname}
+                </strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div className={styles.metricsGrid}>
           <div className={metricCardClass("orange")}>
             <p className={styles.metricLabel}>Total Distance</p>
@@ -179,7 +201,10 @@ export default function Dashboard() {
         {!activitiesLoading && chartData.length > 0 && (
           <div className={styles.chartGrid}>
             <div className={styles.panel}>
-              <h2 className={styles.panelTitle}>3-Month Mileage</h2>
+              <div className={styles.chartHeader}>
+                <span className={styles.chartTag}>Distance log</span>
+                <h2 className={styles.panelTitle}>3-Month Mileage</h2>
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -202,7 +227,10 @@ export default function Dashboard() {
             </div>
 
             <div className={styles.panel}>
-              <h2 className={styles.panelTitle}>Elevation Gain by Month</h2>
+              <div className={styles.chartHeader}>
+                <span className={styles.chartTag}>Vertical log</span>
+                <h2 className={styles.panelTitle}>Elevation Gain by Month</h2>
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -219,7 +247,10 @@ export default function Dashboard() {
 
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
-            <h2 className={styles.panelTitle}>Recent Activities</h2>
+            <div>
+              <span className={styles.chartTag}>Field notes</span>
+              <h2 className={styles.panelTitle}>Recent Activities</h2>
+            </div>
           </div>
 
           {activitiesLoading ? (

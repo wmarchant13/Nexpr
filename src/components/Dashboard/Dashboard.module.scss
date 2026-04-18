@@ -1,9 +1,24 @@
 .page {
+  position: relative;
+  overflow: hidden;
   min-height: 100vh;
   color: #ffffff;
   background:
-    radial-gradient(circle at top, rgba(249, 115, 22, 0.12), transparent 28%),
-    linear-gradient(180deg, #0b1120 0%, #111827 42%, #0f172a 100%);
+    radial-gradient(circle at 8% 12%, rgba(0, 255, 163, 0.08), transparent 22%),
+    radial-gradient(circle at 85% 18%, rgba(58, 130, 246, 0.08), transparent 24%),
+    radial-gradient(circle at 62% 78%, rgba(163, 230, 53, 0.06), transparent 22%),
+    linear-gradient(180deg, #020304 0%, #07090b 46%, #0c1016 100%);
+}
+
+.pageTexture {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .statusPage {
@@ -48,9 +63,9 @@
   position: sticky;
   top: 0;
   z-index: 5;
-  border-bottom: 1px solid rgba(55, 65, 81, 0.9);
-  background: rgba(17, 24, 39, 0.8);
-  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(9, 10, 15, 0.72);
+  backdrop-filter: blur(18px);
 }
 
 .headerInner,
@@ -67,6 +82,18 @@
   padding: 1.5rem 1rem;
 }
 
+.eyebrow,
+.sectionKicker,
+.chartTag,
+.heroMetaLabel {
+  color: #8b95a7;
+  font-size: 0.72rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
 .profileGroup {
   display: flex;
   align-items: center;
@@ -77,22 +104,25 @@
 .avatar {
   width: 3.5rem;
   height: 3.5rem;
-  border: 2px solid #f97316;
-  border-radius: 999px;
+  border: 2px solid #00ffa3;
+  border-radius: 1.25rem;
   object-fit: cover;
   flex-shrink: 0;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.34);
 }
 
 .name {
-  margin: 0;
-  font-size: clamp(1.9rem, 4vw, 2.4rem);
+  margin: 0.2rem 0 0;
+  font-size: clamp(2rem, 4vw, 2.9rem);
+  font-family: var(--font-display);
   font-weight: 800;
-  line-height: 1.05;
+  line-height: 0.98;
+  letter-spacing: -0.06em;
 }
 
 .username {
   margin: 0.25rem 0 0;
-  color: #94a3b8;
+  color: #9ea6b8;
 }
 
 .logoutButton,
@@ -121,14 +151,75 @@
 }
 
 .logoutButton {
-  padding: 0.8rem 1.35rem;
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  padding: 0.9rem 1.3rem;
+  background: linear-gradient(135deg, #0e1116, #171c23);
   color: #fff;
-  box-shadow: 0 16px 28px rgba(234, 88, 12, 0.2);
+  border: 1px solid rgba(58, 130, 246, 0.35);
+  font-family: var(--font-display);
+  box-shadow: none;
 }
 
 .main {
   padding: 2rem 1rem 3rem;
+}
+
+.heroGrid {
+  display: block;
+  margin-bottom: 1.4rem;
+}
+
+.heroIntro {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 2rem 1.15rem 1.5rem 1.25rem;
+  background:
+    linear-gradient(145deg, rgba(12, 14, 17, 0.99), rgba(6, 7, 9, 0.99));
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
+}
+
+.heroIntro {
+  padding: 1.5rem;
+}
+
+.heroTitle {
+  margin: 0.5rem 0 0.8rem;
+  max-width: 12ch;
+  color: #f5f1e8;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+}
+
+.heroText {
+  margin: 0;
+  max-width: 48ch;
+  color: #a6aebe;
+  line-height: 1.65;
+}
+
+.heroMeta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+.heroMetaItem {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.heroMetaValue {
+  color: #f3f6fb;
+  font-size: 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .metricsGrid,
@@ -151,10 +242,10 @@
 .metricCard,
 .runCard,
 .panel {
-  border: 1px solid rgba(55, 65, 81, 0.95);
-  border-radius: 1.25rem;
-  background: linear-gradient(180deg, rgba(31, 41, 55, 0.96), rgba(15, 23, 42, 0.96));
-  box-shadow: 0 18px 45px rgba(2, 6, 23, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1.9rem 1.15rem 1.5rem 1.15rem;
+  background: linear-gradient(180deg, rgba(12, 13, 16, 0.99), rgba(6, 7, 9, 0.99));
+  box-shadow: 0 16px 30px rgba(2, 6, 23, 0.14);
 }
 
 .metricCard,
@@ -165,12 +256,12 @@
     border-color 0.18s ease;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
   }
 }
 
 .metricCardOrange:hover {
-  border-color: rgba(249, 115, 22, 0.45);
+  border-color: rgba(0, 255, 163, 0.45);
 }
 
 .metricCardBlue:hover {
@@ -178,7 +269,7 @@
 }
 
 .metricCardGreen:hover {
-  border-color: rgba(34, 197, 94, 0.45);
+  border-color: rgba(163, 230, 53, 0.45);
 }
 
 .metricCardPurple:hover {
@@ -190,23 +281,23 @@
 }
 
 .runCardIndigo {
-  background: linear-gradient(180deg, rgba(49, 46, 129, 0.92), rgba(30, 41, 59, 0.95));
+  background: linear-gradient(180deg, rgba(27, 42, 77, 0.6), rgba(8, 11, 15, 0.99));
 }
 
 .runCardCyan {
-  background: linear-gradient(180deg, rgba(8, 145, 178, 0.24), rgba(14, 116, 144, 0.25)),
-    linear-gradient(180deg, rgba(31, 41, 55, 0.96), rgba(15, 23, 42, 0.96));
+  background: linear-gradient(180deg, rgba(58, 130, 246, 0.2), rgba(12, 30, 60, 0.18)),
+    linear-gradient(180deg, rgba(12, 13, 16, 0.99), rgba(6, 7, 9, 0.99));
 }
 
 .runCardRed {
-  background: linear-gradient(180deg, rgba(153, 27, 27, 0.24), rgba(127, 29, 29, 0.25)),
-    linear-gradient(180deg, rgba(31, 41, 55, 0.96), rgba(15, 23, 42, 0.96));
+  background: linear-gradient(180deg, rgba(0, 255, 163, 0.14), rgba(5, 42, 31, 0.14)),
+    linear-gradient(180deg, rgba(12, 13, 16, 0.99), rgba(6, 7, 9, 0.99));
 }
 
 .metricLabel,
 .activityStatLabel {
   margin: 0;
-  color: #94a3b8;
+  color: #8e96a8;
   font-size: 0.76rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -215,13 +306,15 @@
 
 .metricValue {
   margin: 0.5rem 0 0;
-  font-size: clamp(2rem, 5vw, 2.7rem);
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  font-family: var(--font-display);
   font-weight: 800;
   line-height: 1;
+  letter-spacing: -0.07em;
 }
 
 .valueOrange {
-  color: #fb923c;
+  color: #00ffa3;
 }
 
 .valueBlue {
@@ -229,7 +322,7 @@
 }
 
 .valueGreen {
-  color: #4ade80;
+  color: #bef264;
 }
 
 .valuePurple {
@@ -245,16 +338,16 @@
 }
 
 .valueCyan {
-  color: #a5f3fc;
+  color: #7dd3fc;
 }
 
 .valueRed {
-  color: #fecaca;
+  color: #86efac;
 }
 
 .metricCaption {
   margin: 0.35rem 0 0;
-  color: #64748b;
+  color: #6f788a;
   font-size: 0.78rem;
 }
 
@@ -264,21 +357,23 @@
 
 .panelHeader {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(55, 65, 81, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .panelTitle {
-  margin: 0;
-  color: #fff;
+  margin: 0.25rem 0 0;
+  color: #f3f6fb;
   font-size: 1.45rem;
+  font-family: var(--font-display);
   font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 .chartGrid .panel {
   padding: 1.5rem;
 }
 
-.chartGrid .panelTitle {
+.chartHeader {
   margin-bottom: 1.5rem;
 }
 
@@ -298,7 +393,7 @@
 
 .activityItem {
   padding: 1.25rem 1.5rem;
-  border-top: 1px solid rgba(55, 65, 81, 0.7);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   transition: background-color 0.18s ease;
 
   &:first-child {
@@ -306,7 +401,7 @@
   }
 
   &:hover {
-    background: rgba(55, 65, 81, 0.28);
+    background: rgba(255, 255, 255, 0.025);
   }
 }
 
@@ -324,14 +419,15 @@
 
 .activityName {
   margin: 0;
-  color: #fff;
-  font-size: 1.1rem;
+  color: #fff7ef;
+  font-size: 1.15rem;
+  font-family: var(--font-display);
   font-weight: 700;
 }
 
 .activityMeta {
   margin: 0.35rem 0 0;
-  color: #94a3b8;
+  color: #97a0b3;
   font-size: 0.92rem;
 }
 
@@ -340,7 +436,7 @@
 }
 
 .activityType {
-  color: #64748b;
+  color: #6d7788;
 }
 
 .activityBadge {
@@ -348,10 +444,10 @@
   align-items: center;
   justify-content: center;
   padding: 0.35rem 0.85rem;
-  border: 1px solid rgba(249, 115, 22, 0.28);
-  border-radius: 999px;
-  background: rgba(249, 115, 22, 0.16);
-  color: #fdba74;
+  border: 1px solid rgba(58, 130, 246, 0.28);
+  border-radius: 0.95rem;
+  background: rgba(58, 130, 246, 0.12);
+  color: #93c5fd;
   font-size: 0.84rem;
   font-weight: 700;
   white-space: nowrap;
@@ -366,8 +462,8 @@
 
 .activityStatCard {
   padding: 0.8rem;
-  border-radius: 0.9rem;
-  background: rgba(15, 23, 42, 0.56);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .activityStatValue {
@@ -382,19 +478,20 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  border-top: 1px solid rgba(55, 65, 81, 0.85);
-  background: rgba(15, 23, 42, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .paginationButton {
   min-width: 7rem;
   padding: 0.75rem 1rem;
-  background: #374151;
+  background: #232734;
   color: #fff;
+  font-family: var(--font-display);
 }
 
 .paginationLabel {
-  color: #94a3b8;
+  color: #9ca4b6;
   font-weight: 600;
 }
 
@@ -436,6 +533,10 @@
 
   .activityBadge {
     align-self: flex-start;
+  }
+
+  .heroMeta {
+    grid-template-columns: 1fr;
   }
 }
 

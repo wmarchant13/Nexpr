@@ -1,5 +1,8 @@
 node_modules/
 dist/
+.output/
+.nitro/
+.tanstack/
 
 # Environment variables & secrets
 .env
@@ -24,11 +27,7 @@ dist/
 .bundle/
 bun.lockb
 
-# Session files
-session.db
-sessions/
-
-# API keys and credentials
+# Sensitive files
 *.key
 *.pem
 *.p12

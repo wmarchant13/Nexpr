@@ -1,205 +1,59 @@
 # Development Guide
 
-## Quick Start
+## Current Architecture
 
-1. **Install dependencies**
+This project is a TanStack Start app.
 
-   ```bash
-   bun install
-   ```
+- Routing lives in `src/routes`
+- Server-side Strava calls live in `src/api`
+- Data fetching hooks live in `src/hooks`
+- UI components live in `src/components`
+- Component styles use Sass modules in each component folder
 
-2. **Setup Strava OAuth**
-   - Go to https://www.strava.com/settings/api
-   - Create a new application
-   - Copy your Client ID and Client Secret
-   - Update `.env` file with your credentials
+## Local Workflow
 
-3. **Run development server**
-
-   ```bash
-   bun run dev
-   ```
-
-4. **Open in browser**
-   - Frontend: http://localhost:5173
-   - API: http://localhost:3000
-
-## Development Workflow
-
-### Making Changes to Backend
-
-The backend uses Bun's `--hot` flag for hot reload:
-
-- Edit files in `server/` directory
-- Changes are automatically reloaded
-- Check terminal for any errors
-
-### Making Changes to Frontend
-
-The frontend uses Vite's hot module replacement:
-
-- Edit files in `src/` directory
-- Changes appear instantly in the browser
-- Type errors are shown in terminal
-
-### Testing API Endpoints
-
-Use curl or Postman to test endpoints:
+Install dependencies:
 
 ```bash
-# Get login URL
-curl http://localhost:3000/api/auth/strava/login
-
-# Get athlete data (replace TOKEN with actual access token)
-curl -H "Authorization: Bearer TOKEN" http://localhost:3000/api/strava/athlete
-
-# Get activities
-curl -H "Authorization: Bearer TOKEN" http://localhost:3000/api/strava/activities?page=1&per_page=10
-```
-
-## Common Issues & Solutions
-
-### Port Already in Use
-
-```bash
-# Change port in .env
-PORT=3001
-```
-
-### Module Not Found Errors
-
-```bash
-# Reinstall dependencies
-rm -rf node_modules
 bun install
 ```
 
-### OAuth Redirect Mismatch
+Run development server:
 
-- Ensure `STRAVA_REDIRECT_URI` in `.env` matches Strava app settings
-- Default: `http://localhost:3000/api/auth/strava/callback`
-
-### CORS Errors
-
-- Make sure Vite proxy is enabled in `vite.config.ts`
-- Both servers should be running (`bun run dev` starts both)
-
-## Code Examples
-
-### Using the Athlete Hook
-
-```tsx
-import { useAthlete } from "../hooks";
-
-function Profile() {
-  const { data: athlete, isLoading, error } = useAthlete();
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading profile</div>;
-
-  return (
-    <h1>
-      {athlete.firstname} {athlete.lastname}
-    </h1>
-  );
-}
+```bash
+bun run dev
 ```
 
-### Fetching Activities
+Open [http://localhost:3000](http://localhost:3000).
 
-```tsx
-import { useActivities } from "../hooks";
+## OAuth Notes
 
-function ActivitiesList() {
-  const [page, setPage] = useState(1);
-  const { data: activities, isLoading } = useActivities(page, 20);
+- The login flow starts from the home page
+- Strava redirects back to `/auth/strava/callback`
+- The callback exchanges the code for a token
+- On success, the app redirects to `/dashboard`
 
-  return (
-    <div>
-      {activities?.map((activity) => (
-        <div key={activity.id}>{activity.name}</div>
-      ))}
-    </div>
-  );
-}
+## Validation
+
+Use:
+
+```bash
+npm run type-check
+npm run build
 ```
 
-### Making Custom API Calls
+## Implementation Notes
 
-```tsx
-import { useMutation } from "@tanstack/react-query";
-import apiClient from "../api-client";
+- React Query is provided at the root route level
+- Route protection for `/dashboard` is handled in the file route
+- Auth state is based on the presence of an access token in `localStorage`
+- Styling is no longer Tailwind-based
 
-const { mutate: doSomething } = useMutation({
-  mutationFn: async (data) => {
-    const response = await apiClient.post("/api/custom", data);
-    return response.data;
-  },
-});
-```
+## Cleanup Status
 
-## Authentication Flow Details
+Removed from the active app:
 
-1. **Login**
-
-   ```
-   User clicks "Connect with Strava"
-     ↓
-   Frontend calls /api/auth/strava/login
-     ↓
-   Backend generates OAuth URL with state
-     ↓
-   User redirected to Strava
-     ↓
-   User approves access
-   ```
-
-2. **Callback**
-
-   ```
-   Strava redirects to /api/auth/strava/callback?code=xxx&state=yyy
-     ↓
-   Backend verifies state
-     ↓
-   Backend exchanges code for token
-     ↓
-   Token stored in localStorage
-     ↓
-   Redirect to /dashboard
-   ```
-
-3. **Authenticated Requests**
-   ```
-   Each API call includes Authorization header
-     ↓
-   Backend validates token with Strava
-     ↓
-   Returns user data
-   ```
-
-## Type Safety
-
-All TypeScript types are defined in `src/hooks.ts`:
-
-- `Athlete` - User profile
-- `Activity` - Single activity record
-- `Stats` - User statistics
-
-These interfaces are auto-generated from the Strava API responses.
-
-## Next Steps
-
-1. Add user session persistence (database)
-2. Implement token refresh logic
-3. Add more activity filters and sorting
-4. Create activity detail views
-5. Add data visualization (charts/maps)
-6. Deploy to production
-
-## Useful Resources
-
-- [Strava API Docs](https://developers.strava.com/)
-- [Bun Guide](https://bun.sh/docs)
-- [Elysia Docs](https://elysiajs.com/)
-- [React Query Docs](https://tanstack.com/query/latest)
-- [Tailwind CSS](https://tailwindcss.com)
+- Elysia-specific architecture and docs
+- Legacy multi-server assumptions
+- Unused Axios API client
+- Unused Strava server functions that were not used by the UI

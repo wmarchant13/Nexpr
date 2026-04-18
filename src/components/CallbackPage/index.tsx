@@ -19,6 +19,7 @@ function StatusLayout({
 }) {
   return (
     <div className={styles.page}>
+      <div className={styles.ambientGrid} aria-hidden="true" />
       <div className={`${styles.card} ${centered ? styles.centered : ""}`.trim()}>{children}</div>
     </div>
   );
@@ -60,6 +61,7 @@ export default function CallbackPage() {
   if (search.error) {
     return (
       <StatusLayout>
+        <p className={styles.eyebrow}>Strava callback</p>
         <h1 className={styles.errorTitle}>Authentication Failed</h1>
         <p className={styles.message}>{errorMsg}</p>
         <a href="/" className={styles.errorButton}>
@@ -72,6 +74,7 @@ export default function CallbackPage() {
   if (status === "success") {
     return (
       <StatusLayout centered>
+        <p className={styles.eyebrow}>Strava callback</p>
         <div className={styles.successIcon}>✓</div>
         <h1 className={styles.successTitle}>Success!</h1>
         <p className={styles.message}>
@@ -84,6 +87,7 @@ export default function CallbackPage() {
   if (status === "error") {
     return (
       <StatusLayout>
+        <p className={styles.eyebrow}>Strava callback</p>
         <h1 className={styles.errorTitle}>Authentication Failed</h1>
         <p className={styles.message}>{errorMsg}</p>
         <a href="/" className={styles.errorButton}>
@@ -95,8 +99,10 @@ export default function CallbackPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.ambientGrid} aria-hidden="true" />
       <div className={styles.loadingState}>
         <div className={styles.spinner} />
+        <p className={styles.eyebrow}>Strava callback</p>
         <p className={styles.loadingText}>Processing authentication...</p>
       </div>
     </div>

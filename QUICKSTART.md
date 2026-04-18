@@ -1,72 +1,46 @@
-# Quick Start Guide - Secund.io
+# Quick Start
 
-## 1️⃣ Install Dependencies
+## 1. Install
 
 ```bash
 cd /Users/wmarchant/Secund.io
 bun install
 ```
 
-## 2️⃣ Setup Strava OAuth
+## 2. Configure Strava
 
-1. Go to: https://www.strava.com/settings/api
-2. Create New Application
-3. Set **Authorization Callback Domain**: `localhost`
-4. Copy your **Client ID** and **Client Secret**
+1. Go to [https://www.strava.com/settings/api](https://www.strava.com/settings/api)
+2. Create an application
+3. Set the Authorization Callback Domain to `localhost`
+4. Copy your client ID and client secret
 
-## 3️⃣ Configure Environment
+## 3. Add Environment Variables
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and add your Strava credentials:
+Set:
 
 ```env
 STRAVA_CLIENT_ID=your_client_id
 STRAVA_CLIENT_SECRET=your_client_secret
 STRAVA_REDIRECT_URI=http://localhost:3000/auth/strava/callback
-SESSION_SECRET=your_random_32_char_secret_string
 PORT=3000
 NODE_ENV=development
 ```
 
-## 4️⃣ Start Development
+## 4. Start
 
 ```bash
 bun run dev
 ```
 
-Opens TanStack Start development server on **http://localhost:3000** with both frontend and backend running together.
+Open [http://localhost:3000](http://localhost:3000).
 
-## 5️⃣ Test the App
+## 5. Test
 
-1. Open http://localhost:3000 in your browser
-2. Click "Connect with Strava"
-3. Authorize the app
-4. View your activities and stats on the dashboard!
-
-## 📁 Project Structure
-
-```
-
-## 🔑 Key Features
-
-✅ **OAuth 2 Authentication** with Strava  
-✅ **Real-time Activity Tracking**  
-✅ **User Statistics & Analytics**  
-✅ **Type-safe** with TypeScript  
-✅ **Modern UI** with Tailwind CSS  
-✅ **Built-in Caching** with TanStack Query  
-✅ **Full-stack TypeScript** with TanStack Start
-
-## 📚 Full Documentation
-
-See [README.md](./README.md) for detailed API docs and advanced setup.
-
-## 🚀 Next Steps
-
-- Add database for session persistence
-- Implement token refresh
-- Deploy to production
-- Add data visualizations
+1. Click `Connect with Strava`
+2. Approve the Strava authorization
+3. Confirm you land on `/dashboard`
+4. Confirm activities load

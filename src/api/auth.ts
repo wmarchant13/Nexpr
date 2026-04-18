@@ -71,34 +71,3 @@ export const exchangeStravaCode = createServerFn({ method: "POST" })
       throw error;
     }
   });
-
-export const refreshStravaToken = createServerFn({ method: "POST" })
-  .inputValidator((input: { refreshToken: string }) => input)
-  .handler(async ({ data }) => {
-    const refreshToken = data.refreshToken;
-    try {
-      const params = new URLSearchParams({
-        client_id: process.env.STRAVA_CLIENT_ID || "",
-        client_secret: process.env.STRAVA_CLIENT_SECRET || "",
-        refresh_token: refreshToken,
-        grant_type: "refresh_token",
-      });
-
-      const response = await fetch(STRAVA_TOKEN_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: params.toString(),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to refresh access token");
-      }
-
-      return response.json();
-    } catch (error) {
-      console.error("Token refresh error:", error);
-      throw error;
-    }
-  });

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getStravaAuthUrl, exchangeStravaCode } from "../api/auth";
-import { getAthlete, getActivities, getActivity, getStats } from "../api/strava";
+import { getAthlete, getActivities } from "../api/strava";
 
 export interface Athlete {
   id: number;
@@ -25,25 +25,6 @@ export interface Activity {
   sport_type: string;
   start_date: string;
   start_date_local: string;
-}
-
-export interface Stats {
-  biggest_ride_distance: number;
-  biggest_climb_elevation_gain: number;
-  recent_ride_totals: {
-    count: number;
-    distance: number;
-    moving_time: number;
-    elapsed_time: number;
-    elevation_gain: number;
-  };
-  all_ride_totals: {
-    count: number;
-    distance: number;
-    moving_time: number;
-    elapsed_time: number;
-    elevation_gain: number;
-  };
 }
 
 // Auth Hooks
@@ -116,36 +97,6 @@ export const useActivities = (page: number = 1, perPage: number = 20) => {
       return result as Activity[];
     },
     enabled: !!localStorage.getItem("accessToken"),
-  });
-};
-
-export const useActivity = (activityId: number | null) => {
-  return useQuery({
-    queryKey: ["activity", activityId],
-    queryFn: async () => {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) throw new Error("No access token");
-      const result = await getActivity({
-        data: { accessToken, id: activityId!.toString() },
-      });
-      return result as Activity;
-    },
-    enabled: !!activityId && !!localStorage.getItem("accessToken"),
-  });
-};
-
-export const useStats = (athleteId: number | null) => {
-  return useQuery({
-    queryKey: ["stats", athleteId],
-    queryFn: async () => {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) throw new Error("No access token");
-      const result = await getStats({
-        data: { accessToken, athleteId: athleteId!.toString() },
-      });
-      return result as Stats;
-    },
-    enabled: !!athleteId && !!localStorage.getItem("accessToken"),
   });
 };
 
