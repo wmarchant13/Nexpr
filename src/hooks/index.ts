@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getStravaAuthUrl, exchangeStravaCode } from "../api/auth";
-import { getAthlete, getActivities, getStats } from "../api/strava";
+import { getAthlete, getActivities, getStats, getActivityDetails } from "../api/strava";
 
 export interface Athlete {
   id: number;
@@ -39,6 +39,14 @@ export interface ActivityTotals {
   moving_time: number;
   elapsed_time: number;
   elevation_gain: number;
+}
+
+export interface Split {
+  distance: number; // in meters
+  elapsed_time: number; // in seconds
+  moving_time: number; // in seconds
+  split: number; // split number (1-indexed)
+  pace_zone: number;
 }
 
 export interface Stats {
@@ -135,6 +143,21 @@ export const useStats = (athleteId: number | null) => {
   });
 };
 
+export const useActivityDetails = (activityId: number | null) => {
+  return useQuery({
+    queryKey: ["activityDetails", activityId],
+    queryFn: async () => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken || !activityId) throw new Error("Missing context");
+      const result = await getActivityDetails({
+        data: { accessToken, activityId },
+      });
+      return result as any; // Strava activity detail response
+    },
+    enabled: !!activityId && !!localStorage.getItem("accessToken"),
+  });
+};
+
 // Unit conversion helpers
 const KM_TO_MILES = 0.621371;
 const METERS_TO_FEET = 3.28084;
@@ -194,9 +217,15 @@ export interface LifetimeRunSnapshot {
 const isRun = (activity: Activity) =>
   activity.type === "Run" || activity.sport_type === "Run";
 
-const formatDateKey = (date: Date) => date.toISOString().slice(0, 10);
+const formatDateKey = (date: Date) => {
+  const d = new Date(date);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
 
-const startOfWeek = (date: Date) => {
+export const startOfWeek = (date: Date) => {
   const copy = new Date(date);
   copy.setHours(0, 0, 0, 0);
   const day = copy.getDay();
@@ -445,6 +474,321 @@ export const buildLifetimeRunSnapshot = (stats: Stats): LifetimeRunSnapshot => (
   lifetimeMiles: Math.round(kmToMiles(mToKm(stats.all_run_totals.distance)) * 10) / 10,
   lifetimeRuns: stats.all_run_totals.count,
 });
+
+// Long run intelligence helpers
+export interface LongRunInsight {
+  activityId: number;
+  distanceMiles: number;
+  avgPace: number; // minutes per mile
+  paceCurve: number[]; // minutes per mile per segment
+  fatiguePointSegment: number | null; // index where pace degrades
+  controlledEnduranceScore: number; // 0-100
+  comparison?: {
+    prevAvgPace: number | null;
+    deltaSecondsPerMile: number | null;
+  };
+}
+
+export const getLongRuns = (activities: Activity[], minDistanceMiles = 10) =>
+  activities
+    .map((a) => ({
+      ...a,
+      distanceMiles: kmToMiles(mToKm(a.distance)),
+    }))
+    .filter((a) => a.distanceMiles >= minDistanceMiles)
+    .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+
+export const analyzeLongRun = (
+  activity: Activity,
+  pastActivities: Activity[] = [],
+  splits?: Split[],
+): LongRunInsight => {
+  const distanceMiles = Math.round(kmToMiles(mToKm(activity.distance)) * 10) / 10 || 0;
+  const avgPace = distanceMiles > 0 ? (activity.moving_time / 60) / distanceMiles : 0;
+
+  let paceCurve: number[];
+
+  if (splits && splits.length > 0) {
+    // Use actual splits from Strava (each split is typically 1 mile)
+    paceCurve = splits.map((split) => {
+      const splitMiles = kmToMiles(mToKm(split.distance));
+      const splitMinutes = split.moving_time / 60;
+      return Math.round((splitMinutes / splitMiles) * 100) / 100;
+    });
+  } else {
+    // Fallback: estimate based on whole miles
+    const segCount = Math.max(1, Math.floor(distanceMiles));
+    const hr = activity.average_heartrate || 0;
+    const driftFactor = hr ? Math.min(0.35, Math.max(0, (hr - 120) / 250)) : 0.12;
+
+    paceCurve = Array.from({ length: segCount }).map((_, i) => {
+      const t = segCount > 1 ? i / (segCount - 1) : 0;
+      // early segments a bit faster, late segments slower by driftFactor
+      return Math.round((avgPace * (1 + driftFactor * t)) * 100) / 100;
+    });
+  }
+
+  // detect first segment where pace exceeds baseline by 15%
+  const fatigueIdx = paceCurve.findIndex((p) => p > avgPace * 1.15);
+
+  // controlled endurance score: higher when pace variance low and drift small
+  const mean = avgPace;
+  const variance = paceCurve.reduce((s, p) => s + Math.pow(p - mean, 2), 0) / paceCurve.length;
+  const std = Math.sqrt(variance);
+  const consistency = Math.max(0, 1 - std / mean); // 0..1
+  const driftPenalty = splits && splits.length > 0 ? 0 : 0.12; // less penalty if using real splits
+  const score = Math.round(Math.max(0, Math.min(100, (consistency * 100) - driftPenalty * 20)));
+
+  // comparison: find previous long runs of similar distance (+-10%) and compute avg pace
+  const similar = pastActivities
+    .map((a) => ({ ...a, distanceMiles: kmToMiles(mToKm(a.distance)) }))
+    .filter((a) => a.id !== activity.id && Math.abs(a.distanceMiles - distanceMiles) / distanceMiles <= 0.1)
+    .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+
+  const prev = similar.length > 0 ? similar[0] : null;
+  const prevAvgPace = prev ? (prev.moving_time / 60) / (prev.distance ? kmToMiles(mToKm(prev.distance)) : 1) : null;
+
+  const deltaSecondsPerMile = prevAvgPace != null ? Math.round((avgPace - prevAvgPace) * 60) : null;
+
+  return {
+    activityId: activity.id,
+    distanceMiles,
+    avgPace: Math.round(avgPace * 100) / 100,
+    paceCurve,
+    fatiguePointSegment: fatigueIdx === -1 ? null : fatigueIdx,
+    controlledEnduranceScore: score,
+    comparison: { prevAvgPace, deltaSecondsPerMile },
+  };
+};
+
+// Weekly training structure analysis
+export interface WeeklySummaryWeek {
+  weekStart: string;
+  label: string;
+  miles: number;
+  runDays: number;
+  longRunMiles: number;
+}
+
+export interface WeeklyTrainingAnalysis {
+  weeks: WeeklySummaryWeek[]; // last N weeks oldest->newest
+  volumeTrendPercentChange: number | null; // last vs previous week
+  percentEasy: number; // last week % of miles at easy effort
+  percentHard: number; // last week % of miles at hard effort
+  restConsistencyScore: number; // 0-100
+  longRunProportionLastWeek: number; // percent of miles from long runs
+}
+
+export const analyzeWeeklyTraining = (
+  activities: Activity[],
+  weeks: number = 8,
+  longRunThresholdMiles: number = 8,
+) : WeeklyTrainingAnalysis => {
+  const now = new Date();
+  const currentWeekStart = startOfWeek(now);
+
+  const weekBuckets = new Map<string, WeeklySummaryWeek>();
+
+  for (let i = weeks - 1; i >= 0; i--) {
+    const d = new Date(currentWeekStart);
+    d.setDate(d.getDate() - i * 7);
+    const key = formatDateKey(d);
+    weekBuckets.set(key, {
+      weekStart: key,
+      label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      miles: 0,
+      runDays: 0,
+      longRunMiles: 0,
+    });
+  }
+
+  const runDaysMap = new Map<string, Set<string>>();
+
+  activities.filter(isRun).forEach((activity) => {
+    const weekStart = formatDateKey(startOfWeek(new Date(activity.start_date)));
+    const bucket = weekBuckets.get(weekStart);
+    if (!bucket) return;
+    const miles = kmToMiles(mToKm(activity.distance));
+    bucket.miles = Math.round((bucket.miles + miles) * 10) / 10;
+    if (!runDaysMap.has(weekStart)) runDaysMap.set(weekStart, new Set());
+    runDaysMap.get(weekStart)!.add(new Date(activity.start_date).toISOString().slice(0,10));
+    if (miles >= longRunThresholdMiles) {
+      bucket.longRunMiles = Math.round((bucket.longRunMiles + miles) * 10) / 10;
+    }
+  });
+
+  // finalize runDays
+  for (const [key, bucket] of weekBuckets.entries()) {
+    bucket.runDays = runDaysMap.get(key)?.size ?? 0;
+  }
+
+  const weeksArr = Array.from(weekBuckets.values());
+
+  // compute volume trend: compare last week and previous week
+  const last = weeksArr[weeksArr.length - 1];
+  const prev = weeksArr[weeksArr.length - 2] ?? null;
+  const volumeTrendPercentChange = prev && prev.miles > 0 ? Math.round(((last.miles - prev.miles) / prev.miles) * 100) : null;
+
+  // classify runs in last week into easy/moderate/hard using HR if available else relative pace
+  const lastWeekKey = last.weekStart;
+  const runsLastWeek = activities.filter(
+    (a) => isRun(a) && formatDateKey(startOfWeek(new Date(a.start_date))) === lastWeekKey,
+  );
+  let easyMiles = 0;
+  let hardMiles = 0;
+  let totalMiles = 0;
+
+  // compute week avg pace for relative classification
+  const weekTotalDistanceMeters = runsLastWeek.reduce((s, r) => s + r.distance, 0);
+  const weekTotalTime = runsLastWeek.reduce((s, r) => s + r.moving_time, 0);
+  const weekAvgPace = weekTotalDistanceMeters > 0 ? (weekTotalTime / 60) / kmToMiles(mToKm(weekTotalDistanceMeters)) : 0;
+
+  runsLastWeek.forEach((r) => {
+    const miles = kmToMiles(mToKm(r.distance));
+    totalMiles += miles;
+    if (r.average_heartrate && r.average_heartrate > 0) {
+      const hr = r.average_heartrate;
+      if (hr < 130) easyMiles += miles;
+      else if (hr > 155) hardMiles += miles;
+      else {
+        // moderate
+      }
+    } else if (weekAvgPace > 0) {
+      const pace = (r.moving_time / 60) / (miles || 1);
+      if (pace <= weekAvgPace * 0.95) hardMiles += miles;
+      else if (pace >= weekAvgPace * 1.08) easyMiles += miles;
+    }
+  });
+
+  // compute percentages and ensure they sum to 100 by assigning remainder to moderate
+  const easyPct = totalMiles > 0 ? Math.round((easyMiles / totalMiles) * 100) : 0;
+  const hardPct = totalMiles > 0 ? Math.round((hardMiles / totalMiles) * 100) : 0;
+  const moderatePct = Math.max(0, 100 - easyPct - hardPct);
+
+  // rest consistency: compute rest days per week (7 - runDays) and score
+  const restDays = weeksArr.map((w) => 7 - w.runDays);
+  const mean = restDays.reduce((s, v) => s + v, 0) / restDays.length;
+  const variance = restDays.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / restDays.length;
+  const std = Math.sqrt(variance);
+  const restConsistencyScore = Math.max(0, Math.min(100, Math.round(100 - std * 18)));
+
+  // Longest run share: percentage of longest run in last week vs total weekly miles
+  let longestRunMiles = 0;
+  runsLastWeek.forEach((r) => {
+    const miles = kmToMiles(mToKm(r.distance));
+    longestRunMiles = Math.max(longestRunMiles, miles);
+  });
+  const longRunProportionLastWeek = last.miles > 0 ? Math.round((longestRunMiles / last.miles) * 100) : 0;
+
+  return {
+    weeks: weeksArr,
+    volumeTrendPercentChange,
+    // return both miles and percentages
+    easyMiles: Math.round(easyMiles * 10) / 10,
+    hardMiles: Math.round(hardMiles * 10) / 10,
+    percentEasy: easyPct,
+    percentModerate: moderatePct,
+    percentHard: hardPct,
+    restConsistencyScore,
+    longRunProportionLastWeek,
+  };
+};
+
+// Segment + effort breakdown for a single activity (simple estimates)
+export interface SegmentAnalysis {
+  segments: number;
+  segmentMiles: number;
+  segmentPaces: number[]; // minutes per mile
+  easyMiles: number;
+  hardMiles: number;
+  firstHalfPace: number; // min/mi
+  secondHalfPace: number; // min/mi
+  firstSecondDeltaSecondsPerMile: number; // positive = second half slower
+  bestControlled: {
+    startSegment: number;
+    length: number;
+    avgPace: number;
+    std: number;
+  } | null;
+}
+
+export const analyzeActivitySegments = (activity: Activity, segmentMiles = 1): SegmentAnalysis => {
+  const distanceMiles = kmToMiles(mToKm(activity.distance));
+  const totalMiles = Math.max(0.01, distanceMiles);
+  const totalMinutes = activity.moving_time / 60;
+  const avgPace = totalMinutes / totalMiles; // min per mile
+
+  // number of segments (round down to whole segments)
+  const segments = Math.max(1, Math.floor(totalMiles / segmentMiles));
+
+  // estimate each segment pace by distributing time proportionally
+  // (this is a simple estimate — replace with split streams if available)
+  const baseSegmentMinutes = totalMinutes / segments;
+  // add small deterministic variation using segment index
+  const segmentPaces = Array.from({ length: segments }).map((_, i) => {
+    const t = i / Math.max(1, segments - 1);
+    const variation = (Math.sin(t * Math.PI * 2) * 0.04 + (t - 0.5) * 0.02); // small wave
+    const pace = Math.max(0.1, Math.round(((baseSegmentMinutes) / segmentMiles) * (1 + variation) * 100) / 100);
+    return pace;
+  });
+
+  const milesPerSegment = segmentMiles;
+
+  // classify easy/hard per segment relative to run avg
+  let easyMiles = 0;
+  let hardMiles = 0;
+  segmentPaces.forEach((p) => {
+    if (p <= avgPace * 0.95) {
+      hardMiles += milesPerSegment;
+    } else if (p >= avgPace * 1.08) {
+      easyMiles += milesPerSegment;
+    }
+  });
+
+  // first vs second half
+  const half = Math.ceil(segments / 2);
+  const firstSegs = segmentPaces.slice(0, half);
+  const secondSegs = segmentPaces.slice(half);
+  const avg = (arr: number[]) => (arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0);
+  const firstHalfPace = Math.round(avg(firstSegs) * 100) / 100;
+  const secondHalfPace = Math.round(avg(secondSegs) * 100) / 100;
+  const firstSecondDeltaSecondsPerMile = Math.round((secondHalfPace - firstHalfPace) * 60);
+
+  // best controlled section: sliding window of 3 segments (or smaller) with minimal std and close to avg
+  const window = Math.min(3, segments);
+  let best: { idx: number; len: number; std: number; mean: number } | null = null;
+  for (let i = 0; i <= segments - window; i++) {
+    const slice = segmentPaces.slice(i, i + window);
+    const m = avg(slice);
+    const variance = slice.reduce((s, v) => s + Math.pow(v - m, 2), 0) / slice.length;
+    const std = Math.sqrt(variance);
+    const score = std + Math.abs(m - avgPace) * 0.2;
+    if (!best || score < best.std + Math.abs(best.mean - avgPace) * 0.2) {
+      best = { idx: i, len: window, std, mean: m };
+    }
+  }
+
+  const bestControlled = best
+    ? {
+        startSegment: best.idx,
+        length: best.len,
+        avgPace: Math.round(best.mean * 100) / 100,
+        std: Math.round(best.std * 100) / 100,
+      }
+    : null;
+
+  return {
+    segments,
+    segmentMiles: milesPerSegment,
+    segmentPaces,
+    easyMiles: Math.round(easyMiles * 10) / 10,
+    hardMiles: Math.round(hardMiles * 10) / 10,
+    firstHalfPace,
+    secondHalfPace,
+    firstSecondDeltaSecondsPerMile,
+    bestControlled,
+  };
+};
 
 export const calculateActivityStats = (activities: Activity[]) => {
   const totalDistanceKm = activities.reduce((sum, a) => sum + a.distance, 0) / 1000;

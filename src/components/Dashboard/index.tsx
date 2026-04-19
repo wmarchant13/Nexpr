@@ -23,8 +23,11 @@ import {
   useAthlete,
   useLogout,
   useStats,
+  analyzeWeeklyTraining,
 } from "../../hooks";
 import styles from "./Dashboard.module.scss";
+// Spotify integration temporarily commented out
+// import SpotifyConnect from "./SpotifyConnect";
 
 const chartTooltipStyles = {
   backgroundColor: "#0c1015",
@@ -63,7 +66,10 @@ function LoadingState({ message }: { message: string }) {
 export default function Dashboard() {
   const [page, setPage] = useState(1);
   const { data: athlete, isLoading: athleteLoading } = useAthlete();
-  const { data: activities, isLoading: activitiesLoading } = useActivities(page, 200);
+  const { data: activities, isLoading: activitiesLoading } = useActivities(
+    page,
+    200,
+  );
   const { data: stats } = useStats(athlete?.id ?? null);
   const { mutate: logout } = useLogout();
 
@@ -86,6 +92,13 @@ export default function Dashboard() {
     () => (activities ? calculateRunHighlights(activities) : []),
     [activities],
   );
+
+  // Long run insights removed per user request
+
+  const weeklyTraining = useMemo(() => {
+    if (!activities) return null;
+    return analyzeWeeklyTraining(activities, 8, 8);
+  }, [activities]);
 
   const lifetimeSnapshot = useMemo(
     () => (stats ? buildLifetimeRunSnapshot(stats) : null),
@@ -112,7 +125,11 @@ export default function Dashboard() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.profileGroup}>
-            <img src={athlete.profile} alt={athlete.firstname} className={styles.avatar} />
+            <img
+              src={athlete.profile}
+              alt={athlete.firstname}
+              className={styles.avatar}
+            />
             <div>
               <p className={styles.eyebrow}>Personal motion archive</p>
               <h1 className={styles.name}>
@@ -121,9 +138,12 @@ export default function Dashboard() {
               <p className={styles.username}>@{athlete.username}</p>
             </div>
           </div>
-          <button onClick={() => logout()} className={styles.logoutButton}>
-            Logout
-          </button>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {/* SpotifyConnect removed — Spotify integration commented out */}
+            <button onClick={() => logout()} className={styles.logoutButton}>
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 
@@ -131,18 +151,25 @@ export default function Dashboard() {
         <section className={styles.heroGrid}>
           <div className={styles.heroIntro}>
             <p className={styles.sectionKicker}>Dashboard</p>
-            <h2 className={styles.heroTitle}>Your recent movement, clearly organized.</h2>
+            <h2 className={styles.heroTitle}>
+              Your recent movement, clearly organized.
+            </h2>
             <p className={styles.heroText}>
-              Review recent volume, elevation, pace, and activity patterns in one place.
+              Review recent volume, elevation, pace, and activity patterns in
+              one place.
             </p>
             <div className={styles.heroMeta}>
               <div className={styles.heroMetaItem}>
                 <span className={styles.heroMetaLabel}>Current block</span>
-                <strong className={styles.heroMetaValue}>{runnerBlock?.totalMiles ?? 0} mi</strong>
+                <strong className={styles.heroMetaValue}>
+                  {runnerBlock?.totalMiles ?? 0} mi
+                </strong>
               </div>
               <div className={styles.heroMetaItem}>
                 <span className={styles.heroMetaLabel}>Consistency</span>
-                <strong className={styles.heroMetaValue}>{runnerBlock?.consistencyScore ?? 0}%</strong>
+                <strong className={styles.heroMetaValue}>
+                  {runnerBlock?.consistencyScore ?? 0}%
+                </strong>
               </div>
             </div>
           </div>
@@ -159,7 +186,9 @@ export default function Dashboard() {
 
           <div className={metricCardClass("blue")}>
             <p className={styles.metricLabel}>Run Days</p>
-            <p className={`${styles.metricValue} ${valueClass("blue")}`}>{runnerBlock?.runDays || 0}</p>
+            <p className={`${styles.metricValue} ${valueClass("blue")}`}>
+              {runnerBlock?.runDays || 0}
+            </p>
             <p className={styles.metricCaption}>days in 4 weeks</p>
           </div>
 
@@ -192,19 +221,25 @@ export default function Dashboard() {
           <div className={styles.runStatsGrid}>
             <div className={runCardClass("indigo")}>
               <p className={styles.metricLabel}>Weekly Average</p>
-              <p className={`${styles.metricValue} ${valueClass("indigo")}`}>{runnerBlock?.weeklyAverageMiles || 0}</p>
+              <p className={`${styles.metricValue} ${valueClass("indigo")}`}>
+                {runnerBlock?.weeklyAverageMiles || 0}
+              </p>
               <p className={styles.metricCaption}>miles per week</p>
             </div>
 
             <div className={runCardClass("cyan")}>
               <p className={styles.metricLabel}>3-Month Runs</p>
-              <p className={`${styles.metricValue} ${valueClass("cyan")}`}>{runStats.totalRuns}</p>
+              <p className={`${styles.metricValue} ${valueClass("cyan")}`}>
+                {runStats.totalRuns}
+              </p>
               <p className={styles.metricCaption}>run workouts</p>
             </div>
 
             <div className={runCardClass("red")}>
               <p className={styles.metricLabel}>Average Run Distance</p>
-              <p className={`${styles.metricValue} ${valueClass("red")}`}>{runStats.avgDistance}</p>
+              <p className={`${styles.metricValue} ${valueClass("red")}`}>
+                {runStats.avgDistance}
+              </p>
               <p className={styles.metricCaption}>miles per run</p>
             </div>
           </div>
@@ -220,18 +255,30 @@ export default function Dashboard() {
               <div className={styles.snapshotCards}>
                 <div className={styles.snapshotCard}>
                   <span className={styles.snapshotLabel}>Last 4 Weeks</span>
-                  <strong className={styles.snapshotValue}>{lifetimeSnapshot.recentMiles} mi</strong>
-                  <span className={styles.snapshotDetail}>{lifetimeSnapshot.recentRuns} runs</span>
+                  <strong className={styles.snapshotValue}>
+                    {lifetimeSnapshot.recentMiles} mi
+                  </strong>
+                  <span className={styles.snapshotDetail}>
+                    {lifetimeSnapshot.recentRuns} runs
+                  </span>
                 </div>
                 <div className={styles.snapshotCard}>
                   <span className={styles.snapshotLabel}>Year to Date</span>
-                  <strong className={styles.snapshotValue}>{lifetimeSnapshot.ytdMiles} mi</strong>
-                  <span className={styles.snapshotDetail}>{lifetimeSnapshot.ytdRuns} runs</span>
+                  <strong className={styles.snapshotValue}>
+                    {lifetimeSnapshot.ytdMiles} mi
+                  </strong>
+                  <span className={styles.snapshotDetail}>
+                    {lifetimeSnapshot.ytdRuns} runs
+                  </span>
                 </div>
                 <div className={styles.snapshotCard}>
                   <span className={styles.snapshotLabel}>Lifetime</span>
-                  <strong className={styles.snapshotValue}>{lifetimeSnapshot.lifetimeMiles} mi</strong>
-                  <span className={styles.snapshotDetail}>{lifetimeSnapshot.lifetimeRuns} runs</span>
+                  <strong className={styles.snapshotValue}>
+                    {lifetimeSnapshot.lifetimeMiles} mi
+                  </strong>
+                  <span className={styles.snapshotDetail}>
+                    {lifetimeSnapshot.lifetimeRuns} runs
+                  </span>
                 </div>
               </div>
             </div>
@@ -248,11 +295,72 @@ export default function Dashboard() {
               <div className={styles.snapshotCards}>
                 {runHighlights.map((highlight) => (
                   <div key={highlight.label} className={styles.snapshotCard}>
-                    <span className={styles.snapshotLabel}>{highlight.label}</span>
-                    <strong className={styles.snapshotValue}>{highlight.value}</strong>
-                    <span className={styles.snapshotDetail}>{highlight.detail}</span>
+                    <span className={styles.snapshotLabel}>
+                      {highlight.label}
+                    </span>
+                    <strong className={styles.snapshotValue}>
+                      {highlight.value}
+                    </strong>
+                    <span className={styles.snapshotDetail}>
+                      {highlight.detail}
+                    </span>
                   </div>
                 ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Long run insights removed per user request */}
+
+        {weeklyTraining && (
+          <section className={styles.snapshotGrid}>
+            <div className={styles.panel}>
+              <div className={styles.chartHeader}>
+                <span className={styles.chartTag}>Weekly training</span>
+                <h2 className={styles.panelTitle}>Weekly Structure</h2>
+              </div>
+
+              <div style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', gap: 18 }}>
+                  <div>
+                    <div className={styles.metricLabel}>Easy / Moderate / Hard</div>
+                    <div style={{ fontWeight: 800 }}>{weeklyTraining.percentEasy}% / {weeklyTraining.percentModerate}% / {weeklyTraining.percentHard}%</div>
+                    <div className={styles.metricCaption}>last week (% of miles)</div>
+                  </div>
+
+                  <div>
+                    <div className={styles.metricLabel}>Volume trend</div>
+                    <div style={{ fontWeight: 800 }}>{weeklyTraining.volumeTrendPercentChange != null ? `${weeklyTraining.volumeTrendPercentChange}%` : '—'}</div>
+                    <div className={styles.metricCaption}>change vs previous week</div>
+                  </div>
+
+                  <div>
+                    <div className={styles.metricLabel}>Rest consistency</div>
+                    <div style={{ fontWeight: 800 }}>{weeklyTraining.restConsistencyScore}</div>
+                    <div className={styles.metricCaption}>0–100 (steadiness of rest days)</div>
+                  </div>
+
+                  <div>
+                    <div className={styles.metricLabel}>Long run share</div>
+                    <div style={{ fontWeight: 800 }}>{weeklyTraining.longRunProportionLastWeek}%</div>
+                    <div className={styles.metricCaption}>longest run as % of weekly mileage</div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 12 }}>
+                  <div className={styles.metricLabel}>Recent weekly miles</div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'end' }}>
+                    {weeklyTraining.weeks.map((w) => (
+                      <div key={w.weekStart} style={{ textAlign: 'center' }}>
+                        <div style={{ height: 48, width: 18, background: '#111827', borderRadius: 6, display: 'flex', alignItems: 'end', justifyContent: 'center' }}>
+                          <div style={{ width: '100%', background: '#7dd3a6', height: `${Math.min(100, Math.round(w.miles))}%`, borderRadius: 6 }} />
+                        </div>
+                        <div className={styles.metricCaption} style={{ marginTop: 6 }}>{w.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -274,11 +382,18 @@ export default function Dashboard() {
                     contentStyle={chartTooltipStyles}
                     labelStyle={chartLabelStyles}
                     formatter={(value: any, name: string) =>
-                      name && /pace/i.test(name) ? formatPace(Number(value)) : value
+                      name && /pace/i.test(name)
+                        ? formatPace(Number(value))
+                        : value
                     }
                   />
                   <Legend />
-                  <Bar dataKey="miles" fill="#00ffa3" name="Mileage" radius={[8, 8, 0, 0]} />
+                  <Bar
+                    dataKey="miles"
+                    fill="#00ffa3"
+                    name="Mileage"
+                    radius={[8, 8, 0, 0]}
+                  />
                   <Line
                     type="monotone"
                     dataKey="runs"
@@ -306,11 +421,18 @@ export default function Dashboard() {
                     contentStyle={chartTooltipStyles}
                     labelStyle={chartLabelStyles}
                     formatter={(value: any, name: string) =>
-                      name && /pace/i.test(name) ? formatPace(Number(value)) : value
+                      name && /pace/i.test(name)
+                        ? formatPace(Number(value))
+                        : value
                     }
                   />
                   <Legend />
-                  <Bar dataKey="longRun" fill="#60a5fa" name="Long run (mi)" radius={[8, 8, 0, 0]} />
+                  <Bar
+                    dataKey="longRun"
+                    fill="#60a5fa"
+                    name="Long run (mi)"
+                    radius={[8, 8, 0, 0]}
+                  />
                   <Line
                     type="monotone"
                     dataKey="avgPace"
@@ -348,16 +470,22 @@ export default function Dashboard() {
                       <p className={styles.activityMeta}>
                         {new Date(activity.start_date).toLocaleDateString()}{" "}
                         <span className={styles.metaDivider}>•</span>
-                        <span className={styles.activityType}>{activity.type}</span>
+                        <span className={styles.activityType}>
+                          {activity.type}
+                        </span>
                       </p>
                     </div>
-                    <span className={styles.activityBadge}>{activity.sport_type}</span>
+                    <span className={styles.activityBadge}>
+                      {activity.sport_type}
+                    </span>
                   </div>
 
                   <div className={styles.activityStatsGrid}>
                     <div className={styles.activityStatCard}>
                       <p className={styles.activityStatLabel}>Distance</p>
-                      <p className={styles.activityStatValue}>{kmToMiles(activity.distance / 1000)} mi</p>
+                      <p className={styles.activityStatValue}>
+                        {kmToMiles(activity.distance / 1000)} mi
+                      </p>
                     </div>
                     <div className={styles.activityStatCard}>
                       <p className={styles.activityStatLabel}>Elevation</p>
@@ -367,15 +495,23 @@ export default function Dashboard() {
                     </div>
                     <div className={styles.activityStatCard}>
                       <p className={styles.activityStatLabel}>Time</p>
-                      <p className={styles.activityStatValue}>{Math.round(activity.moving_time / 60)} min</p>
+                      <p className={styles.activityStatValue}>
+                        {Math.round(activity.moving_time / 60)} min
+                      </p>
                     </div>
                     <div className={styles.activityStatCard}>
                       <p className={styles.activityStatLabel}>Pace</p>
                       <p className={styles.activityStatValue}>
-                        {formatPace(activity.moving_time / 60 / kmToMiles(activity.distance / 1000))}/mi
+                        {formatPace(
+                          activity.moving_time /
+                            60 /
+                            kmToMiles(activity.distance / 1000),
+                        )}
+                        /mi
                       </p>
                     </div>
                   </div>
+                  
                 </div>
               ))}
             </div>

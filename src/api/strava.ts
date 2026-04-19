@@ -40,3 +40,14 @@ export const getStats = createServerFn({ method: "GET" })
   .handler(async ({ data }) =>
     fetchFromStrava(`/athletes/${data.athleteId}/stats`, data.accessToken),
   );
+
+export const getActivityDetails = createServerFn({ method: "GET" })
+  .inputValidator(
+    (input: { accessToken: string; activityId: number }) => input,
+  )
+  .handler(async ({ data }) =>
+    fetchFromStrava(
+      `/activities/${data.activityId}?include_all_efforts=false`,
+      data.accessToken,
+    ),
+  );
