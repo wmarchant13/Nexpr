@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getStravaAuthUrl, exchangeStravaCode } from "../api/auth";
-import { getAthlete, getActivities } from "../api/strava";
+import { getAthlete, getActivities, getStats } from "../api/strava";
 
 export interface Athlete {
   id: number;
@@ -25,6 +25,26 @@ export interface Activity {
   sport_type: string;
   start_date: string;
   start_date_local: string;
+  average_speed?: number;
+  average_heartrate?: number;
+  max_heartrate?: number;
+  achievement_count?: number;
+  kudos_count?: number;
+  suffer_score?: number;
+}
+
+export interface ActivityTotals {
+  count: number;
+  distance: number;
+  moving_time: number;
+  elapsed_time: number;
+  elevation_gain: number;
+}
+
+export interface Stats {
+  recent_run_totals: ActivityTotals;
+  all_run_totals: ActivityTotals;
+  ytd_run_totals: ActivityTotals;
 }
 
 // Auth Hooks
@@ -100,6 +120,21 @@ export const useActivities = (page: number = 1, perPage: number = 20) => {
   });
 };
 
+export const useStats = (athleteId: number | null) => {
+  return useQuery({
+    queryKey: ["stats", athleteId],
+    queryFn: async () => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken || !athleteId) throw new Error("Missing athlete context");
+      const result = await getStats({
+        data: { accessToken, athleteId: athleteId.toString() },
+      });
+      return result as Stats;
+    },
+    enabled: !!athleteId && !!localStorage.getItem("accessToken"),
+  });
+};
+
 // Unit conversion helpers
 const KM_TO_MILES = 0.621371;
 const METERS_TO_FEET = 3.28084;
@@ -121,6 +156,68 @@ export interface RunStats {
   avgDistance: number; // miles
   totalRuns: number;
 }
+
+export interface RunnerBlockStats {
+  totalMiles: number;
+  totalRuns: number;
+  avgPace: number;
+  longRunMiles: number;
+  elevationFeet: number;
+  runDays: number;
+  weeklyAverageMiles: number;
+  consistencyScore: number;
+}
+
+export interface WeeklyRunVolumeDatum {
+  label: string;
+  miles: number;
+  runs: number;
+  longRun: number;
+  avgPace: number | null;
+}
+
+export interface RunHighlight {
+  label: string;
+  value: string;
+  detail: string;
+}
+
+export interface LifetimeRunSnapshot {
+  recentMiles: number;
+  recentRuns: number;
+  ytdMiles: number;
+  ytdRuns: number;
+  lifetimeMiles: number;
+  lifetimeRuns: number;
+}
+
+const isRun = (activity: Activity) =>
+  activity.type === "Run" || activity.sport_type === "Run";
+
+const formatDateKey = (date: Date) => date.toISOString().slice(0, 10);
+
+const startOfWeek = (date: Date) => {
+  const copy = new Date(date);
+  copy.setHours(0, 0, 0, 0);
+  const day = copy.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  copy.setDate(copy.getDate() + diff);
+  return copy;
+};
+
+export const formatPace = (minutesPerMile: number): string => {
+  if (!Number.isFinite(minutesPerMile) || minutesPerMile <= 0) {
+    return "--";
+  }
+
+  const totalSeconds = Math.round(minutesPerMile * 60);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+};
+
+export const formatDurationHours = (seconds: number): string =>
+  `${Math.round((seconds / 3600) * 10) / 10}h`;
 
 export const aggregate3MonthData = (activities: Activity[]): MileageChartData[] => {
   const now = new Date();
@@ -196,6 +293,158 @@ export const calculate3MonthRunStats = (activities: Activity[]): RunStats => {
     totalRuns: runs.length,
   };
 };
+
+export const calculateRunnerBlockStats = (
+  activities: Activity[],
+  days: number = 28,
+): RunnerBlockStats => {
+  const now = new Date();
+  const cutoff = new Date(now);
+  cutoff.setDate(cutoff.getDate() - days);
+
+  const runs = activities.filter((activity) => isRun(activity) && new Date(activity.start_date) >= cutoff);
+
+  if (runs.length === 0) {
+    return {
+      totalMiles: 0,
+      totalRuns: 0,
+      avgPace: 0,
+      longRunMiles: 0,
+      elevationFeet: 0,
+      runDays: 0,
+      weeklyAverageMiles: 0,
+      consistencyScore: 0,
+    };
+  }
+
+  const totalDistanceMeters = runs.reduce((sum, activity) => sum + activity.distance, 0);
+  const totalMovingTime = runs.reduce((sum, activity) => sum + activity.moving_time, 0);
+  const totalMiles = kmToMiles(mToKm(totalDistanceMeters));
+  const runDays = new Set(runs.map((activity) => formatDateKey(new Date(activity.start_date)))).size;
+
+  return {
+    totalMiles,
+    totalRuns: runs.length,
+    avgPace: (totalMovingTime / 60) / kmToMiles(mToKm(totalDistanceMeters)),
+    longRunMiles: kmToMiles(mToKm(Math.max(...runs.map((activity) => activity.distance)))),
+    elevationFeet: metersToFeet(runs.reduce((sum, activity) => sum + activity.total_elevation_gain, 0)),
+    runDays,
+    weeklyAverageMiles: Math.round((totalMiles / (days / 7)) * 10) / 10,
+    consistencyScore: Math.round((runDays / days) * 100),
+  };
+};
+
+export const buildWeeklyRunVolume = (
+  activities: Activity[],
+  weeks: number = 8,
+): WeeklyRunVolumeDatum[] => {
+  const now = new Date();
+  const currentWeekStart = startOfWeek(now);
+  const weekBuckets = new Map<string, WeeklyRunVolumeDatum>();
+
+  for (let index = weeks - 1; index >= 0; index -= 1) {
+    const weekStart = new Date(currentWeekStart);
+    weekStart.setDate(weekStart.getDate() - index * 7);
+    const key = formatDateKey(weekStart);
+    weekBuckets.set(key, {
+      label: weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      miles: 0,
+      runs: 0,
+      longRun: 0,
+      avgPace: null,
+    });
+  }
+
+  const paceAccumulator = new Map<string, { distance: number; time: number }>();
+
+  activities
+    .filter(isRun)
+    .forEach((activity) => {
+      const weekStart = startOfWeek(new Date(activity.start_date));
+      const key = formatDateKey(weekStart);
+      const bucket = weekBuckets.get(key);
+
+      if (!bucket) {
+        return;
+      }
+
+      const miles = kmToMiles(mToKm(activity.distance));
+      bucket.miles = Math.round((bucket.miles + miles) * 10) / 10;
+      bucket.runs += 1;
+      bucket.longRun = Math.max(bucket.longRun, miles);
+
+      const current = paceAccumulator.get(key) ?? { distance: 0, time: 0 };
+      current.distance += activity.distance;
+      current.time += activity.moving_time;
+      paceAccumulator.set(key, current);
+    });
+
+  return Array.from(weekBuckets.entries()).map(([key, bucket]) => {
+    const paceData = paceAccumulator.get(key);
+    return {
+      ...bucket,
+      avgPace:
+        paceData && paceData.distance > 0
+          ? Math.round((((paceData.time / 60) / kmToMiles(mToKm(paceData.distance))) * 100)) / 100
+          : null,
+    };
+  });
+};
+
+export const calculateRunHighlights = (activities: Activity[]): RunHighlight[] => {
+  const runs = activities.filter(isRun);
+
+  if (runs.length === 0) {
+    return [];
+  }
+
+  const longestRun = runs.reduce((best, activity) =>
+    activity.distance > best.distance ? activity : best,
+  );
+  const hilliestRun = runs.reduce((best, activity) =>
+    activity.total_elevation_gain > best.total_elevation_gain ? activity : best,
+  );
+  const fastestRun = runs
+    .filter((activity) => activity.distance >= 5000)
+    .reduce<Activity | null>((best, activity) => {
+      if (!best) return activity;
+      const bestPace = best.moving_time / best.distance;
+      const currentPace = activity.moving_time / activity.distance;
+      return currentPace < bestPace ? activity : best;
+    }, null);
+
+  const highlights: RunHighlight[] = [
+    {
+      label: "Longest recent run",
+      value: `${kmToMiles(mToKm(longestRun.distance))} mi`,
+      detail: `${new Date(longestRun.start_date).toLocaleDateString()} · ${longestRun.name}`,
+    },
+    {
+      label: "Most vertical run",
+      value: `${metersToFeet(hilliestRun.total_elevation_gain)} ft`,
+      detail: `${new Date(hilliestRun.start_date).toLocaleDateString()} · ${hilliestRun.name}`,
+    },
+  ];
+
+  if (fastestRun) {
+    highlights.unshift({
+      label: "Fastest 5K+ pace",
+      value: `${formatPace((fastestRun.moving_time / 60) / kmToMiles(mToKm(fastestRun.distance)))}/mi`,
+      detail: `${kmToMiles(mToKm(fastestRun.distance))} mi · ${fastestRun.name}`,
+    });
+  }
+
+  return highlights;
+};
+
+export const buildLifetimeRunSnapshot = (stats: Stats): LifetimeRunSnapshot => ({
+  recentMiles: Math.round(kmToMiles(mToKm(stats.recent_run_totals.distance)) * 10) / 10,
+  recentRuns: stats.recent_run_totals.count,
+  ytdMiles: Math.round(kmToMiles(mToKm(stats.ytd_run_totals.distance)) * 10) / 10,
+  ytdRuns: stats.ytd_run_totals.count,
+  lifetimeMiles: Math.round(kmToMiles(mToKm(stats.all_run_totals.distance)) * 10) / 10,
+  lifetimeRuns: stats.all_run_totals.count,
+});
 
 export const calculateActivityStats = (activities: Activity[]) => {
   const totalDistanceKm = activities.reduce((sum, a) => sum + a.distance, 0) / 1000;

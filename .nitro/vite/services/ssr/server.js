@@ -16607,7 +16607,7 @@ function getResponse() {
 }
 var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 async function getStartManifest(matchedRoutes) {
-  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-A7M5crJb.js");
+  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-DsO9CbUV.js");
   const startManifest = tsrStartManifest();
   const rootRoute = startManifest.routes[rootRouteId] = startManifest.routes[rootRouteId] || {};
   rootRoute.assets = rootRoute.assets || [];
@@ -16632,6 +16632,18 @@ async function getStartManifest(matchedRoutes) {
   };
 }
 const manifest = {
+  "ea3e6ffcf7f8567fd9ff559f16d3bf6185ca1c045c3183591d4c9704507a53cd": {
+    functionName: "getAthlete_createServerFn_handler",
+    importer: () => import("./assets/strava-CuasyTSh.js")
+  },
+  "8d24b1404747be8b48fd30bdf931924de3d897236fcb5d242f53f38b7ca5789d": {
+    functionName: "getActivities_createServerFn_handler",
+    importer: () => import("./assets/strava-CuasyTSh.js")
+  },
+  "730706da68dc73f668d21e04610a4a25811254b36a37cb962d4a7b09a7e8f8cc": {
+    functionName: "getStats_createServerFn_handler",
+    importer: () => import("./assets/strava-CuasyTSh.js")
+  },
   "57e57f9ad3a052abb4ff80e36000664d4271aaf52959c15686bf6cd3dd155e55": {
     functionName: "getStravaAuthUrl_createServerFn_handler",
     importer: () => import("./assets/auth-Yc-UQOgd.js")
@@ -16639,14 +16651,6 @@ const manifest = {
   "fa770a19229d28f852abdf85c9ce2b503e8a91dbf68339ba2dd4cc0f8e9e2688": {
     functionName: "exchangeStravaCode_createServerFn_handler",
     importer: () => import("./assets/auth-Yc-UQOgd.js")
-  },
-  "ea3e6ffcf7f8567fd9ff559f16d3bf6185ca1c045c3183591d4c9704507a53cd": {
-    functionName: "getAthlete_createServerFn_handler",
-    importer: () => import("./assets/strava-BZ91ld_c.js")
-  },
-  "8d24b1404747be8b48fd30bdf931924de3d897236fcb5d242f53f38b7ca5789d": {
-    functionName: "getActivities_createServerFn_handler",
-    importer: () => import("./assets/strava-BZ91ld_c.js")
   }
 };
 async function getServerFnById(id, access) {
@@ -17406,7 +17410,7 @@ var baseManifestPromise;
 var cachedFinalManifestPromise;
 async function loadEntries() {
   const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-    import("./assets/router-BOCA6xyt.js").then((n2) => n2.o),
+    import("./assets/router-wv7RxLoN.js").then((n2) => n2.o),
     import("./assets/start-HYkvq4Ni.js"),
     import("./assets/__23tanstack-start-plugin-adapters-Cwee5PKy.js")
   ]);

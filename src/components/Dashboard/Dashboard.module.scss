@@ -5,8 +5,16 @@
   color: #ffffff;
   background:
     radial-gradient(circle at 8% 12%, rgba(0, 255, 163, 0.08), transparent 22%),
-    radial-gradient(circle at 85% 18%, rgba(58, 130, 246, 0.08), transparent 24%),
-    radial-gradient(circle at 62% 78%, rgba(163, 230, 53, 0.06), transparent 22%),
+    radial-gradient(
+      circle at 85% 18%,
+      rgba(58, 130, 246, 0.08),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 62% 78%,
+      rgba(163, 230, 53, 0.06),
+      transparent 22%
+    ),
     linear-gradient(180deg, #020304 0%, #07090b 46%, #0c1016 100%);
 }
 
@@ -171,8 +179,11 @@
 .heroIntro {
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 2rem 1.15rem 1.5rem 1.25rem;
-  background:
-    linear-gradient(145deg, rgba(12, 14, 17, 0.99), rgba(6, 7, 9, 0.99));
+  background: linear-gradient(
+    145deg,
+    rgba(12, 14, 17, 0.99),
+    rgba(6, 7, 9, 0.99)
+  );
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
 }
 
@@ -244,8 +255,13 @@
 .panel {
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 1.9rem 1.15rem 1.5rem 1.15rem;
-  background: linear-gradient(180deg, rgba(12, 13, 16, 0.99), rgba(6, 7, 9, 0.99));
+  background: linear-gradient(
+    180deg,
+    rgba(12, 13, 16, 0.99),
+    rgba(6, 7, 9, 0.99)
+  );
   box-shadow: 0 16px 30px rgba(2, 6, 23, 0.14);
+  padding: 20px;
 }
 
 .metricCard,
@@ -281,16 +297,22 @@
 }
 
 .runCardIndigo {
-  background: linear-gradient(180deg, rgba(27, 42, 77, 0.6), rgba(8, 11, 15, 0.99));
+  background: linear-gradient(
+    180deg,
+    rgba(27, 42, 77, 0.6),
+    rgba(8, 11, 15, 0.99)
+  );
 }
 
 .runCardCyan {
-  background: linear-gradient(180deg, rgba(58, 130, 246, 0.2), rgba(12, 30, 60, 0.18)),
+  background:
+    linear-gradient(180deg, rgba(58, 130, 246, 0.2), rgba(12, 30, 60, 0.18)),
     linear-gradient(180deg, rgba(12, 13, 16, 0.99), rgba(6, 7, 9, 0.99));
 }
 
 .runCardRed {
-  background: linear-gradient(180deg, rgba(0, 255, 163, 0.14), rgba(5, 42, 31, 0.14)),
+  background:
+    linear-gradient(180deg, rgba(0, 255, 163, 0.14), rgba(5, 42, 31, 0.14)),
     linear-gradient(180deg, rgba(12, 13, 16, 0.99), rgba(6, 7, 9, 0.99));
 }
 
@@ -371,6 +393,46 @@
 
 .chartGrid .panel {
   padding: 1.5rem;
+}
+
+.snapshotGrid {
+  margin-bottom: 2rem;
+}
+
+.snapshotCards {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.snapshotCard {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.snapshotLabel {
+  color: #8e96a8;
+  font-size: 0.72rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.snapshotValue {
+  color: #f3f6fb;
+  font-size: 1.2rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.snapshotDetail {
+  color: #9ca4b6;
+  font-size: 0.88rem;
 }
 
 .chartHeader {
@@ -501,6 +563,10 @@
   }
 
   .runStatsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .snapshotCards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
