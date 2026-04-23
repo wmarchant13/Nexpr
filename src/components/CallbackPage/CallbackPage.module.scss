@@ -1,38 +1,23 @@
 .page {
-  position: relative;
-  overflow: hidden;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background:
-    radial-gradient(circle at top, rgba(0, 255, 163, 0.1), transparent 28%),
-    radial-gradient(circle at 82% 20%, rgba(58, 130, 246, 0.1), transparent 24%),
-    linear-gradient(180deg, #030405 0%, #0a0c10 100%);
+  background: var(--cream);
 }
 
 .ambientGrid {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 34px 34px;
-  opacity: 0.55;
-  pointer-events: none;
+  display: none;
 }
 
 .card {
   position: relative;
-  z-index: 1;
-  width: min(100%, 30rem);
-  padding: 1.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.9rem 1.15rem 1.5rem 1.2rem;
-  background:
-    linear-gradient(145deg, rgba(14, 16, 19, 0.99), rgba(7, 8, 10, 0.99));
-  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.24);
+  width: min(100%, 28rem);
+  padding: 3rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--paper);
 }
 
 .centered {
@@ -40,11 +25,11 @@
 }
 
 .eyebrow {
-  margin: 0 0 0.8rem;
-  color: #8d97a8;
-  font-size: 0.72rem;
-  font-family: var(--font-display);
-  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: var(--ink-40);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -52,82 +37,63 @@
 .errorTitle,
 .successTitle {
   margin: 0 0 0.75rem;
-  font-size: 2rem;
-  font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink);
 }
 
 .errorTitle {
-  color: #f87171;
-}
-
-.successTitle {
-  color: #ffffff;
+  color: var(--accent);
 }
 
 .message {
   margin: 0 0 1.5rem;
-  color: #97a0b1;
-  line-height: 1.6;
+  color: var(--ink-60);
+  line-height: 1.65;
+  font-size: 0.9375rem;
 }
 
 .errorButton {
-  display: block;
-  padding: 0.85rem 1rem;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, #0d1116, #171b22);
-  border: 1px solid rgba(58, 130, 246, 0.34);
-  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border-radius: var(--radius);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  color: var(--cream);
   text-align: center;
   text-decoration: none;
-  font-family: var(--font-display);
-  font-weight: 700;
-  transition:
-    transform 0.18s ease,
-    filter 0.18s ease;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: background 0.2s, border-color 0.2s;
 
   &:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.05);
+    background: var(--accent);
+    border-color: var(--accent);
   }
 }
 
 .successIcon {
   margin-bottom: 1rem;
-  color: #00ffa3;
-  font-size: 3.4rem;
+  color: var(--success);
+  font-size: 3rem;
   line-height: 1;
 }
 
-.loadingState {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 22rem);
-  padding: 1.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.9rem 1.15rem 1.5rem 1.2rem;
-  background:
-    linear-gradient(145deg, rgba(14, 16, 19, 0.99), rgba(7, 8, 10, 0.99));
-  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.24);
-  text-align: center;
-}
-
-.spinner {
-  width: 4rem;
-  height: 4rem;
-  margin: 0 auto 1rem;
-  border: 4px solid rgba(148, 163, 184, 0.25);
-  border-top-color: #00ffa3;
+.loadingSpinner {
+  width: 18px;
+  height: 18px;
+  margin: 0 auto 16px;
+  border: 1.5px solid var(--ink-15);
+  border-top-color: var(--ink);
   border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-
-.loadingText {
-  margin: 0;
-  color: #dde3ec;
-  font-size: 1.125rem;
-  font-family: var(--font-display);
+  animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {

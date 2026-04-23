@@ -1,0 +1,241 @@
+.layout {
+  position: relative;
+  min-height: 100vh;
+  background: #050505;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.backgroundLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.backgroundScrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(5, 5, 5, 0.28), rgba(5, 5, 5, 0.5)),
+    radial-gradient(circle at center, rgba(5, 5, 5, 0.04), rgba(5, 5, 5, 0.38));
+}
+
+.backgroundTile {
+  position: absolute;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  background: #0f0f0f;
+  filter: contrast(1.08) saturate(0.92);
+  opacity: 0.98;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.tileNorthwest {
+  top: 112px;
+  left: 4vw;
+  width: min(31vw, 420px);
+  aspect-ratio: 0.9;
+  transform: rotate(-5deg);
+}
+
+.tileNorth {
+  top: 84px;
+  right: 12vw;
+  width: min(18vw, 240px);
+  aspect-ratio: 0.68;
+  transform: rotate(3deg);
+}
+
+.tileEast {
+  top: 36vh;
+  right: 3vw;
+  width: min(26vw, 360px);
+  aspect-ratio: 0.86;
+  transform: rotate(4deg);
+}
+
+.tileSouthwest {
+  bottom: 88px;
+  left: 12vw;
+  width: min(24vw, 320px);
+  aspect-ratio: 1.28;
+  transform: rotate(-4deg);
+}
+
+/* ── Top Header ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-h);
+  background: rgba(10, 10, 10, 0.78);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+.headerInner {
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--page-px);
+  display: grid;
+  grid-template-columns: 176px 1fr 220px;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  color: var(--ink);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.wordmarkLogo {
+  display: block;
+  width: 112px;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.wordmarkSub {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+  display: block;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.avatarButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  display: block;
+  // Sharp white border on dark bg
+  filter: none;
+}
+
+.logoutButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  padding: 0;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+/* ── Main Content ── */
+.main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding-bottom: 64px;
+
+  @media (min-width: 769px) {
+    padding-bottom: 0;
+  }
+}
+
+.contentShell {
+  position: relative;
+  z-index: 1;
+}
+
+.footerWrapper {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 32px var(--page-px);
+  max-width: var(--max-w);
+  margin: 80px auto 0;
+  width: 100%;
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .headerInner {
+    grid-template-columns: 1fr auto;
+    padding: 0 20px;
+    gap: 12px;
+  }
+
+  .wordmarkLogo {
+    width: 92px;
+  }
+
+  .backgroundScrim {
+    background:
+      linear-gradient(to bottom, rgba(5, 5, 5, 0.4), rgba(5, 5, 5, 0.62)),
+      radial-gradient(circle at center, rgba(5, 5, 5, 0.08), rgba(5, 5, 5, 0.5));
+  }
+
+  .backgroundTile {
+    opacity: 0.86;
+  }
+
+  .tileNorthwest {
+    top: 108px;
+    left: -6vw;
+    width: 56vw;
+  }
+
+  .tileNorth {
+    top: 132px;
+    right: 2vw;
+    width: 34vw;
+  }
+
+  .tileEast {
+    top: auto;
+    bottom: 24vh;
+    right: -8vw;
+    width: 48vw;
+  }
+
+  .tileSouthwest {
+    bottom: 96px;
+    left: 2vw;
+    width: 46vw;
+  }
+
+  .footerWrapper {
+    padding: 24px 20px;
+    margin-top: 48px;
+  }
+}

@@ -1,7 +1,7 @@
 {
-  "name": "secund-io",
-  "version": "1.0.0",
-  "description": "Strava data tracking app with OAuth 2 authentication",
+  "name": "nexpr",
+  "version": "2.0.0",
+  "description": "Unlock your next PR - Data-driven running performance platform",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@tanstack/react-query": "^5.28.0",
     "@tanstack/react-router": "^1.168.22",
     "@tanstack/react-start": "^1.167.41",

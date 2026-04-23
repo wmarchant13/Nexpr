@@ -32,6 +32,7 @@ export default function CallbackPage() {
   const hasCalledRef = React.useRef(false);
 
   const callbackMutation = useStravaCallback(search.code || "");
+  const { mutate } = callbackMutation;
 
   useEffect(() => {
     if (search.error) {
@@ -43,12 +44,12 @@ export default function CallbackPage() {
     if (search.code && !hasCalledRef.current) {
       hasCalledRef.current = true;
       setStatus("loading");
-      callbackMutation.mutate(undefined, {
+      mutate(undefined, {
         onSuccess: () => {
           setStatus("success");
           setTimeout(() => {
             window.location.replace("/dashboard");
-          }, 1500);
+          }, 800);
         },
         onError: (error) => {
           setStatus("error");
@@ -56,7 +57,9 @@ export default function CallbackPage() {
         },
       });
     }
-  }, [search.code, search.error, search.error_description, callbackMutation]);
+    // mutate is stable; search params won't change after mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.code, search.error, search.error_description]);
 
   if (search.error) {
     return (

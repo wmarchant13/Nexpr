@@ -97,7 +97,7 @@ export default function Dashboard() {
 
   const weeklyTraining = useMemo(() => {
     if (!activities) return null;
-    return analyzeWeeklyTraining(activities, 8, 8);
+    return analyzeWeeklyTraining(activities, 8);
   }, [activities]);
 
   const lifetimeSnapshot = useMemo(
@@ -249,7 +249,7 @@ export default function Dashboard() {
           <section className={styles.snapshotGrid}>
             <div className={styles.panel}>
               <div className={styles.chartHeader}>
-                <span className={styles.chartTag}>Strava stats</span>
+                <span className={styles.chartTag}>Your totals</span>
                 <h2 className={styles.panelTitle}>Running Totals</h2>
               </div>
               <div className={styles.snapshotCards}>

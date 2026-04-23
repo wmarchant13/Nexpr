@@ -1,0 +1,254 @@
+/**
+ * Fueling API Server Functions
+ * 
+ * Server-side functions for persisting fueling data to Neon PostgreSQL.
+ * Uses @neondatabase/serverless for edge-compatible connections.
+ */
+
+import { createServerFn } from "@tanstack/react-start";
+import { neon } from "@neondatabase/serverless";
+
+// ============================================================================
+// DATABASE CONNECTION
+// ============================================================================
+
+function getDb() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL environment variable is not set");
+  }
+  return neon(databaseUrl);
+}
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface FuelingEntryRow {
+  id: number;
+  athlete_id: number;
+  activity_id: number;
+  carbs_grams: number | null;
+  gels_count: number | null;
+  hydration_ml: number | null;
+  caffeine_count: number | null;
+  timing_before: string | null;
+  timing_during: string | null;
+  timing_after: string | null;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FuelingEntryInput {
+  athleteId: number;
+  activityId: number;
+  carbsGrams?: number;
+  gelsCount?: number;
+  hydrationMl?: number;
+  caffeineCount?: number;
+  timingBefore?: string;
+  timingDuring?: string;
+  timingAfter?: string;
+  note?: string;
+}
+
+// ============================================================================
+// SERVER FUNCTIONS
+// ============================================================================
+
+/**
+ * Get fueling entry for a specific activity.
+ */
+export const getFuelingEntry = createServerFn({ method: "GET" })
+  .inputValidator((input: { activityId: number }) => input)
+  .handler(async ({ data }) => {
+    const sql = getDb();
+    
+    const rows = await sql`
+      SELECT * FROM fueling_entries 
+      WHERE activity_id = ${data.activityId}
+      LIMIT 1
+    `;
+    
+    if (rows.length === 0) {
+      return null;
+    }
+    
+    const row = rows[0] as FuelingEntryRow;
+    return {
+      activityId: row.activity_id,
+      carbsGrams: row.carbs_grams ?? undefined,
+      gelsCount: row.gels_count ?? undefined,
+      hydrationMl: row.hydration_ml ?? undefined,
+      caffeineCount: row.caffeine_count ?? undefined,
+      timing: {
+        beforeRun: row.timing_before as any,
+        duringRun: row.timing_during as any,
+        afterRun: row.timing_after as any,
+      },
+      note: row.note ?? undefined,
+      createdAt: new Date(row.created_at).getTime(),
+      updatedAt: new Date(row.updated_at).getTime(),
+    };
+  });
+
+/**
+ * Get all fueling entries for an athlete.
+ * Used for building aggregate fueling profile.
+ */
+export const getAllFuelingEntries = createServerFn({ method: "GET" })
+  .inputValidator((input: { athleteId: number }) => input)
+  .handler(async ({ data }) => {
+    const sql = getDb();
+    
+    const rows = await sql`
+      SELECT * FROM fueling_entries 
+      WHERE athlete_id = ${data.athleteId}
+      ORDER BY created_at DESC
+    `;
+    
+    return (rows as FuelingEntryRow[]).map((row) => ({
+      activityId: row.activity_id,
+      carbsGrams: row.carbs_grams ?? undefined,
+      gelsCount: row.gels_count ?? undefined,
+      hydrationMl: row.hydration_ml ?? undefined,
+      caffeineCount: row.caffeine_count ?? undefined,
+      timing: {
+        beforeRun: row.timing_before as any,
+        duringRun: row.timing_during as any,
+        afterRun: row.timing_after as any,
+      },
+      note: row.note ?? undefined,
+      createdAt: new Date(row.created_at).getTime(),
+      updatedAt: new Date(row.updated_at).getTime(),
+    }));
+  });
+
+/**
+ * Save or update fueling entry for an activity.
+ * Uses upsert (INSERT ... ON CONFLICT UPDATE).
+ */
+export const saveFuelingEntry = createServerFn({ method: "POST" })
+  .inputValidator((input: FuelingEntryInput) => input)
+  .handler(async ({ data }) => {
+    const sql = getDb();
+    
+    const now = new Date().toISOString();
+    
+    await sql`
+      INSERT INTO fueling_entries (
+        athlete_id,
+        activity_id,
+        carbs_grams,
+        gels_count,
+        hydration_ml,
+        caffeine_count,
+        timing_before,
+        timing_during,
+        timing_after,
+        note,
+        created_at,
+        updated_at
+      ) VALUES (
+        ${data.athleteId},
+        ${data.activityId},
+        ${data.carbsGrams ?? null},
+        ${data.gelsCount ?? null},
+        ${data.hydrationMl ?? null},
+        ${data.caffeineCount ?? null},
+        ${data.timingBefore ?? null},
+        ${data.timingDuring ?? null},
+        ${data.timingAfter ?? null},
+        ${data.note ?? null},
+        ${now},
+        ${now}
+      )
+      ON CONFLICT (activity_id) DO UPDATE SET
+        carbs_grams = EXCLUDED.carbs_grams,
+        gels_count = EXCLUDED.gels_count,
+        hydration_ml = EXCLUDED.hydration_ml,
+        caffeine_count = EXCLUDED.caffeine_count,
+        timing_before = EXCLUDED.timing_before,
+        timing_during = EXCLUDED.timing_during,
+        timing_after = EXCLUDED.timing_after,
+        note = EXCLUDED.note,
+        updated_at = ${now}
+    `;
+    
+    return { success: true, activityId: data.activityId };
+  });
+
+/**
+ * Delete fueling entry for an activity.
+ */
+export const deleteFuelingEntry = createServerFn({ method: "POST" })
+  .inputValidator((input: { athleteId: number; activityId: number }) => input)
+  .handler(async ({ data }) => {
+    const sql = getDb();
+    
+    await sql`
+      DELETE FROM fueling_entries 
+      WHERE activity_id = ${data.activityId}
+        AND athlete_id = ${data.athleteId}
+    `;
+    
+    return { success: true, activityId: data.activityId };
+  });
+
+/**
+ * Delete ALL fueling entries for an athlete.
+ * Called on disconnect/logout to comply with Strava API data deletion requirements.
+ */
+export const deleteAllFuelingEntries = createServerFn({ method: "POST" })
+  .inputValidator((input: { athleteId: number }) => input)
+  .handler(async ({ data }) => {
+    const sql = getDb();
+    
+    const result = await sql`
+      DELETE FROM fueling_entries 
+      WHERE athlete_id = ${data.athleteId}
+      RETURNING id
+    `;
+    
+    return { success: true, deletedCount: result.length };
+  });
+
+/**
+ * Initialize the fueling_entries table.
+ * Call this once to set up the schema.
+ */
+export const initFuelingTable = createServerFn({ method: "POST" })
+  .handler(async () => {
+    const sql = getDb();
+    
+    await sql`
+      CREATE TABLE IF NOT EXISTS fueling_entries (
+        id SERIAL PRIMARY KEY,
+        athlete_id BIGINT NOT NULL,
+        activity_id BIGINT NOT NULL UNIQUE,
+        carbs_grams INT,
+        gels_count INT,
+        hydration_ml INT,
+        caffeine_count INT,
+        timing_before VARCHAR(20),
+        timing_during VARCHAR(20),
+        timing_after VARCHAR(20),
+        note TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `;
+    
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_fueling_athlete 
+      ON fueling_entries(athlete_id)
+    `;
+    
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_fueling_activity 
+      ON fueling_entries(activity_id)
+    `;
+    
+    return { success: true, message: "Fueling table initialized" };
+  });

@@ -1,0 +1,92 @@
+/* ── Desktop Nav — lives inside the header center column ── */
+.desktopNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.navItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+.navLogo {
+  display: block;
+  width: 34px;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.active {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+/* ── Mobile Bottom Bar ── */
+.mobileNav {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    height: 56px;
+    background: var(--cream);
+    border-top: 1px solid var(--border);
+    align-items: stretch;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+
+.mobileNavItem {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  padding: 0 4px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.mobileNavLogo {
+  display: block;
+  width: 26px;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.mobileActive {
+  color: var(--ink);
+}

@@ -1,0 +1,858 @@
+/* ── Goals / Race Day ── */
+
+.page { background: transparent; min-height: 100vh; }
+
+.container {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: var(--page-py) var(--page-px) 80px;
+}
+
+/* ── Page Header ── */
+.header {
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+
+.kicker {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  color: var(--ink-60);
+  margin: 8px 0 0;
+  line-height: 1.6;
+}
+
+/* ── Loading ── */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 12px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-60);
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--ink-15);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Add Goal Form ── */
+.formSection {
+  margin-bottom: 48px;
+  padding: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+}
+
+.goalForm {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.distanceSelect {
+  padding: 10px 14px;
+  background: var(--cream);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+  appearance: none;
+
+  option { background: var(--cream); color: var(--ink); }
+  &:focus { border-color: var(--ink); }
+}
+
+.timeInputWrapper { display: flex; flex-direction: column; gap: 4px; }
+
+.timeInput {
+  width: 120px;
+  padding: 10px 12px;
+  background: var(--cream);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  text-align: center;
+  outline: none;
+
+  &::placeholder { color: var(--ink-40); }
+  &:focus { border-color: var(--ink); }
+}
+
+.timeInputError { border-color: var(--accent) !important; }
+
+.timeError {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+.addButton {
+  padding: 10px 24px;
+  background: var(--ink);
+  color: var(--cream);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+/* ── Goals ── */
+.goalsSection { margin-bottom: 56px; }
+
+.sectionTitle {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+  margin: 0 0 24px;
+}
+
+.sectionSubtitle {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--ink-60);
+  margin: -16px 0 24px;
+}
+
+.goalsGrid { display: flex; flex-direction: column; }
+
+.goalCard {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+
+  &:first-child { border-top: 1px solid var(--border); }
+}
+
+.goalCard.complete .goalDistance { color: var(--success); }
+
+.goalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.goalDistance {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+.goalActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.completeBadge {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--success);
+  border: 1px solid rgba(42,96,73,0.25);
+  padding: 3px 10px;
+  border-radius: var(--radius);
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: var(--ink-40);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.2s;
+
+  &:hover { color: var(--accent); }
+}
+
+.goalBody {
+  display: flex;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.timeStat { display: flex; flex-direction: column; gap: 4px; }
+
+.timeLabel {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+}
+
+.timeValue {
+  font-family: var(--font-mono);
+  font-size: 1.375rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.timeComplete { color: var(--success); }
+
+.gapChip {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 12px;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-60);
+  letter-spacing: 0.04em;
+}
+
+.gapClose {
+  color: var(--warning);
+  border-color: rgba(122,85,0,0.25);
+  background: var(--warning-bg);
+}
+
+.gapComplete {
+  color: var(--success);
+  border-color: rgba(42,96,73,0.25);
+  background: var(--success-bg);
+}
+
+.emptyState {
+  padding: 48px 0;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  color: var(--ink-60);
+  font-style: italic;
+
+  p { margin: 0; }
+}
+
+.emptyHint {
+  font-style: normal;
+  color: var(--ink-40);
+  font-size: 0.875rem;
+  margin-top: 6px !important;
+}
+
+/* ── PRs ── */
+.prsSection { margin-bottom: 56px; }
+
+.prsLoading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-60);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 16px 0;
+}
+
+.prsGrid { display: flex; flex-direction: column; }
+
+.prCard {
+  display: grid;
+  grid-template-columns: 140px 1fr 120px 120px;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+
+  &:first-child { border-top: 1px solid var(--border); }
+}
+
+.prDistance {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-60);
+}
+
+.prTime {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.prPace {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-60);
+  text-align: right;
+}
+
+.prDate {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-40);
+  text-align: right;
+  letter-spacing: 0.03em;
+}
+
+.noPrs {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  color: var(--ink-60);
+  padding: 32px 0;
+  font-style: italic;
+
+  p { margin: 0; }
+}
+
+.noPrsHint {
+  font-style: normal;
+  color: var(--ink-40);
+  font-size: 0.875rem;
+  margin-top: 4px !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .container { padding: 40px 20px 80px; }
+  .goalBody { gap: 24px; }
+  .prCard { grid-template-columns: 1fr auto; }
+  .prPace, .prDate { display: none; }
+}
+
+.container {
+  max-width: 78rem;
+  margin: 0 auto;
+}
+
+
+
+.kicker {
+  display: block;
+  color: var(--fg-muted);
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: none;
+  margin-bottom: 0.4rem;
+}
+
+.title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.95rem;
+}
+
+/* ── Loading ── */
+
+
+/* Thick-thin rule under page header */
+.header {
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: transparent;
+  }
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--fg-muted);
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 0.75rem;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Add Goal Form ── */
+
+.formSection {
+  margin-bottom: 2.5rem;
+  padding: 2rem;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+}
+
+.goalForm {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.distanceSelect {
+  padding: 0.6rem 0.875rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--fg);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  appearance: none;
+  min-width: 10rem;
+  outline: none;
+  
+  option {
+    background: var(--bg);
+    color: var(--fg);
+  }
+  
+  &:focus {
+    border-color: var(--accent);
+  }
+}
+
+.timeInputWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.timeLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}
+
+.timeInputRow {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.timeInput {
+  width: 9rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg);
+  font-size: 0.95rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  
+  &:focus {
+    border-color: var(--accent);
+  }
+}
+
+.timeInputError {
+  border-color: rgba(194, 65, 65, 0.65);
+}
+
+.timeError {
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+
+.timeSep {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--fg-muted);
+}
+
+.addButton {
+  padding: 0.6rem 1.5rem;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--accent-fg);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+  
+  &:hover:not(:disabled) {
+    opacity: 0.88;
+  }
+  
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Goal Cards ── */
+
+.goalsSection {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--fg);
+}
+
+.sectionSubtitle {
+  margin: 0 0 1rem;
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+}
+
+.goalGrid,
+.goalsGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.goalCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  transition: border-color 0.12s ease;
+  
+  &:hover {
+    border-color: var(--border-strong);
+  }
+}
+
+.goalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.goalActions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.completeBadge {
+  border: 1px solid rgba(21, 115, 71, 0.35);
+  background: var(--success-subtle);
+  color: var(--success);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.14rem 0.4rem;
+  border-radius: var(--radius);
+}
+
+.goalBody {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.timeStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.timeLabel {
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+}
+
+.timeValue {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.deleteButton,
+.deleteGoalBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg-subtle);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.12s ease;
+
+  &:hover {
+    background: var(--danger-subtle);
+    border-color: rgba(194, 65, 65, 0.5);
+    color: var(--danger);
+  }
+}
+
+.goalDistance {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--accent);
+}
+
+.goalTime {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.goalTimeValue {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--fg);
+  letter-spacing: -0.02em;
+}
+
+.goalTimePace {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+
+.goalGap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.gapChip {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  background: var(--bg-muted);
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+}
+
+.gapClose {
+  background: rgba(217, 119, 6, 0.1);
+  color: var(--warning);
+}
+
+.gapComplete {
+  background: var(--success-subtle);
+  color: var(--success);
+}
+
+.deleteGoalBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg-subtle);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  
+  &:hover {
+    background: var(--danger-subtle);
+    border-color: rgba(220, 38, 38, 0.3);
+    color: var(--danger);
+  }
+}
+
+.emptyState {
+  padding: 2rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg-muted);
+}
+
+.emptyHint {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+}
+
+/* ── PRs Section ── */
+
+.prsSection {
+  margin-bottom: 2.5rem;
+}
+
+.prsLoading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  padding: 1rem 0;
+  
+  .spinner {
+    margin: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+.prsGrid {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.prCard {
+  display: grid;
+  grid-template-columns: 9rem 1fr auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.prDistance {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--accent);
+}
+
+.prTime {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--fg);
+  letter-spacing: -0.02em;
+}
+
+.prPace {
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  color: var(--fg-muted);
+}
+
+.prDate {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  text-align: right;
+}
+
+.noPrs {
+  padding: 2.5rem 2rem;
+  text-align: center;
+  color: var(--fg-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  
+  p {
+    margin: 0 0 0.4rem;
+  }
+}
+
+.noPrsHint {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.timeComplete {
+  color: var(--success);
+}

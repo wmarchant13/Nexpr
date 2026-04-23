@@ -19,20 +19,25 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Secund.io - Strava Activity Tracker",
+        title: "Nexpr - Unlock Your Next PR",
       },
       {
         name: "description",
-        content: "Track and visualize your Strava activities with Secund.io",
+        content:
+          "Data-driven running performance platform. Train smarter, race faster, unlock your next personal record.",
       },
     ],
     links: [
       { rel: "icon", href: "/favicon.ico" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap",
       },
     ],
   }),
@@ -46,62 +51,151 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
         <style>{`
-          /* Design tokens: editorial + performance-focused */
           :root {
-            --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            --font-display: "Space Grotesk", "Space Grotesk", Georgia, 'Times New Roman', serif;
+            /* ── Typefaces ── */
+            --font-serif: 'DM Serif Display', Georgia, 'Times New Roman', serif;
+            --font-body-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 
-            /* Colors */
-            --bg-900: #050607; /* primary dark */
-            --bg-800: #0b0d10;
-            --fg-100: #f7f7f5; /* off-white */
-            --muted: #9aa3b2;
-            --accent: #7dd3a6; /* muted green accent */
-            --accent-amber: #f59e0b;
+            /* ── Dark palette — black base, white text ── */
+            --bg:          #0A0A0A;
+            --bg-subtle:   #111111;
+            --bg-muted:    #1A1A1A;
+            --bg-raised:   #1C1C1C;
 
-            /* Spacing scale */
-            --space-xs: 0.25rem;
-            --space-sm: 0.5rem;
-            --space-md: 1rem;
-            --space-lg: 1.5rem;
-            --space-xl: 2.5rem;
+            /* Surface aliases */
+            --cream:  #0A0A0A;
+            --paper:  #111111;
+            --ink:    #FFFFFF;
 
-            --radius-lg: 1rem;
+            /* White-based opacity tiers */
+            --ink-80:  rgba(255,255,255,0.80);
+            --ink-60:  rgba(255,255,255,0.60);
+            --ink-40:  rgba(255,255,255,0.40);
+            --ink-15:  rgba(255,255,255,0.15);
 
-            /* Typographic scale */
-            --h1: 2.6rem;
-            --h2: 1.6rem;
-            --stat-size: 2.8rem;
+            /* ── Brand accents ── */
+            --accent:       #FFFFFF;
+            --accent-hover: #D6D6D6;
+            --accent-10:    rgba(255,255,255,0.12);
+            --ochre:        #C4A668;
+            --ochre-bg:     rgba(196,166,104,0.12);
+            --forest:       #2D3B2D;
+            --stamp:        #FFFFFF;
+
+            /* ── Borders — white at low opacity ── */
+            --border:        rgba(255,255,255,0.10);
+            --border-strong: rgba(255,255,255,0.22);
+
+            /* ── Semantic ── */
+            --success:       #4ABA8A;
+            --success-bg:    rgba(74,186,138,0.10);
+            --success-subtle:rgba(74,186,138,0.10);
+            --success-fg:    #4ABA8A;
+            --warning:       #C4A668;
+            --warning-bg:    rgba(196,166,104,0.10);
+            --warning-subtle:rgba(196,166,104,0.10);
+            --danger:        #E2E2E2;
+            --danger-bg:     rgba(255,255,255,0.10);
+            --danger-subtle: rgba(255,255,255,0.10);
+
+            /* ── Radius ── */
+            --radius-sm: 2px;
+            --radius:    3px;
+            --radius-md: 4px;
+            --radius-lg: 4px;
+
+            /* ── Layout ── */
+            --header-h: 60px;
+            --max-w:    1280px;
+            --page-px:  48px;
+            --page-py:  72px;
+
+            /* ── Legacy aliases ── */
+            --fg:          #FFFFFF;
+            --fg-muted:    rgba(255,255,255,0.55);
+            --fg-secondary:rgba(255,255,255,0.70);
+            --fg-subtle:   rgba(255,255,255,0.38);
+            --font-body:   'Inter', -apple-system, sans-serif;
+            --font-display:'DM Serif Display', Georgia, serif;
+            --bg-900:      #0A0A0A;
+            --bg-800:      #111111;
+            --fg-100:      #FFFFFF;
+            --muted:       rgba(255,255,255,0.55);
+            --shadow-sm:   none;
+            --shadow:      none;
+            --accent-subtle: rgba(255,255,255,0.12);
+            --accent-fg:   #000000;
+            --white:       #FFFFFF;
           }
-
-          /* Dark mode only — no light-mode overrides included */
 
           *, *::before, *::after { box-sizing: border-box; }
 
-          html, body, #root { min-height: 100%; height: 100%; }
+          html, body, #root { min-height: 100%; }
 
-          html { background: var(--bg-900); }
+          html { background: #0A0A0A; }
 
           body {
             margin: 0;
-            background: linear-gradient(180deg, var(--bg-900) 0%, var(--bg-800) 100%);
-            color: var(--fg-100);
-            font-family: var(--font-body);
+            background: #0A0A0A;
+            color: #FFFFFF;
+            font-family: var(--font-sans);
+            font-size: 0.9375rem;
+            line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            line-height: 1.4;
           }
 
-          h1, h2, h3 { font-family: var(--font-display); margin: 0; }
+          /* Grain texture overlay */
+          body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 300px 300px;
+          }
+
+          h1, h2, h3, h4 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            margin: 0;
+            color: #FFFFFF;
+            line-height: 1.1;
+          }
 
           a { color: inherit; text-decoration: none; }
 
-          /* Utility: large stat display */
-          .stat-large { font-size: var(--stat-size); font-weight: 800; letter-spacing: -0.02em; }
+          /* Crosshair cursor on all interactive elements */
+          a, button, [role="button"], input, select, label[for] {
+            cursor: crosshair;
+          }
 
-          /* Reduced motion preference respects subtle motion only */
+          /* Scroll fade-up animation classes */
+          .fade-up {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 500ms ease-out, transform 500ms ease-out;
+          }
+          .fade-up-slow {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 800ms ease-out, transform 800ms ease-out;
+          }
+          .fade-up.in-view,
+          .fade-up-slow.in-view {
+            opacity: 1;
+            transform: translateY(0);
+          }
+
           @media (prefers-reduced-motion: reduce) {
             * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+            .fade-up, .fade-up-slow { opacity: 1; transform: none; }
           }
         `}</style>
       </head>
