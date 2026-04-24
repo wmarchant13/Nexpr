@@ -1,7 +1,7 @@
 const WINDOW_MS = 60_000;
 
-const DEFAULT_LIMIT = 120;
-const AUTH_LIMIT = 15;
+const DEFAULT_LIMIT = 300;
+const AUTH_LIMIT = 20;
 
 interface RateLimitEntry {
   count: number;

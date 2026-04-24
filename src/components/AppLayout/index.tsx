@@ -15,22 +15,22 @@ export default function AppLayout() {
     <div className={styles.layout}>
       <div className={styles.backgroundLayer} aria-hidden="true">
         <img
-          src="/assets/pexels-caique-araujo-101156227-15875672.jpg"
+          src="/assets/duo-running.jpg"
           alt=""
           className={`${styles.backgroundTile} ${styles.tileNorthwest}`}
         />
         <img
-          src="/assets/pexels-ketut-subiyanto-5036843.jpg"
+          src="/assets/man-running.jpg"
           alt=""
           className={`${styles.backgroundTile} ${styles.tileNorth}`}
         />
         <img
-          src="/assets/pexels-kf-zhou-609625381-19146676.jpg"
+          src="/assets/man-running-2.jpg"
           alt=""
           className={`${styles.backgroundTile} ${styles.tileEast}`}
         />
         <img
-          src="/assets/pexels-umutdagli-15085825.jpg"
+          src="/assets/track-running.jpg"
           alt=""
           className={`${styles.backgroundTile} ${styles.tileSouthwest}`}
         />

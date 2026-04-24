@@ -84,7 +84,7 @@ The webhook handles `athlete.deauthorize` events to delete app data on disconnec
 
 ## Rate Limiting
 
-All requests are limited to **120/minute per IP**. Auth endpoints (`/auth/*`) use a stricter **15/minute** limit. Responses include `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers.
+Page and API requests are limited to **300/minute per IP**. Auth endpoints (`/auth/*`) use a stricter **20/minute** limit. Internal server function RPCs (`/_server/*`) and static assets are excluded from rate limiting — they are already protected by session authentication. Responses include `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers.
 
 ## Security
 

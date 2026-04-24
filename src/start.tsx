@@ -2,9 +2,18 @@ import { createMiddleware, createStart } from "@tanstack/react-start";
 import { isbot } from "isbot";
 import { checkRateLimit, getClientIp, limitForPath } from "./utils/server/rateLimit";
 
-// Rate limit middleware: 120 req/min per IP, 15/min on auth paths
+// Rate limit middleware: 300 req/min per IP, 20/min on auth paths; skips /_server RPC and assets
 const rateLimitMiddleware = createMiddleware({ type: "request" }).server(
   async ({ next, pathname, request }) => {
+    // /_server calls are React Query RPCs — already session-gated, skip rate limit
+    if (
+      pathname.startsWith("/_server") ||
+      pathname.startsWith("/assets/") ||
+      pathname === "/favicon.ico"
+    ) {
+      return next();
+    }
+
     const ip = getClientIp(request);
     const limit = limitForPath(pathname);
     const { allowed, remaining, resetAt } = checkRateLimit(ip, limit);

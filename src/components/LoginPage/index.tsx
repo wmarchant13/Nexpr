@@ -10,7 +10,7 @@ export default function LoginPage() {
       {}
       <video
         className={styles.videoBg}
-        src="/assets/group-running.mp4"
+        src="/assets/running-video.mp4"
         autoPlay
         muted
         loop
