@@ -1,10 +1,3 @@
-/**
- * Profile Page
- *
- * User profile and account settings.
- * Shows lifetime stats and account management.
- */
-
 import React, { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
@@ -20,6 +13,7 @@ export const Route = createFileRoute("/_app/profile")({
   component: ProfilePage,
 });
 
+// Athlete profile and account settings page
 function ProfilePage() {
   const { data: athlete, isLoading: athleteLoading } = useAthlete();
   const { data: stats } = useStats(athlete?.id ?? null);
@@ -33,6 +27,7 @@ function ProfilePage() {
 
   const cacheStatus = useMemo(() => getCacheStatus(), []);
 
+  // Handles clear cache
   const handleClearCache = () => {
     clearCache();
     window.location.reload();
@@ -62,7 +57,6 @@ function ProfilePage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        {/* Profile Header */}
         <section className={styles.profileHeader}>
           <div className={styles.avatarWrapper}>
             {avatarUrl ? (
@@ -97,7 +91,6 @@ function ProfilePage() {
           </div>
         </section>
 
-        {/* Lifetime Stats */}
         {lifetimeStats && (
           <section className={styles.statsSection}>
             <h2 className={styles.sectionTitle}>Lifetime Running Stats</h2>
@@ -130,7 +123,6 @@ function ProfilePage() {
           </section>
         )}
 
-        {/* Data Management */}
         <section className={styles.settingsSection}>
           <h2 className={styles.sectionTitle}>Data & Cache</h2>
           <div className={styles.settingsCard}>
@@ -165,7 +157,6 @@ function ProfilePage() {
           </div>
         </section>
 
-        {/* Account Actions */}
         <section className={styles.settingsSection}>
           <h2 className={styles.sectionTitle}>Account</h2>
           <div className={styles.settingsCard}>
@@ -190,7 +181,6 @@ function ProfilePage() {
           </div>
         </section>
 
-        {/* App Info */}
         <section className={styles.appInfo}>
           <div className={styles.appBrand}>
             <img

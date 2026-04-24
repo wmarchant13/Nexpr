@@ -77,10 +77,10 @@ export interface ActivityTotals {
 }
 
 export interface Split {
-  distance: number; // in meters
-  elapsed_time: number; // in seconds
-  moving_time: number; // in seconds
-  split: number; // split number (1-indexed)
+  distance: number; 
+  elapsed_time: number; 
+  moving_time: number; 
+  split: number; 
   pace_zone: number;
 }
 
@@ -90,6 +90,7 @@ export interface Stats {
   ytd_run_totals: ActivityTotals;
 }
 
+// Query hook: returns current authentication status
 export const useViewerSession = () => {
   return useQuery({
     queryKey: ["viewer-session"],
@@ -99,7 +100,7 @@ export const useViewerSession = () => {
   });
 };
 
-// Auth Hooks
+// Mutation hook: initiates Strava OAuth redirect
 export const useStravaLogin = () => {
   return useMutation({
     mutationFn: async () => {
@@ -116,6 +117,7 @@ export const useStravaLogin = () => {
   });
 };
 
+// Mutation hook: completes OAuth flow with code + state
 export const useStravaCallback = (code: string, returnedState?: string) => {
   const queryClient = useQueryClient();
 
@@ -143,7 +145,7 @@ export const useStravaCallback = (code: string, returnedState?: string) => {
       }
 
       if (typeof window !== "undefined") {
-        // Reset stale Strava cache before applying newly authorized identity.
+        
         clearCache();
         localStorage.removeItem("nexpr_best_efforts_v1");
         if (result.athlete) {
@@ -154,7 +156,7 @@ export const useStravaCallback = (code: string, returnedState?: string) => {
       return result;
     },
     onSuccess: () => {
-      // Invalidate all Strava data so the next page load fetches fresh data.
+      
       void queryClient.invalidateQueries({ queryKey: ["viewer-session"] });
       void queryClient.invalidateQueries({ queryKey: ["athlete"] });
       void queryClient.invalidateQueries({ queryKey: ["activities"] });
@@ -163,14 +165,15 @@ export const useStravaCallback = (code: string, returnedState?: string) => {
   });
 };
 
+// Mutation hook: clears session and redirects to home
 export const useLogout = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
       await logoutStravaSession();
-      // Clear Strava-sourced cached data (required by Strava API Terms)
-      // Note: Fueling data is user-created content within Nexpr, NOT Strava data,
-      // so it is retained for the user's benefit.
+      
+      
+      
       clearCache();
       if (typeof window !== "undefined") {
         localStorage.removeItem("athlete");
@@ -186,14 +189,12 @@ export const useLogout = () => {
   });
 };
 
-// Strava API Hooks with Caching
-// These hooks check local cache first to minimize API calls
-
+// Query hook: fetches athlete profile with local cache
 export const useAthlete = () => {
   return useQuery({
     queryKey: ["athlete"],
     queryFn: async () => {
-      // Check cache first
+      
       const cached = getCachedAthlete();
       if (cached) {
         return cached;
@@ -202,25 +203,23 @@ export const useAthlete = () => {
       const result = await getAthlete();
       const athlete = result as Athlete;
 
-      // Cache the result
+      
       cacheAthlete(athlete);
       return athlete;
     },
     enabled: typeof window !== "undefined",
-    staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 60 * 60 * 1000,   // keep in memory 1 hour between navigations
+    staleTime: 60 * 60 * 1000, 
+    gcTime: 60 * 60 * 1000,   
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: false,
   });
 };
 
-// The primary bulk-activities query. All pages that need the full activity
-// list use (1, 100) so they share one cache entry and only ever fire one
-// request to Strava. Paginated list views use (page, 30) for a separate key.
+// Query hook: fetches activity list with local cache
 export const useActivities = (page: number = 1, perPage: number = 30) => {
-  // Normalise: any page-1 bulk request (perPage >= 50) shares a single key
-  // so dashboard, insights, and goals all read from the same cache entry.
+  
+  
   const isBulk = page === 1 && perPage >= 50;
   const queryKey = isBulk ? ["activities"] : ["activities", page, perPage];
 
@@ -255,6 +254,7 @@ export const useActivities = (page: number = 1, perPage: number = 30) => {
   });
 };
 
+// Query hook: fetches lifetime stats with local cache
 export const useStats = (athleteId: number | null) => {
   return useQuery({
     queryKey: ["stats", athleteId],
@@ -279,6 +279,7 @@ export const useStats = (athleteId: number | null) => {
   });
 };
 
+// Query hook: fetches full details for a single activity
 export const useActivityDetails = (activityId: number | null) => {
   return useQuery({
     queryKey: ["activityDetails", activityId],
@@ -295,10 +296,6 @@ export const useActivityDetails = (activityId: number | null) => {
     retry: false,
   });
 };
-
-// ============================================================================
-// FUELING HOOKS
-// ============================================================================
 
 import {
   getFuelingEntry as getFuelingEntryApi,
@@ -324,9 +321,7 @@ export interface FuelingEntry {
   updatedAt: number;
 }
 
-/**
- * Hook to get fueling entry for a specific activity.
- */
+// Query hook: fetches fueling entry for a single activity
 export const useFuelingEntry = (activityId: number | null) => {
   return useQuery({
     queryKey: ["fueling", activityId],
@@ -336,13 +331,11 @@ export const useFuelingEntry = (activityId: number | null) => {
       return result as FuelingEntry | null;
     },
     enabled: !!activityId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, 
   });
 };
 
-/**
- * Hook to get all fueling entries for current athlete.
- */
+// Query hook: fetches all fueling entries for the athlete
 export const useAllFuelingEntries = (athleteId: number | null) => {
   return useQuery({
     queryKey: ["fueling", "all", athleteId],
@@ -352,13 +345,11 @@ export const useAllFuelingEntries = (athleteId: number | null) => {
       return result as FuelingEntry[];
     },
     enabled: !!athleteId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, 
   });
 };
 
-/**
- * Hook to save fueling entry.
- */
+// Mutation hook: upserts a fueling entry
 export const useSaveFuelingEntry = () => {
   const queryClient = useQueryClient();
 
@@ -368,7 +359,7 @@ export const useSaveFuelingEntry = () => {
       return result;
     },
     onSuccess: (_, variables) => {
-      // Invalidate relevant queries
+      
       queryClient.invalidateQueries({
         queryKey: ["fueling", variables.activityId],
       });
@@ -377,9 +368,7 @@ export const useSaveFuelingEntry = () => {
   });
 };
 
-/**
- * Hook to delete fueling entry.
- */
+// Mutation hook: removes a fueling entry
 export const useDeleteFuelingEntry = () => {
   const queryClient = useQueryClient();
 
@@ -389,7 +378,7 @@ export const useDeleteFuelingEntry = () => {
       return result;
     },
     onSuccess: (_, variables) => {
-      // Invalidate relevant queries
+      
       queryClient.invalidateQueries({
         queryKey: ["fueling", variables.activityId],
       });
@@ -398,7 +387,6 @@ export const useDeleteFuelingEntry = () => {
   });
 };
 
-// Re-export effort classification utilities for convenience
 export {
   classifyEffort,
   classifyEfforts,
@@ -415,17 +403,18 @@ export {
   type EffortFactors,
 } from "../store/effort";
 
-// Unit conversion helpers
 const KM_TO_MILES = 0.621371;
 const METERS_TO_FEET = 3.28084;
 
+// Converts kilometers to miles, rounded to one decimal
 export const kmToMiles = (km: number): number =>
   Math.round(km * KM_TO_MILES * 10) / 10;
+// Converts meters to feet
 export const metersToFeet = (meters: number): number =>
   Math.round(meters * METERS_TO_FEET);
+// Converts meters to kilometers
 export const mToKm = (m: number): number => m / 1000;
 
-// Data aggregation utilities
 export interface MileageChartData {
   month: string;
   distance: number;
@@ -434,8 +423,8 @@ export interface MileageChartData {
 }
 
 export interface RunStats {
-  avgPace: number; // minutes per mile
-  avgDistance: number; // miles
+  avgPace: number; 
+  avgDistance: number; 
   totalRuns: number;
 }
 
@@ -473,9 +462,11 @@ export interface LifetimeRunSnapshot {
   lifetimeRuns: number;
 }
 
+// Returns true if an activity is a running activity
 const isRun = (activity: Activity) =>
   activity.type === "Run" || activity.sport_type === "Run";
 
+// Formats a Date as YYYY-MM-DD string
 const formatDateKey = (date: Date) => {
   const d = new Date(date);
   const yyyy = d.getFullYear();
@@ -484,6 +475,7 @@ const formatDateKey = (date: Date) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+// Returns the Monday of the week containing a given date
 export const startOfWeek = (date: Date) => {
   const copy = new Date(date);
   copy.setHours(0, 0, 0, 0);
@@ -493,6 +485,7 @@ export const startOfWeek = (date: Date) => {
   return copy;
 };
 
+// Formats minutes-per-mile as a M:SS string
 export const formatPace = (minutesPerMile: number): string => {
   if (!Number.isFinite(minutesPerMile) || minutesPerMile <= 0) {
     return "--";
@@ -504,9 +497,11 @@ export const formatPace = (minutesPerMile: number): string => {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
 
+// Formats seconds as a decimal hours string
 export const formatDurationHours = (seconds: number): string =>
   `${Math.round((seconds / 3600) * 10) / 10}h`;
 
+// Aggregates activity distance and elevation by month
 export const aggregate3MonthData = (
   activities: Activity[],
 ): MileageChartData[] => {
@@ -522,7 +517,7 @@ export const aggregate3MonthData = (
     { distance: number; activities: number; elevation: number }
   >();
 
-  // Initialize last 3 months
+  
   for (let i = 0; i < 3; i++) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthKey = date.toLocaleDateString("en-US", {
@@ -532,7 +527,7 @@ export const aggregate3MonthData = (
     monthMap.set(monthKey, { distance: 0, activities: 0, elevation: 0 });
   }
 
-  // Aggregate activities
+  
   activities.forEach((activity) => {
     const activityDate = new Date(activity.start_date);
     if (activityDate >= threeMonthsAgo) {
@@ -553,7 +548,7 @@ export const aggregate3MonthData = (
     }
   });
 
-  // Convert to array and sort chronologically
+  
   const data = Array.from(monthMap.entries())
     .map(([month, data]) => ({
       month,
@@ -570,6 +565,7 @@ export const aggregate3MonthData = (
   return data;
 };
 
+// Computes average pace and distance over the past 3 months
 export const calculate3MonthRunStats = (activities: Activity[]): RunStats => {
   const now = new Date();
   const threeMonthsAgo = new Date(
@@ -578,7 +574,7 @@ export const calculate3MonthRunStats = (activities: Activity[]): RunStats => {
     now.getDate(),
   );
 
-  // Filter for runs only
+  
   const runs = activities.filter(
     (a) =>
       (a.type === "Run" || a.sport_type === "Run") &&
@@ -602,6 +598,7 @@ export const calculate3MonthRunStats = (activities: Activity[]): RunStats => {
   };
 };
 
+// Computes training block stats over the past N days
 export const calculateRunnerBlockStats = (
   activities: Activity[],
   days: number = 28,
@@ -656,6 +653,7 @@ export const calculateRunnerBlockStats = (
   };
 };
 
+// Builds weekly mileage buckets for a chart
 export const buildWeeklyRunVolume = (
   activities: Activity[],
   weeks: number = 8,
@@ -716,6 +714,7 @@ export const buildWeeklyRunVolume = (
   });
 };
 
+// Finds the longest, hilliest, and fastest recent runs
 export const calculateRunHighlights = (
   activities: Activity[],
 ): RunHighlight[] => {
@@ -764,6 +763,7 @@ export const calculateRunHighlights = (
   return highlights;
 };
 
+// Formats Strava lifetime stats into a summary object
 export const buildLifetimeRunSnapshot = (
   stats: Stats,
 ): LifetimeRunSnapshot => ({
@@ -778,20 +778,20 @@ export const buildLifetimeRunSnapshot = (
   lifetimeRuns: stats.all_run_totals.count,
 });
 
-// Long run intelligence helpers
 export interface LongRunInsight {
   activityId: number;
   distanceMiles: number;
-  avgPace: number; // minutes per mile
-  paceCurve: number[]; // minutes per mile per segment
-  fatiguePointSegment: number | null; // index where pace degrades
-  controlledEnduranceScore: number; // 0-100
+  avgPace: number; 
+  paceCurve: number[]; 
+  fatiguePointSegment: number | null; 
+  controlledEnduranceScore: number; 
   comparison?: {
     prevAvgPace: number | null;
     deltaSecondsPerMile: number | null;
   };
 }
 
+// Filters and maps activities to long runs above a distance threshold
 export const getLongRuns = (activities: Activity[], minDistanceMiles = 10) =>
   activities
     .map((a) => ({
@@ -804,6 +804,7 @@ export const getLongRuns = (activities: Activity[], minDistanceMiles = 10) =>
         new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
     );
 
+// Analyze Long Run
 export const analyzeLongRun = (
   activity: Activity,
   pastActivities: Activity[] = [],
@@ -817,14 +818,14 @@ export const analyzeLongRun = (
   let paceCurve: number[];
 
   if (splits && splits.length > 0) {
-    // Use actual splits from Strava (each split is typically 1 mile)
+    
     paceCurve = splits.map((split) => {
       const splitMiles = kmToMiles(mToKm(split.distance));
       const splitMinutes = split.moving_time / 60;
       return Math.round((splitMinutes / splitMiles) * 100) / 100;
     });
   } else {
-    // Fallback: estimate based on whole miles
+    
     const segCount = Math.max(1, Math.floor(distanceMiles));
     const hr = activity.average_heartrate || 0;
     const driftFactor = hr
@@ -833,26 +834,26 @@ export const analyzeLongRun = (
 
     paceCurve = Array.from({ length: segCount }).map((_, i) => {
       const t = segCount > 1 ? i / (segCount - 1) : 0;
-      // early segments a bit faster, late segments slower by driftFactor
+      
       return Math.round(avgPace * (1 + driftFactor * t) * 100) / 100;
     });
   }
 
-  // detect first segment where pace exceeds baseline by 15%
+  
   const fatigueIdx = paceCurve.findIndex((p) => p > avgPace * 1.15);
 
-  // controlled endurance score: higher when pace variance low and drift small
+  
   const mean = avgPace;
   const variance =
     paceCurve.reduce((s, p) => s + Math.pow(p - mean, 2), 0) / paceCurve.length;
   const std = Math.sqrt(variance);
-  const consistency = Math.max(0, 1 - std / mean); // 0..1
-  const driftPenalty = splits && splits.length > 0 ? 0 : 0.12; // less penalty if using real splits
+  const consistency = Math.max(0, 1 - std / mean); 
+  const driftPenalty = splits && splits.length > 0 ? 0 : 0.12; 
   const score = Math.round(
     Math.max(0, Math.min(100, consistency * 100 - driftPenalty * 20)),
   );
 
-  // comparison: find previous long runs of similar distance (+-10%) and compute avg pace
+  
   const similar = pastActivities
     .map((a) => ({ ...a, distanceMiles: kmToMiles(mToKm(a.distance)) }))
     .filter(
@@ -886,7 +887,6 @@ export const analyzeLongRun = (
   };
 };
 
-// Weekly training structure analysis
 export interface WeeklySummaryWeek {
   weekStart: string;
   label: string;
@@ -896,17 +896,18 @@ export interface WeeklySummaryWeek {
 }
 
 export interface WeeklyTrainingAnalysis {
-  weeks: WeeklySummaryWeek[]; // last N weeks oldest->newest
-  volumeTrendPercentChange: number | null; // last vs previous week
-  easyMiles: number; // last week easy effort miles
-  hardMiles: number; // last week hard effort miles
-  percentEasy: number; // last week % of miles at easy effort
-  percentModerate: number; // last week % of miles at moderate effort
-  percentHard: number; // last week % of miles at hard effort
-  restConsistencyScore: number; // 0-100
-  longRunProportionLastWeek: number; // percent of miles from long runs
+  weeks: WeeklySummaryWeek[]; 
+  volumeTrendPercentChange: number | null; 
+  easyMiles: number; 
+  hardMiles: number; 
+  percentEasy: number; 
+  percentModerate: number; 
+  percentHard: number; 
+  restConsistencyScore: number; 
+  longRunProportionLastWeek: number; 
 }
 
+// Analyze Weekly Training
 export const analyzeWeeklyTraining = (
   activities: Activity[],
   weeks: number = 8,
@@ -941,20 +942,20 @@ export const analyzeWeeklyTraining = (
     runDaysMap
       .get(weekStart)!
       .add(new Date(activity.start_date).toISOString().slice(0, 10));
-    // Track longest run of the week (not sum of all long runs)
+    
     if (miles > bucket.longRunMiles) {
       bucket.longRunMiles = Math.round(miles * 10) / 10;
     }
   });
 
-  // finalize runDays
+  
   for (const [key, bucket] of weekBuckets.entries()) {
     bucket.runDays = runDaysMap.get(key)?.size ?? 0;
   }
 
   const weeksArr = Array.from(weekBuckets.values());
 
-  // compute volume trend: compare last week and previous week
+  
   const last = weeksArr[weeksArr.length - 1];
   const prev = weeksArr[weeksArr.length - 2] ?? null;
   const volumeTrendPercentChange =
@@ -962,7 +963,7 @@ export const analyzeWeeklyTraining = (
       ? Math.round(((last.miles - prev.miles) / prev.miles) * 100)
       : null;
 
-  // classify runs in last week into easy/moderate/hard using HR if available else relative pace
+  
   const lastWeekKey = last.weekStart;
   const runsLastWeek = activities.filter(
     (a) =>
@@ -973,7 +974,7 @@ export const analyzeWeeklyTraining = (
   let hardMiles = 0;
   let totalMiles = 0;
 
-  // compute week avg pace for relative classification
+  
   const weekTotalDistanceMeters = runsLastWeek.reduce(
     (s, r) => s + r.distance,
     0,
@@ -992,7 +993,7 @@ export const analyzeWeeklyTraining = (
       if (hr < 130) easyMiles += miles;
       else if (hr > 155) hardMiles += miles;
       else {
-        // moderate
+        
       }
     } else if (weekAvgPace > 0) {
       const pace = r.moving_time / 60 / (miles || 1);
@@ -1001,14 +1002,14 @@ export const analyzeWeeklyTraining = (
     }
   });
 
-  // compute percentages and ensure they sum to 100 by assigning remainder to moderate
+  
   const easyPct =
     totalMiles > 0 ? Math.round((easyMiles / totalMiles) * 100) : 0;
   const hardPct =
     totalMiles > 0 ? Math.round((hardMiles / totalMiles) * 100) : 0;
   const moderatePct = Math.max(0, 100 - easyPct - hardPct);
 
-  // rest consistency: compute rest days per week (7 - runDays) and score
+  
   const restDays = weeksArr.map((w) => 7 - w.runDays);
   const mean = restDays.reduce((s, v) => s + v, 0) / restDays.length;
   const variance =
@@ -1019,7 +1020,7 @@ export const analyzeWeeklyTraining = (
     Math.min(100, Math.round(100 - std * 18)),
   );
 
-  // Longest run share: percentage of longest run in last week vs total weekly miles
+  
   let longestRunMiles = 0;
   runsLastWeek.forEach((r) => {
     const miles = kmToMiles(mToKm(r.distance));
@@ -1031,7 +1032,7 @@ export const analyzeWeeklyTraining = (
   return {
     weeks: weeksArr,
     volumeTrendPercentChange,
-    // return both miles and percentages
+    
     easyMiles: Math.round(easyMiles * 10) / 10,
     hardMiles: Math.round(hardMiles * 10) / 10,
     percentEasy: easyPct,
@@ -1042,16 +1043,15 @@ export const analyzeWeeklyTraining = (
   };
 };
 
-// Segment + effort breakdown for a single activity (simple estimates)
 export interface SegmentAnalysis {
   segments: number;
   segmentMiles: number;
-  segmentPaces: number[]; // minutes per mile
+  segmentPaces: number[]; 
   easyMiles: number;
   hardMiles: number;
-  firstHalfPace: number; // min/mi
-  secondHalfPace: number; // min/mi
-  firstSecondDeltaSecondsPerMile: number; // positive = second half slower
+  firstHalfPace: number; 
+  secondHalfPace: number; 
+  firstSecondDeltaSecondsPerMile: number; 
   bestControlled: {
     startSegment: number;
     length: number;
@@ -1060,6 +1060,7 @@ export interface SegmentAnalysis {
   } | null;
 }
 
+// Analyze Activity Segments
 export const analyzeActivitySegments = (
   activity: Activity,
   segmentMiles = 1,
@@ -1067,18 +1068,18 @@ export const analyzeActivitySegments = (
   const distanceMiles = kmToMiles(mToKm(activity.distance));
   const totalMiles = Math.max(0.01, distanceMiles);
   const totalMinutes = activity.moving_time / 60;
-  const avgPace = totalMinutes / totalMiles; // min per mile
+  const avgPace = totalMinutes / totalMiles; 
 
-  // number of segments (round down to whole segments)
+  
   const segments = Math.max(1, Math.floor(totalMiles / segmentMiles));
 
-  // estimate each segment pace by distributing time proportionally
-  // (this is a simple estimate — replace with split streams if available)
+  
+  
   const baseSegmentMinutes = totalMinutes / segments;
-  // add small deterministic variation using segment index
+  
   const segmentPaces = Array.from({ length: segments }).map((_, i) => {
     const t = i / Math.max(1, segments - 1);
-    const variation = Math.sin(t * Math.PI * 2) * 0.04 + (t - 0.5) * 0.02; // small wave
+    const variation = Math.sin(t * Math.PI * 2) * 0.04 + (t - 0.5) * 0.02; 
     const pace = Math.max(
       0.1,
       Math.round((baseSegmentMinutes / segmentMiles) * (1 + variation) * 100) /
@@ -1089,7 +1090,7 @@ export const analyzeActivitySegments = (
 
   const milesPerSegment = segmentMiles;
 
-  // classify easy/hard per segment relative to run avg
+  
   let easyMiles = 0;
   let hardMiles = 0;
   segmentPaces.forEach((p) => {
@@ -1100,10 +1101,11 @@ export const analyzeActivitySegments = (
     }
   });
 
-  // first vs second half
+  
   const half = Math.ceil(segments / 2);
   const firstSegs = segmentPaces.slice(0, half);
   const secondSegs = segmentPaces.slice(half);
+  // Avg
   const avg = (arr: number[]) =>
     arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0;
   const firstHalfPace = Math.round(avg(firstSegs) * 100) / 100;
@@ -1112,7 +1114,7 @@ export const analyzeActivitySegments = (
     (secondHalfPace - firstHalfPace) * 60,
   );
 
-  // best controlled section: sliding window of 3 segments (or smaller) with minimal std and close to avg
+  
   const window = Math.min(3, segments);
   let best: { idx: number; len: number; std: number; mean: number } | null =
     null;
@@ -1150,6 +1152,7 @@ export const analyzeActivitySegments = (
   };
 };
 
+// Computes activity stats
 export const calculateActivityStats = (activities: Activity[]) => {
   const totalDistanceKm =
     activities.reduce((sum, a) => sum + a.distance, 0) / 1000;
@@ -1174,10 +1177,6 @@ export const calculateActivityStats = (activities: Activity[]) => {
   };
 };
 
-// ============================================================================
-// STRAVA BEST EFFORTS / PR HOOKS
-// ============================================================================
-
 export interface BestEffort {
   name: string;
   elapsed_time: number;
@@ -1188,6 +1187,7 @@ export interface BestEffort {
 
 const BEST_EFFORTS_CACHE_KEY = "nexpr_best_efforts_v1";
 
+// Returns best efforts cache
 function loadBestEffortsCache(): Record<
   number,
   { efforts: BestEffort[]; fetchedAt: number }
@@ -1206,6 +1206,7 @@ function loadBestEffortsCache(): Record<
   }
 }
 
+// Saves best efforts cache
 function saveBestEffortsCache(
   cache: Record<number, { efforts: BestEffort[]; fetchedAt: number }>,
 ): void {
@@ -1231,19 +1232,16 @@ const EFFORT_RACE_METERS: Record<RaceDistance, number> = {
   Marathon: 42195,
 };
 
-const BEST_EFFORTS_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const BEST_EFFORTS_TTL = 24 * 60 * 60 * 1000; 
 
-/**
- * Hook to fetch Strava best efforts and return PRs at standard distances.
- * Caches results in localStorage to avoid redundant API calls.
- */
+// React hook: strava p rs
 export const useStravaPRs = (activities: Activity[] | undefined) => {
   return useQuery<PRRecord[]>({
     queryKey: ["strava-prs", activities?.length ?? 0],
     queryFn: async (): Promise<PRRecord[]> => {
       if (!activities || activities.length === 0) return [];
 
-      // All runs sorted most-recent first
+      
       const runs = activities
         .filter((a) => a.type === "Run" || a.sport_type === "Run")
         .sort(
@@ -1251,16 +1249,16 @@ export const useStravaPRs = (activities: Activity[] | undefined) => {
             new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
         );
 
-      // Target ALL runs with any achievement — these are the only activities
-      // where Strava records best_efforts with pr_rank data.
-      // Fall back to all runs if fewer than 10 have achievements.
+      
+      
+      
       let candidates = runs.filter((a) => (a.achievement_count ?? 0) > 0);
       if (candidates.length < 10) {
         candidates = runs;
       }
       candidates = candidates.slice(0, 12);
 
-      // Load cache and identify what needs fetching
+      
       const cache = loadBestEffortsCache();
       const now = Date.now();
       const toFetch = candidates.filter((a) => {
@@ -1269,7 +1267,7 @@ export const useStravaPRs = (activities: Activity[] | undefined) => {
       });
 
       if (toFetch.length > 0) {
-        // Batch conservatively to avoid burning through Strava's short-term limit.
+        
         for (let i = 0; i < toFetch.length; i += 2) {
           const batch = toFetch.slice(i, i + 2);
           const results = await Promise.all(
@@ -1289,9 +1287,9 @@ export const useStravaPRs = (activities: Activity[] | undefined) => {
         saveBestEffortsCache(cache);
       }
 
-      // Find the all-time PR at each standard distance.
-      // Prefer efforts where pr_rank === 1 (confirmed Strava all-time PR).
-      // Fall back to fastest elapsed_time across all cached efforts.
+      
+      
+      
       const bestByDistance = new Map<
         RaceDistance,
         {
@@ -1313,8 +1311,8 @@ export const useStravaPRs = (activities: Activity[] | undefined) => {
           const isConfirmedPR = effort.pr_rank === 1;
           const existing = bestByDistance.get(raceDistance);
 
-          // Confirmed PR always wins over unconfirmed.
-          // Among same confirmation status, pick faster time.
+          
+          
           const replace =
             !existing ||
             (isConfirmedPR && !existing.isConfirmedPR) ||
@@ -1359,10 +1357,7 @@ export const useStravaPRs = (activities: Activity[] | undefined) => {
   });
 };
 
-// ============================================================================
-// GOALS HOOKS
-// ============================================================================
-
+// React hook: goals
 export const useGoals = (athleteId: number | undefined) => {
   return useQuery({
     queryKey: ["goals", athleteId],
@@ -1381,6 +1376,7 @@ export const useGoals = (athleteId: number | undefined) => {
   });
 };
 
+// React hook: save goal
 export const useSaveGoal = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -1398,6 +1394,7 @@ export const useSaveGoal = () => {
   });
 };
 
+// React hook: delete goal
 export const useDeleteGoal = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -1411,10 +1408,7 @@ export const useDeleteGoal = () => {
   });
 };
 
-// ============================================================================
-// SYMPTOM LOG HOOKS
-// ============================================================================
-
+// React hook: symptom entries
 export const useSymptomEntries = (athleteId: number | undefined) => {
   return useQuery({
     queryKey: ["symptomEntries", athleteId],
@@ -1428,6 +1422,7 @@ export const useSymptomEntries = (athleteId: number | undefined) => {
   });
 };
 
+// React hook: save symptom entry
 export const useSaveSymptomEntry = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -1453,6 +1448,7 @@ export const useSaveSymptomEntry = () => {
   });
 };
 
+// React hook: delete symptom entry
 export const useDeleteSymptomEntry = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -1466,10 +1462,7 @@ export const useDeleteSymptomEntry = () => {
   });
 };
 
-// ============================================================================
-// WEEKLY REFLECTION HOOKS
-// ============================================================================
-
+// React hook: reflections
 export const useReflections = (athleteId: number | undefined) => {
   return useQuery({
     queryKey: ["reflections", athleteId],
@@ -1486,6 +1479,7 @@ export const useReflections = (athleteId: number | undefined) => {
   });
 };
 
+// React hook: save reflection
 export const useSaveReflection = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -1508,8 +1502,8 @@ export const useSaveReflection = () => {
         weekStart: normalizeWeekStart(entry.weekStart),
       };
       const queryKey = ["reflections", athleteId];
-      // Immediately update the cache so the UI reflects the save without
-      // waiting for the refetch to complete.
+      
+      
       queryClient.setQueryData<WeeklyReflection[]>(queryKey, (old = []) => {
         const idx = old.findIndex(
           (r) => normalizeWeekStart(r.weekStart) === normalizedEntry.weekStart,
@@ -1524,6 +1518,7 @@ export const useSaveReflection = () => {
   });
 };
 
+// React hook: delete reflection
 export const useDeleteReflection = () => {
   const queryClient = useQueryClient();
   return useMutation({

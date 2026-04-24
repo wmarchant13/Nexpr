@@ -3,6 +3,7 @@ dist/
 .output/
 .nitro/
 .tanstack/
+.vercel/
 
 # Environment variables & secrets
 .env

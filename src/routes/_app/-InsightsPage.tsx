@@ -1,9 +1,4 @@
-/**
- * Insights Page
- *
- * Deep training analysis and PR prediction system.
- * The core value proposition of Nexpr.
- */
+
 
 import React, { useMemo } from "react";
 import {
@@ -37,6 +32,7 @@ import styles from "./Insights.module.scss";
 
 const CHART_ACCENT = "#86A7C8";
 
+// Training insights page with fitness metrics and PR projections
 export function InsightsPage() {
   const { data: athlete } = useAthlete();
   const { data: activities, isLoading } = useActivities(1, 100);

@@ -1,4 +1,4 @@
-/// <reference types="vite/client" />
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   HeadContent,
@@ -47,6 +47,7 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 });
 
+// 404 page shown when no route matches
 function RootNotFound() {
   return (
     <main
@@ -105,6 +106,7 @@ function RootNotFound() {
   );
 }
 
+// Root HTML document shell with global CSS variables
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -267,6 +269,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Root route component wrapping the app with QueryClient
 function RootComponent() {
   const [queryClient] = React.useState(
     () =>

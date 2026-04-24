@@ -12,12 +12,12 @@ import {
   getCurrentStravaSession,
 } from "../utils/server/stravaSession";
 
-//OAUTH FINAL VARS
 const STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize";
 const STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token";
 const STRAVA_REQUESTED_SCOPE = "read,activity:read_all,profile:read_all";
 const STRAVA_OAUTH_STATE_COOKIE = "nexpr_strava_oauth_state";
 
+// Returns cookie config for the OAuth CSRF state token
 function oauthStateCookieOptions() {
   return {
     httpOnly: true,
@@ -28,11 +28,12 @@ function oauthStateCookieOptions() {
   };
 }
 
+// Generates a random hex CSRF state string
 function generateState(): string {
   return crypto.randomUUID().replace(/-/g, "");
 }
 
-//Gather the auth url using a generated state and cookie
+// Builds the Strava OAuth authorization URL
 export const getStravaAuthUrl = createServerFn({ method: "GET" })
   .inputValidator((input: { origin: string }) => input)
   .handler(async ({ data }) => {
@@ -55,7 +56,7 @@ export const getStravaAuthUrl = createServerFn({ method: "GET" })
     };
   });
 
-//Connect to Strava
+// Exchanges an OAuth code for access and refresh tokens
 export const exchangeStravaCode = createServerFn({ method: "POST" })
   .inputValidator((input: { code: string; state?: string }) => input)
   .handler(async ({ data }) => {
@@ -119,7 +120,7 @@ export const exchangeStravaCode = createServerFn({ method: "POST" })
     };
   });
 
-//If there is a current session grab it
+// Returns the current authentication status
 export const getViewerSession = createServerFn({ method: "GET" }).handler(
   async () => {
     const session = await getCurrentStravaSession();
@@ -134,7 +135,7 @@ export const getViewerSession = createServerFn({ method: "GET" }).handler(
   },
 );
 
-//Logout of a current session
+// Clears the current Strava session
 export const logoutStravaSession = createServerFn({ method: "POST" }).handler(
   async () => {
     await clearCurrentStravaSession();

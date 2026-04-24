@@ -1,9 +1,4 @@
-/**
- * Fueling API Server Functions
- *
- * Server-side functions for persisting fueling data to Neon PostgreSQL.
- * Uses @neondatabase/serverless for edge-compatible connections.
- */
+
 
 import { createServerFn } from "@tanstack/react-start";
 import { getDb, toRows } from "../utils/server/env";
@@ -15,7 +10,6 @@ import {
 
 const FUELING_TIMINGS = ["none", "light", "moderate", "heavy"] as const;
 
-//Types
 export interface FuelingEntryRow {
   id: number;
   athlete_id: number;
@@ -45,7 +39,7 @@ export interface FuelingEntryInput {
   note?: string;
 }
 
-// Get fueling entry for a specific activity.
+// Fetches the fueling entry for a single activity
 export const getFuelingEntry = createServerFn({ method: "GET" })
   .inputValidator((input: { activityId: number }) => input)
   .handler(async ({ data }) => {
@@ -85,10 +79,7 @@ export const getFuelingEntry = createServerFn({ method: "GET" })
     };
   });
 
-/**
- * Get all fueling entries for an athlete.
- * Used for building aggregate fueling profile.
- */
+// Fetches all fueling entries for an athlete
 export const getAllFuelingEntries = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
@@ -123,10 +114,7 @@ export const getAllFuelingEntries = createServerFn({ method: "GET" })
     }));
   });
 
-/**
- * Save or update fueling entry for an activity.
- * Uses upsert (INSERT ... ON CONFLICT UPDATE).
- */
+// Upserts a fueling entry for an activity
 export const saveFuelingEntry = createServerFn({ method: "POST" })
   .inputValidator((input: FuelingEntryInput) => input)
   .handler(async ({ data }) => {
@@ -230,9 +218,7 @@ export const saveFuelingEntry = createServerFn({ method: "POST" })
     return { success: true, activityId };
   });
 
-/**
- * Delete fueling entry for an activity.
- */
+// Removes a fueling entry for an activity
 export const deleteFuelingEntry = createServerFn({ method: "POST" })
   .inputValidator((input: { athleteId: number; activityId: number }) => input)
   .handler(async ({ data }) => {
@@ -254,67 +240,3 @@ export const deleteFuelingEntry = createServerFn({ method: "POST" })
 
     return { success: true, activityId };
   });
-
-// /**
-//  * Delete ALL fueling entries for an athlete.
-//  * Called on disconnect/logout to comply with Strava API data deletion requirements.
-//  */
-// export const deleteAllFuelingEntries = createServerFn({ method: "POST" })
-//   .inputValidator((input: { athleteId: number }) => input)
-//   .handler(async ({ data }) => {
-//     const sql = getDb();
-//     const athleteId = requireNumber(data.athleteId, "athleteId", {
-//       integer: true,
-//       min: 1,
-//     });
-
-//     const result = toRows<{ id: number }>(
-//       await sql`
-//       DELETE FROM fueling_entries
-//       WHERE athlete_id = ${athleteId}
-//       RETURNING id
-//     `,
-//     );
-
-//     return { success: true, deletedCount: result.length };
-//   });
-
-// /**
-//  * Initialize the fueling_entries table.
-//  * Call this once to set up the schema.
-//  */
-// export const initFuelingTable = createServerFn({ method: "POST" }).handler(
-//   async () => {
-//     const sql = getDb();
-
-//     await sql`
-//       CREATE TABLE IF NOT EXISTS fueling_entries (
-//         id SERIAL PRIMARY KEY,
-//         athlete_id BIGINT NOT NULL,
-//         activity_id BIGINT NOT NULL UNIQUE,
-//         carbs_grams INT,
-//         gels_count INT,
-//         hydration_ml INT,
-//         caffeine_count INT,
-//         timing_before VARCHAR(20),
-//         timing_during VARCHAR(20),
-//         timing_after VARCHAR(20),
-//         note TEXT,
-//         created_at TIMESTAMP DEFAULT NOW(),
-//         updated_at TIMESTAMP DEFAULT NOW()
-//       )
-//     `;
-
-//     await sql`
-//       CREATE INDEX IF NOT EXISTS idx_fueling_athlete
-//       ON fueling_entries(athlete_id)
-//     `;
-
-//     await sql`
-//       CREATE INDEX IF NOT EXISTS idx_fueling_activity
-//       ON fueling_entries(activity_id)
-//     `;
-
-//     return { success: true, message: "Fueling table initialized" };
-//   },
-// );

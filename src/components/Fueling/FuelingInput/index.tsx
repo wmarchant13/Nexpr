@@ -1,19 +1,13 @@
-/**
- * Fueling Input Component
- *
- * Lightweight, zero-friction input for logging fueling data on activities.
- * Designed to be minimalist and optional.
- * Persists to Neon PostgreSQL via server functions.
- */
 
-import React, { useState, useEffect } from "react";
+
+import { useState, useEffect } from "react";
 import {
   useFuelingEntry,
   useSaveFuelingEntry,
   useDeleteFuelingEntry,
   type FuelingEntry,
-} from "../../hooks";
-import styles from "./Fueling.module.scss";
+} from "../../../hooks";
+import styles from "./FuelingInput.module.scss";
 
 interface FuelingTiming {
   beforeRun?: "none" | "light" | "moderate" | "heavy";
@@ -29,6 +23,7 @@ interface FuelingInputProps {
   onDelete?: () => void;
 }
 
+// Inline fueling log input for a single activity
 export function FuelingInput({
   activityId,
   athleteId,
@@ -41,23 +36,24 @@ export function FuelingInput({
   const [saved, setSaved] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Load existing entry from server
+  
   const { data: existingEntry, isLoading } = useFuelingEntry(activityId);
   const saveMutation = useSaveFuelingEntry();
   const deleteMutation = useDeleteFuelingEntry();
 
   const hasExisting = !!existingEntry;
 
-  // Sync server data to local state
+  
   useEffect(() => {
     if (existingEntry) {
       setEntry(existingEntry);
     }
   }, [existingEntry]);
 
-  // Only show for long runs (8+ miles)
+  
   const isLongRun = distanceMiles >= 8;
 
+  // Handles save
   const handleSave = async () => {
     try {
       setErrorMessage(null);
@@ -77,13 +73,16 @@ export function FuelingInput({
       setSaved(true);
       onSave?.(entry as FuelingEntry);
 
-      // Reset saved indicator after 2s
+      
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Failed to save fueling entry");
+      setErrorMessage(
+        err instanceof Error ? err.message : "Failed to save fueling entry",
+      );
     }
   };
 
+  // Handles delete
   const handleDelete = async () => {
     try {
       setErrorMessage(null);
@@ -92,10 +91,13 @@ export function FuelingInput({
       setIsExpanded(false);
       onDelete?.();
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Failed to delete fueling entry");
+      setErrorMessage(
+        err instanceof Error ? err.message : "Failed to delete fueling entry",
+      );
     }
   };
 
+  // Update Timing
   const updateTiming = (field: keyof FuelingTiming, value: string) => {
     setEntry((prev) => ({
       ...prev,
@@ -106,7 +108,7 @@ export function FuelingInput({
     }));
   };
 
-  // Compact view for quick logging
+  
   if (!isExpanded) {
     return (
       <div className={styles.compactContainer}>
@@ -150,7 +152,7 @@ export function FuelingInput({
       </div>
 
       <div className={styles.inputGrid}>
-        {/* Gels / Carbs */}
+        {}
         <div className={styles.inputGroup}>
           <label className={styles.label}>Gels / Carbs</label>
           <div className={styles.inputRow}>
@@ -192,7 +194,7 @@ export function FuelingInput({
           </div>
         </div>
 
-        {/* Hydration */}
+        {}
         <div className={styles.inputGroup}>
           <label className={styles.label}>Hydration</label>
           <div className={styles.inputRow}>
@@ -237,7 +239,7 @@ export function FuelingInput({
           </div>
         </div>
 
-        {/* Caffeine */}
+        {}
         <div className={styles.inputGroup}>
           <label className={styles.label}>Caffeine</label>
           <div className={styles.inputRow}>
@@ -262,7 +264,7 @@ export function FuelingInput({
         </div>
       </div>
 
-      {/* Timing (collapsible advanced) */}
+      {}
       <details className={styles.timingSection}>
         <summary className={styles.timingSummary}>Timing breakdown</summary>
         <div className={styles.timingGrid}>
@@ -290,7 +292,7 @@ export function FuelingInput({
         </div>
       </details>
 
-      {/* Note */}
+      {}
       <div className={styles.noteGroup}>
         <input
           type="text"
@@ -304,7 +306,7 @@ export function FuelingInput({
         />
       </div>
 
-      {/* Actions */}
+      {}
       <div className={styles.actions}>
         {hasExisting && (
           <button

@@ -1,31 +1,23 @@
-/**
- * Weekly Reflection Store
- *
- * Once-a-week private diagnostic journal. Connects Running, Strength, and
- * Recovery across the full week. Stored locally — never sent to Strava.
- */
 
-// ─── TYPES ───────────────────────────────────────────────────────────────────
 
 export interface WeeklyReflection {
   id: string;
-  /** ISO date of the Monday that starts the reflected week (YYYY-MM-DD). */
+  
   weekStart: string;
-  /** What felt physically and mechanically better this week. */
+  
   whatFeltBetter: string;
-  /** What felt worse, heavier, or more strained. */
+  
   whatFeltWorse: string;
-  /** Small signals to watch — fatigue, soreness, motivation dips. */
+  
   warningSigns: string;
-  /** Single change to make next week. */
+  
   changeNextWeek: string;
   createdAt: number;
 }
 
-// ─── STORAGE ─────────────────────────────────────────────────────────────────
-
 export const REFLECTION_STORAGE_KEY = "nexpr_weekly_reflections_v1";
 
+// Formats a Date as YYYY-MM-DD string
 function formatDateKey(date: Date): string {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
@@ -33,6 +25,7 @@ function formatDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+// Parses a week-start string into a Date
 function parseWeekStartDate(weekStart: string): Date | null {
   const normalized = normalizeWeekStart(weekStart);
   const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -44,6 +37,7 @@ function parseWeekStartDate(weekStart: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+// Reads weekly reflections from localStorage
 export function loadReflections(): WeeklyReflection[] {
   if (typeof window === "undefined") return [];
   try {
@@ -55,29 +49,28 @@ export function loadReflections(): WeeklyReflection[] {
   }
 }
 
+// Writes weekly reflections to localStorage
 export function saveReflections(reflections: WeeklyReflection[]): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(REFLECTION_STORAGE_KEY, JSON.stringify(reflections));
   } catch {
-    // localStorage may be unavailable
+    
   }
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-
-/** Returns the ISO date string (YYYY-MM-DD) of the most recent Monday. */
+// Returns this Monday's date as YYYY-MM-DD
 export function getCurrentWeekStart(): string {
   const today = new Date();
-  const day = today.getDay(); // 0 = Sunday
-  const diff = day === 0 ? -6 : 1 - day; // shift to Monday
+  const day = today.getDay(); 
+  const diff = day === 0 ? -6 : 1 - day; 
   const monday = new Date(today);
   monday.setDate(today.getDate() + diff);
   monday.setHours(0, 0, 0, 0);
   return formatDateKey(monday);
 }
 
-/** Normalizes a week-start value to YYYY-MM-DD. */
+// Normalizes various week-start formats to YYYY-MM-DD
 export function normalizeWeekStart(weekStart: string): string {
   if (!weekStart) return "";
 
@@ -91,7 +84,7 @@ export function normalizeWeekStart(weekStart: string): string {
   return formatDateKey(parsed);
 }
 
-/** Formats a week-start ISO string as a readable label. */
+// Formats a week-start date as a human-readable label
 export function formatWeekLabel(weekStart: string): string {
   const d = parseWeekStartDate(weekStart);
   if (!d) return "Unknown week";
@@ -103,7 +96,7 @@ export function formatWeekLabel(weekStart: string): string {
   });
 }
 
-/** Simple UUID v4 for reflection IDs. */
+// Generates a UUID for a new weekly reflection
 export function newReflectionId(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();

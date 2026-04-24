@@ -24,10 +24,6 @@ import {
 
 export type { RaceDistance } from "./predictions";
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
 export interface OracleQuery {
   distance: RaceDistance;
   targetSeconds: number;
@@ -61,37 +57,27 @@ export interface OracleResult {
   query: OracleQuery;
   currentPR: PRRecord | null;
 
-  // Core probability
   probability: number;
   probabilityLow: number;
   probabilityHigh: number;
 
-  // Time projections
   projectedSeconds: number;
   projectedSecondsLow: number;
   projectedSecondsHigh: number;
 
-  // Gap to target
   gapSeconds: number;
-  gapPositive: boolean; // true = already faster than target
+  gapPositive: boolean;
 
-  // Verdict
   verdict: OracleVerdict;
   verdictText: string;
 
-  // What to do
   levers: OracleLever[];
 
-  // Prediction quality
   dataConfidence: number;
   dataConfidenceReason: string;
 
   weeksToOptimal: number;
 }
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
 
 const RACE_DISTANCE_METERS: Record<RaceDistance, number> = {
   "5K": 5000,
@@ -100,7 +86,6 @@ const RACE_DISTANCE_METERS: Record<RaceDistance, number> = {
   Marathon: 42195,
 };
 
-// Minimum weekly mileage to perform well at each distance
 const TARGET_WEEKLY_MILES: Record<RaceDistance, number> = {
   "5K": 25,
   "10K": 35,
@@ -108,7 +93,6 @@ const TARGET_WEEKLY_MILES: Record<RaceDistance, number> = {
   Marathon: 50,
 };
 
-// Key long run targets per distance
 const LONG_RUN_TARGETS: Record<RaceDistance, number> = {
   "5K": 8,
   "10K": 12,
@@ -116,7 +100,6 @@ const LONG_RUN_TARGETS: Record<RaceDistance, number> = {
   Marathon: 20,
 };
 
-// Base time variance % per distance (longer = more variance)
 const BASE_VARIANCE: Record<RaceDistance, number> = {
   "5K": 0.02,
   "10K": 0.025,
@@ -124,27 +107,21 @@ const BASE_VARIANCE: Record<RaceDistance, number> = {
   Marathon: 0.055,
 };
 
-// ============================================================================
-// HELPERS
-// ============================================================================
-
+// Clamps a value between a min and max
 function clamp(val: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, val));
 }
 
+// Predicts race time using the Riegel power-law formula
 function riegelPredict(
   baseTime: number,
   baseDistMeters: number,
   targetDistMeters: number,
 ): number {
-  // Riegel formula: T2 = T1 × (D2/D1)^1.06
   return baseTime * Math.pow(targetDistMeters / baseDistMeters, 1.06);
 }
 
-// ============================================================================
-// LEVER DETECTION
-// ============================================================================
-
+// Identifies the highest-impact training changes for a goal
 function detectLevers(
   activities: Activity[],
   metrics: FitnessMetrics,
@@ -157,7 +134,6 @@ function detectLevers(
   );
   const now = Date.now();
 
-  // — CONSISTENCY —
   const recentWeeks = weeklyLoads.slice(-8);
   const weekMiles = recentWeeks.map((w) => w.totalMiles);
   const avgMiles =
@@ -180,7 +156,6 @@ function detectLevers(
     });
   }
 
-  // — VOLUME —
   const targetMiles = TARGET_WEEKLY_MILES[distance];
   if (avgMiles < targetMiles * 0.7) {
     const deficit = Math.round(targetMiles * 0.7 - avgMiles);
@@ -194,7 +169,6 @@ function detectLevers(
     });
   }
 
-  // — QUALITY WORK (threshold / intervals) —
   const last28Days = runs.filter(
     (r) => (now - new Date(r.start_date).getTime()) / 86400000 <= 28,
   );
@@ -225,7 +199,6 @@ function detectLevers(
     });
   }
 
-  // — LONG RUN —
   const longRunTarget = LONG_RUN_TARGETS[distance];
   if (distance === "Half Marathon" || distance === "Marathon") {
     const longestRecent =
@@ -249,7 +222,6 @@ function detectLevers(
     }
   }
 
-  // — MARATHON SPECIFIC: 18+ mile runs —
   if (distance === "Marathon") {
     const longRunCount = runs.filter(
       (r) => kmToMiles(mToKm(r.distance)) >= 18,
@@ -266,7 +238,6 @@ function detectLevers(
     }
   }
 
-  // — RAMP RATE / RECOVERY —
   if (metrics.rampRate > 15) {
     levers.push({
       title: "Reduce weekly load increase",
@@ -288,16 +259,12 @@ function detectLevers(
     });
   }
 
-  // Sort by impact, return top 4
   return levers
     .sort((a, b) => b.probabilityGain - a.probabilityGain)
     .slice(0, 4);
 }
 
-// ============================================================================
-// MAIN ORACLE FUNCTION
-// ============================================================================
-
+// Core Oracle engine: computes probability and projected race time
 export function runOracle(
   activities: Activity[],
   query: OracleQuery,
@@ -310,7 +277,7 @@ export function runOracle(
     (a) => a.type === "Run" || a.sport_type === "Run",
   );
   const metrics = calculateFitnessMetrics(activities);
-  // Use Strava-confirmed all-time PRs when available, fall back to activity scan
+
   const prs =
     stravaPRs && stravaPRs.length > 0 ? stravaPRs : findPRs(activities);
   const weeklyLoads = calculateWeeklyLoads(activities, 16);
@@ -318,7 +285,6 @@ export function runOracle(
 
   const currentPR = prs.find((p) => p.distance === distance) ?? null;
 
-  // — DATA CONFIDENCE —
   let dataConfidence = 100;
   const confidenceNotes: string[] = [];
 
@@ -348,9 +314,9 @@ export function runOracle(
       ? `Lower confidence: ${confidenceNotes.join(", ")}.`
       : "Solid data — prediction confidence is high.";
 
-  // — BASELINE PROJECTION (Riegel from best recent effort) —
   const baselineRun = runs
     .filter((r) => {
+      // Days Ago
       const daysAgo = (now - new Date(r.start_date).getTime()) / 86400000;
       return daysAgo <= 60 && r.distance >= 3000;
     })
@@ -390,11 +356,9 @@ export function runOracle(
     rawProjected = currentPR!.time;
   }
 
-  // Apply small readiness adjustment (better readiness = slightly faster prediction)
   const readinessAdj = 1 - clamp(metrics.readiness / 900, -0.025, 0.025);
   const projectedSeconds = rawProjected * readinessAdj;
 
-  // — VARIANCE BANDS —
   const recentWeeks = weeklyLoads.slice(-8);
   const weekMiles = recentWeeks.map((w) => w.totalMiles);
   const avgMiles =
@@ -405,7 +369,6 @@ export function runOracle(
   );
   const cv = avgMiles > 0 ? stdDev / avgMiles : 0.35;
 
-  // Weeks-out modifier: further out = more variance (more time for things to change)
   const weeksModifier = clamp(weeksToRace / 16, 0.5, 2.0);
   const variancePct = BASE_VARIANCE[distance] * (1 + cv) * weeksModifier;
   const varianceSeconds = projectedSeconds * variancePct;
@@ -417,18 +380,13 @@ export function runOracle(
     projectedSeconds - varianceSeconds * 0.8,
   );
 
-  // — GAP —
   const gapSeconds = Math.round(targetSeconds - projectedSeconds);
-  const gapPositive = gapSeconds >= 0; // positive = we're already under target
+  const gapPositive = gapSeconds >= 0;
 
-  // — PROBABILITY —
-  // Logistic function on normalized gap.
-  // Positive gap = target is slower than projected = high probability.
   const sigma = varianceSeconds;
   const normalizedGap = sigma > 0 ? gapSeconds / sigma : gapPositive ? 3 : -3;
   const baseProbability = 100 / (1 + Math.exp(-normalizedGap * 0.75));
 
-  // Training quality modifier: consistent building training = slight uplift
   const trainingBonus = clamp(
     (metrics.trend === "building" ? 0.08 : 0) +
       (metrics.rampRate > 0 && metrics.rampRate < 15 ? 0.04 : 0) +
@@ -446,7 +404,6 @@ export function runOracle(
   const probabilityLow = clamp(probability - 13, 2, 94);
   const probabilityHigh = clamp(probability + 11, 4, 97);
 
-  // — VERDICT —
   const gapMinutes = Math.abs(gapSeconds) / 60;
   const gapLabel = gapPositive
     ? `${formatOracleTime(Math.abs(gapSeconds))} under target`
@@ -472,10 +429,8 @@ export function runOracle(
     verdictText = `The gap is large — ${formatOracleTime(Math.abs(gapSeconds))}. Build your base significantly before targeting this time. Set an intermediate milestone first.`;
   }
 
-  // — LEVERS —
   const levers = detectLevers(activities, metrics, weeklyLoads, distance);
 
-  // — WEEKS TO OPTIMAL READINESS —
   const weeksToOptimal =
     metrics.readiness >= 15
       ? 0
@@ -501,10 +456,7 @@ export function runOracle(
   };
 }
 
-// ============================================================================
-// FORMAT HELPERS (used by component)
-// ============================================================================
-
+// Formats seconds as a human-readable race time string
 export function formatOracleTime(seconds: number): string {
   if (seconds <= 0) return "--";
   const h = Math.floor(seconds / 3600);
@@ -516,6 +468,7 @@ export function formatOracleTime(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+// Parses MM:SS or HH:MM:SS input to total seconds
 export function parseTimeInput(input: string): number | null {
   const trimmed = input.trim();
   const parts = trimmed.split(":").map(Number);

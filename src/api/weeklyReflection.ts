@@ -30,7 +30,7 @@ export interface ReflectionInput {
   changeNextWeek: string;
 }
 
-//Reflections for journal
+// Fetches all weekly reflections for an athlete
 export const getReflections = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
@@ -55,6 +55,7 @@ export const getReflections = createServerFn({ method: "GET" })
     }));
   });
 
+// Upserts a weekly reflection entry
 export const saveReflection = createServerFn({ method: "POST" })
   .inputValidator((input: ReflectionInput) => input)
   .handler(async ({ data }) => {
@@ -104,6 +105,7 @@ export const saveReflection = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+// Removes a weekly reflection by week start
 export const deleteReflection = createServerFn({ method: "POST" })
   .inputValidator((input: { weekStart: string; athleteId: number }) => input)
   .handler(async ({ data }) => {

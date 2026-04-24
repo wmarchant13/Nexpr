@@ -9,10 +9,13 @@ type CacheEntry = {
 
 const STRAVA_API_BASE = "https://www.strava.com/api/v3";
 
+// Response Cache
 const responseCache = new Map<string, CacheEntry>();
+// In Flight Requests
 const inFlightRequests = new Map<string, Promise<unknown>>();
 let rateLimitedUntil = 0;
 
+// Parses Retry-After header into milliseconds
 function getRetryAfterMs(response: Response): number {
   const retryAfter = response.headers.get("retry-after");
   if (!retryAfter) return 60_000;
@@ -30,10 +33,12 @@ function getRetryAfterMs(response: Response): number {
   return 60_000;
 }
 
+// Builds a response-cache key from endpoint and token
 function getCacheKey(endpoint: string, accessToken: string) {
   return `${accessToken}:${endpoint}`;
 }
 
+// Extracts a human-readable message from a failed response
 async function parseError(response: Response): Promise<string> {
   try {
     const payload = await response.json();
@@ -43,6 +48,7 @@ async function parseError(response: Response): Promise<string> {
   }
 }
 
+// Executes an authenticated GET request to the Strava API
 async function performFetch<T>(endpoint: string, accessToken: string): Promise<T> {
   if (Date.now() < rateLimitedUntil) {
     const waitSeconds = Math.ceil((rateLimitedUntil - Date.now()) / 1000);
@@ -71,6 +77,7 @@ async function performFetch<T>(endpoint: string, accessToken: string): Promise<T
   return (await response.json()) as T;
 }
 
+// Fetches from Strava with in-flight dedup and response caching
 export async function fetchStrava<T>(
   endpoint: string,
   accessToken: string,

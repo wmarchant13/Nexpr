@@ -14,6 +14,7 @@ type StravaWebhookEvent = {
   };
 };
 
+// Json Response
 function jsonResponse(body: unknown, status: number = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -23,6 +24,7 @@ function jsonResponse(body: unknown, status: number = 200) {
   });
 }
 
+// Parses positive int
 function parsePositiveInt(value: string | null) {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
@@ -49,6 +51,7 @@ export const Route = createFileRoute("/api/strava/webhook")({
         return jsonResponse({ "hub.challenge": challenge });
       },
       POST: async ({ request }) => {
+        // Payload
         const payload = (await request.json().catch(() => null)) as StravaWebhookEvent | null;
         if (!payload) {
           return jsonResponse({ error: "Invalid webhook payload" }, 400);

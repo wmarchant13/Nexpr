@@ -1,24 +1,8 @@
-/**
- * Nexpr PR Prediction Engine
- * 
- * Uses historical data to predict potential PRs and provide
- * actionable training insights. All calculations are derived
- * from cached activity data - no additional API calls.
- * 
- * Key Metrics:
- * - Momentum (4-week average weekly mileage)
- * - Freshness (rolling 7-day miles vs 28-day weekly baseline)
- * - Readiness (acute/chronic score from rolling mileage)
- * - PR Probability based on current training trajectory
- * 
- * Note: These are Nexpr-specific metrics derived from activity data.
- * They are NOT the same as any other platform's calculations.
- */
+
 
 import type { Activity } from "../hooks";
 import { kmToMiles, mToKm, formatPace } from "../hooks";
 
-// Standard race distances in meters
 const RACE_DISTANCES = {
   "5K": 5000,
   "10K": 10000,
@@ -30,28 +14,28 @@ export type RaceDistance = keyof typeof RACE_DISTANCES;
 
 export interface PRRecord {
   distance: RaceDistance;
-  time: number; // seconds
-  pace: number; // min/mile
+  time: number; 
+  pace: number; 
   date: Date;
   activityId: number;
   activityName: string;
 }
 
 export interface FitnessMetrics {
-  momentum: number;     // 4-week average weekly mileage
-  freshness: number;    // Rolling 7-day miles vs 28-day weekly baseline (%)
-  readiness: number;    // Acute/chronic readiness score (0-100)
+  momentum: number;     
+  freshness: number;    
+  readiness: number;    
   trend: "building" | "maintaining" | "recovering" | "declining";
-  rampRate: number;     // Weekly momentum change percentage
+  rampRate: number;     
 }
 
 export interface PRPrediction {
   distance: RaceDistance;
   currentPR: PRRecord | null;
-  predictedTime: number | null;  // seconds
-  predictedPace: number | null;  // min/mile
-  probability: number;           // 0-100
-  readinessScore: number;        // 0-100
+  predictedTime: number | null;  
+  predictedPace: number | null;  
+  probability: number;           
+  readinessScore: number;        
   daysToOptimalReadiness: number;
   recommendation: string;
 }
@@ -82,9 +66,7 @@ export interface TrainingRecommendation {
   suggestedPace: string;
 }
 
-/**
- * Returns the ISO date string (YYYY-MM-DD) of the Monday for a given date.
- */
+// Formats a Date as YYYY-MM-DD string
 function formatDateKey(date: Date): string {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
@@ -92,11 +74,13 @@ function formatDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+// Parses a YYYY-MM-DD string into a Date object
 function parseDateKey(dateKey: string): Date {
   const [year, month, day] = dateKey.split("-").map(Number);
   return new Date(year, month - 1, day);
 }
 
+// Returns the Monday key for a given date
 function getWeekMonday(date: Date): string {
   const d = new Date(date);
   const day = d.getDay();
@@ -106,6 +90,7 @@ function getWeekMonday(date: Date): string {
   return formatDateKey(d);
 }
 
+// Returns true if the run exceeds effort thresholds
 function isHardRun(activity: Activity, baselinePace: number): boolean {
   const miles = kmToMiles(mToKm(activity.distance));
   if (miles <= 0) return false;
@@ -116,18 +101,12 @@ function isHardRun(activity: Activity, baselinePace: number): boolean {
 
   if (baselinePace <= 0) return false;
 
+  // Pace
   const pace = (activity.moving_time / 60) / miles;
   return pace <= baselinePace * 0.95;
 }
 
-/**
- * Calculate fitness metrics from weekly mileage.
- * - Momentum    = avg weekly miles over the last 4 completed weeks (W-1..W-4)
- * - Freshness   = 1 - (acute / chronic), as %; positive = fresher than baseline
- * - Readiness   = 0–100 score based on acute/chronic ratio
- *                 Acute = rolling 7-day miles; Chronic = rolling 28-day avg weekly miles
- *                 Readiness = clamp(0, 200 - 100 * (acute / chronic), 100)
- */
+// Computes momentum, freshness, and readiness metrics
 export function calculateFitnessMetrics(activities: Activity[]): FitnessMetrics {
   const runs = activities.filter(a => a.type === "Run" || a.sport_type === "Run");
 
@@ -135,7 +114,7 @@ export function calculateFitnessMetrics(activities: Activity[]): FitnessMetrics 
     return { momentum: 0, freshness: 0, readiness: 0, trend: "maintaining", rampRate: 0 };
   }
 
-  // Build a map of weekStart (YYYY-MM-DD) → total miles
+  
   const weekMiles = new Map<string, number>();
   for (const run of runs) {
     const key = getWeekMonday(new Date(run.start_date));
@@ -146,6 +125,7 @@ export function calculateFitnessMetrics(activities: Activity[]): FitnessMetrics 
   const now = new Date();
   const thisMonday = getWeekMonday(now);
 
+  // Returns the week-key N weeks before the current Monday
   function mondayMinusWeeks(n: number): string {
     const d = parseDateKey(thisMonday);
     d.setDate(d.getDate() - n * 7);
@@ -153,12 +133,12 @@ export function calculateFitnessMetrics(activities: Activity[]): FitnessMetrics 
     return formatDateKey(d);
   }
 
-  // Momentum = avg of last 4 completed weeks (W-1..W-4)
+  
   const momentumWeeks = [1, 2, 3, 4].map(n => weekMiles.get(mondayMinusWeeks(n)) ?? 0);
   const momentum = Math.round((momentumWeeks.reduce((s, v) => s + v, 0) / 4) * 10) / 10;
 
-  // Readiness: acute/chronic ratio → 0–100 score
-  // Acute = rolling 7-day mileage; Chronic avg = rolling 28-day total / 4
+  
+  
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   const twentyEightDaysAgo = new Date(now);
@@ -172,14 +152,14 @@ export function calculateFitnessMetrics(activities: Activity[]): FitnessMetrics 
     if (date >= sevenDaysAgo) acute += miles;
     if (date >= twentyEightDaysAgo) chronic28 += miles;
   }
-  const chronicAvg = chronic28 / 4; // weekly avg over 28-day window
+  const chronicAvg = chronic28 / 4; 
   const ratio = chronicAvg > 0 ? acute / chronicAvg : 1;
   const freshness = chronicAvg > 0
     ? Math.round((1 - acute / chronicAvg) * 1000) / 10
     : 0;
   const readiness = Math.min(100, Math.max(0, Math.round((200 - 100 * ratio) * 10) / 10));
 
-  // Ramp rate: change from prior 4-week avg (W-2..W-5) to last completed week (W-1)
+  
   const lastWeekMiles = weekMiles.get(mondayMinusWeeks(1)) ?? 0;
   const priorWeeks = [2, 3, 4, 5].map(n => weekMiles.get(mondayMinusWeeks(n)) ?? 0);
   const priorAvg = priorWeeks.reduce((s, v) => s + v, 0) / 4;
@@ -196,25 +176,22 @@ export function calculateFitnessMetrics(activities: Activity[]): FitnessMetrics 
   return { momentum, freshness, readiness, trend, rampRate };
 }
 
-/**
- * Find personal records for standard race distances
- * Looks for activities close to race distances (±5%)
- */
+// Finds the best recorded time for each standard race distance
 export function findPRs(activities: Activity[]): PRRecord[] {
   const runs = activities.filter(a => a.type === "Run" || a.sport_type === "Run");
   const prs: PRRecord[] = [];
   
   for (const [distanceName, targetMeters] of Object.entries(RACE_DISTANCES)) {
-    const tolerance = targetMeters * 0.05; // 5% tolerance
+    const tolerance = targetMeters * 0.05; 
     
-    // Find all activities within tolerance of this distance
+    
     const candidates = runs.filter(
       a => Math.abs(a.distance - targetMeters) <= tolerance
     );
     
     if (candidates.length === 0) continue;
     
-    // Find fastest (best pace)
+    
     const fastest = candidates.reduce((best, current) => {
       const bestPace = best.moving_time / best.distance;
       const currentPace = current.moving_time / current.distance;
@@ -222,6 +199,7 @@ export function findPRs(activities: Activity[]): PRRecord[] {
     });
     
     const miles = kmToMiles(mToKm(fastest.distance));
+    // Pace
     const pace = (fastest.moving_time / 60) / miles;
     
     prs.push({
@@ -243,33 +221,27 @@ export interface EffortDistribution {
   percentHard: number;
 }
 
-/**
- * Calculate race readiness score based on effort distribution
- * Optimal endurance training follows 80/10/10 (easy/moderate/hard)
- * Returns 0-100 score where 100 = perfect distribution
- */
+// Scores effort distribution against the 80/10/10 ideal
 function calculateEffortReadiness(effort: EffortDistribution): number {
   const idealEasy = 80;
   const idealModerate = 10;
   const idealHard = 10;
   
-  // Calculate deviation from ideal (penalize more for too little easy)
+  
   const easyDiff = Math.abs(effort.percentEasy - idealEasy);
   const moderateDiff = Math.abs(effort.percentModerate - idealModerate);
   const hardDiff = Math.abs(effort.percentHard - idealHard);
   
-  // Weight easy running higher (more important for race readiness)
+  
+  // Total Diff
   const totalDiff = (easyDiff * 1.5) + moderateDiff + hardDiff;
   
-  // Convert to 0-100 scale (max possible diff ~120 with weighting)
+  
   const score = Math.max(0, Math.min(100, 100 - totalDiff));
   return Math.round(score);
 }
 
-/**
- * Predict potential PR times based on current training
- * Uses Riegel formula with training metrics and effort distribution adjustments
- */
+// Predicts future PRs using Riegel extrapolation and readiness
 export function predictPRs(
   activities: Activity[],
   trainingMetrics: FitnessMetrics,
@@ -278,20 +250,21 @@ export function predictPRs(
   const currentPRs = findPRs(activities);
   const predictions: PRPrediction[] = [];
   
-  // Calculate effort-based readiness if available
+  
   const effortReadiness = effortDistribution 
     ? calculateEffortReadiness(effortDistribution)
     : null;
   
-  // Get recent performance baseline
+  
   const recentRuns = activities
     .filter(a => {
       const isRun = a.type === "Run" || a.sport_type === "Run";
+      // Days Ago
       const daysAgo = (Date.now() - new Date(a.start_date).getTime()) / (1000 * 60 * 60 * 24);
-      return isRun && daysAgo <= 30 && a.distance >= 3000; // 3K+ runs in last 30 days
+      return isRun && daysAgo <= 30 && a.distance >= 3000; 
     })
     .sort((a, b) => {
-      // Sort by pace (fastest first)
+      
       const paceA = a.moving_time / a.distance;
       const paceB = b.moving_time / b.distance;
       return paceA - paceB;
@@ -310,7 +283,7 @@ export function predictPRs(
     }));
   }
   
-  // Use best recent effort as baseline
+  
   const baseline = recentRuns[0];
   const baselineSeconds = baseline.moving_time;
   const baselineMeters = baseline.distance;
@@ -318,19 +291,21 @@ export function predictPRs(
   for (const [distanceName, targetMeters] of Object.entries(RACE_DISTANCES)) {
     const existingPR = currentPRs.find(p => p.distance === distanceName) || null;
     
-    // Riegel formula: T2 = T1 × (D2/D1)^1.06
+    
     const predictedSeconds = baselineSeconds * Math.pow(targetMeters / baselineMeters, 1.06);
     
-    // Adjust based on training readiness
+    
     const readinessAdjustment = 1 - (trainingMetrics.readiness / 500);
     const adjustedSeconds = predictedSeconds * readinessAdjustment;
     
     const predictedMiles = kmToMiles(mToKm(targetMeters));
+    // Predicted Pace
     const predictedPace = (adjustedSeconds / 60) / predictedMiles;
     
-    // Calculate probability of beating PR
+    
     let probability = 0;
     if (existingPR) {
+      // Improvement
       const improvement = (existingPR.time - adjustedSeconds) / existingPR.time;
       if (improvement > 0) {
         probability = Math.min(95, Math.round(improvement * 500 + trainingMetrics.readiness * 2));
@@ -338,10 +313,10 @@ export function predictPRs(
         probability = Math.max(5, Math.round(50 + trainingMetrics.readiness * 2));
       }
     } else {
-      probability = 75; // High probability if no PR exists
+      probability = 75; 
     }
     
-    // Readiness score: combine training readiness with effort distribution
+    
     let readinessScore: number;
     if (effortReadiness !== null) {
       const trainingScore = Math.max(0, Math.min(100, 50 + trainingMetrics.readiness * 3));
@@ -352,13 +327,13 @@ export function predictPRs(
       );
     }
     
-    // Days to optimal readiness (targeting readiness of +15 to +25)
+    
     const optimalReadiness = 20;
     const daysToOptimal = trainingMetrics.readiness >= optimalReadiness 
       ? 0 
       : Math.round((optimalReadiness - trainingMetrics.readiness) * 2);
     
-    // Generate recommendation based on readiness and effort distribution
+    
     let recommendation: string;
     const effortNote = effortDistribution && effortDistribution.percentEasy < 60
       ? " Increase easy runs to improve recovery."
@@ -389,9 +364,7 @@ export function predictPRs(
   return predictions;
 }
 
-/**
- * Calculate weekly training loads for trend visualization
- */
+// Builds weekly load objects for the past N weeks
 export function calculateWeeklyLoads(activities: Activity[], weeks: number = 12): WeeklyLoad[] {
   const runs = activities.filter(a => a.type === "Run" || a.sport_type === "Run");
 
@@ -400,7 +373,7 @@ export function calculateWeeklyLoads(activities: Activity[], weeks: number = 12)
 
   for (let w = weeks - 1; w >= 0; w--) {
     const weekStart = new Date(now);
-    weekStart.setDate(weekStart.getDate() - (w * 7) - now.getDay() + 1); // Monday
+    weekStart.setDate(weekStart.getDate() - (w * 7) - now.getDay() + 1); 
     weekStart.setHours(0, 0, 0, 0);
 
     const weekEnd = new Date(weekStart);
@@ -433,6 +406,7 @@ export function calculateWeeklyLoads(activities: Activity[], weeks: number = 12)
   return weeklyLoads;
 }
 
+// Detects mileage and intensity spikes that elevate injury risk
 export function calculateInjuryRiskWarnings(activities: Activity[]): InjuryRiskWarning[] {
   const runs = activities
     .filter(a => a.type === "Run" || a.sport_type === "Run")
@@ -464,7 +438,9 @@ export function calculateInjuryRiskWarnings(activities: Activity[]): InjuryRiskW
     return date >= previousWeekStart && date < currentWeekStart;
   });
 
+  // Miles For
   const milesFor = (items: Activity[]) => items.reduce((sum, run) => sum + kmToMiles(mToKm(run.distance)), 0);
+  // Baseline Pace
   const baselinePace = (() => {
     const totalMiles = milesFor(runs);
     const totalTime = runs.reduce((sum, run) => sum + run.moving_time, 0);
@@ -559,39 +535,42 @@ export function calculateInjuryRiskWarnings(activities: Activity[]): InjuryRiskW
   return warnings;
 }
 
-/**
- * Generate today's training recommendation\n */
+// Recommends today's training type based on recent load
 export function getTodayRecommendation(
   activities: Activity[],
   trainingMetrics: FitnessMetrics
 ): TrainingRecommendation {
-  // Look at recent days
+  
   const now = new Date();
   const recentRuns = activities
     .filter(a => {
       const isRun = a.type === "Run" || a.sport_type === "Run";
+      // Days Ago
       const daysAgo = (now.getTime() - new Date(a.start_date).getTime()) / (1000 * 60 * 60 * 24);
       return isRun && daysAgo <= 3;
     });
   
   const runYesterday = recentRuns.some(r => {
+    // Days Ago
     const daysAgo = (now.getTime() - new Date(r.start_date).getTime()) / (1000 * 60 * 60 * 24);
     return daysAgo <= 1 && daysAgo > 0;
   });
   
   const hardEffortRecently = recentRuns.some(r => {
     const miles = kmToMiles(mToKm(r.distance));
+    // Pace
     const pace = (r.moving_time / 60) / miles;
     return miles > 8 || pace < 8 || (r.average_heartrate && r.average_heartrate > 160);
   });
   
-  // Base average pace on all-time data
+  
   const allRuns = activities.filter(a => a.type === "Run" || a.sport_type === "Run");
   const totalTime = allRuns.reduce((sum, r) => sum + r.moving_time, 0);
   const totalDist = allRuns.reduce((sum, r) => sum + r.distance, 0);
+  // Avg Pace
   const avgPace = (totalTime / 60) / kmToMiles(mToKm(totalDist));
   
-  // Decision logic
+  
   if (trainingMetrics.readiness < -15) {
     return {
       type: "recover",
@@ -631,9 +610,7 @@ export function getTodayRecommendation(
   };
 }
 
-/**
- * Format seconds to mm:ss or hh:mm:ss
- */
+// Formats seconds as H:MM:SS or M:SS
 export function formatTime(seconds: number): string {
   if (seconds < 3600) {
     const mins = Math.floor(seconds / 60);

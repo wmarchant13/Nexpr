@@ -1,9 +1,4 @@
-/**
- * Activities Page
- *
- * Dedicated view for browsing and searching all activities.
- * Optimized for large activity histories with virtualization.
- */
+
 
 import React, { useState, useMemo, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
@@ -28,6 +23,7 @@ export const Route = createFileRoute("/_app/activities")({
 
 type SortField = "date" | "distance" | "pace" | "elevation";
 
+// Activities list page with fueling and symptom log per run
 function ActivitiesPage() {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>("date");
@@ -43,18 +39,18 @@ function ActivitiesPage() {
   const filteredAndSorted = useMemo(() => {
     if (!activities) return [];
 
-    // Only show runs
+    
     let result = activities.filter(
       (a) => a.type === "Run" || a.sport_type === "Run",
     );
 
-    // Filter by search query
+    
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter((a) => a.name.toLowerCase().includes(query));
     }
 
-    // Sort
+    
     result.sort((a, b) => {
       let comparison = 0;
 
@@ -69,7 +65,7 @@ function ActivitiesPage() {
         case "pace":
           const paceA = a.moving_time / a.distance;
           const paceB = b.moving_time / b.distance;
-          comparison = paceA - paceB; // Lower is better
+          comparison = paceA - paceB; 
           break;
         case "elevation":
           comparison = b.total_elevation_gain - a.total_elevation_gain;
@@ -218,7 +214,7 @@ function ActivitiesPage() {
                     </div>
                   </div>
 
-                  {/* Fueling Input for Long Runs */}
+                  {}
                   {athlete && (
                     <FuelingInput
                       activityId={activity.id}
@@ -227,10 +223,10 @@ function ActivitiesPage() {
                     />
                   )}
 
-                  {/* Fueling Analysis Card */}
+                  {}
                   <FuelingCard activity={activity} />
 
-                  {/* Mechanical Stress Log */}
+                  {}
                   <div className={styles.symptomToggleRow}>
                     <button
                       className={`${styles.symptomToggleBtn} ${openSymptomId === activity.id ? styles.active : ""}`}

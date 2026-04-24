@@ -31,8 +31,10 @@ export type StravaSession = {
   grantedScope: string;
 };
 
+// Refresh In Flight
 const refreshInFlight = new Map<string, Promise<StravaSession>>();
 
+// Returns true if value is a valid UUID string
 function isUuid(value: string | undefined): value is string {
   return Boolean(
     value &&
@@ -40,6 +42,7 @@ function isUuid(value: string | undefined): value is string {
   );
 }
 
+// Returns Strava session cookie configuration
 function cookieOptions() {
   return {
     httpOnly: true,
@@ -50,6 +53,7 @@ function cookieOptions() {
   };
 }
 
+// Maps a DB row to a typed StravaSession object
 function toSession(row: StoredSessionRow): StravaSession {
   return {
     id: row.id,
@@ -61,6 +65,7 @@ function toSession(row: StoredSessionRow): StravaSession {
   };
 }
 
+// Writes refreshed token fields back to the DB
 async function persistUpdatedTokens(sessionId: string, payload: SessionTokenPayload) {
   const db = getDb();
   const row = firstRow<StoredSessionRow>(await db`
@@ -81,6 +86,7 @@ async function persistUpdatedTokens(sessionId: string, payload: SessionTokenPayl
   return toSession(row);
 }
 
+// Calls the Strava token-refresh endpoint and persists results
 async function refreshStoredSession(session: StravaSession): Promise<StravaSession> {
   const response = await fetch("https://www.strava.com/oauth/token", {
     method: "POST",
@@ -110,6 +116,7 @@ async function refreshStoredSession(session: StravaSession): Promise<StravaSessi
   });
 }
 
+// Inserts a new session row and sets the session cookie
 export async function createStravaSession(payload: SessionTokenPayload) {
   const db = getDb();
   const row = firstRow<StoredSessionRow>(await db`
@@ -139,6 +146,7 @@ export async function createStravaSession(payload: SessionTokenPayload) {
   return session;
 }
 
+// Reads the current session from cookie and DB
 export async function getCurrentStravaSession(): Promise<StravaSession | null> {
   const sessionId = getCookie(STRAVA_SESSION_COOKIE);
   if (!isUuid(sessionId)) {
@@ -156,6 +164,7 @@ export async function getCurrentStravaSession(): Promise<StravaSession | null> {
   return row ? toSession(row) : null;
 }
 
+// Returns the current session or throws if unauthenticated
 export async function requireCurrentStravaSession(): Promise<StravaSession> {
   const session = await getCurrentStravaSession();
   if (!session) {
@@ -164,6 +173,7 @@ export async function requireCurrentStravaSession(): Promise<StravaSession> {
   return session;
 }
 
+// Returns access token, refreshing it if near expiry
 export async function requireStravaAccess(): Promise<{
   athleteId: number;
   accessToken: string;
@@ -211,6 +221,7 @@ export async function requireStravaAccess(): Promise<{
   };
 }
 
+// Deletes the session cookie and removes the DB row
 export async function clearCurrentStravaSession() {
   const sessionId = getCookie(STRAVA_SESSION_COOKIE);
   deleteCookie(STRAVA_SESSION_COOKIE, cookieOptions());
@@ -223,11 +234,13 @@ export async function clearCurrentStravaSession() {
   await db`DELETE FROM strava_sessions WHERE id = ${sessionId}`;
 }
 
+// Deletes all sessions for a given athlete
 export async function clearStravaSessionsForAthlete(athleteId: number) {
   const db = getDb();
   await db`DELETE FROM strava_sessions WHERE athlete_id = ${athleteId}`;
 }
 
+// Removes all app data rows for an athlete
 export async function deleteAthleteAppData(athleteId: number) {
   const db = getDb();
   await db`DELETE FROM fueling_entries WHERE athlete_id = ${athleteId}`;
@@ -237,6 +250,7 @@ export async function deleteAthleteAppData(athleteId: number) {
   await clearStravaSessionsForAthlete(athleteId);
 }
 
+// Removes activity-level data rows for an athlete
 export async function deleteAthleteActivityData(athleteId: number, activityId: number) {
   const db = getDb();
   await db`

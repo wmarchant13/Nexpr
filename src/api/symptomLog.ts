@@ -38,7 +38,7 @@ export interface SymptomInput {
   notes?: string;
 }
 
-//Get symptoms if logged for an activity
+// Fetches all symptom log entries for an athlete
 export const getSymptomEntries = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
@@ -64,7 +64,7 @@ export const getSymptomEntries = createServerFn({ method: "GET" })
     }));
   });
 
-//Save a symptom entry to database
+// Inserts a new symptom log entry
 export const saveSymptomEntry = createServerFn({ method: "POST" })
   .inputValidator((input: SymptomInput) => input)
   .handler(async ({ data }) => {
@@ -106,7 +106,7 @@ export const saveSymptomEntry = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-//Delete a symptom entry from the database
+// Removes a symptom entry by id
 export const deleteSymptomEntry = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string; athleteId: number }) => input)
   .handler(async ({ data }) => {

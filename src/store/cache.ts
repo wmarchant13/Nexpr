@@ -1,15 +1,4 @@
-/**
- * Nexpr Local Cache System
- * 
- * Implements intelligent local caching to minimize Strava API calls.
- * Activities are cached with timestamps and only refreshed when stale.
- * 
- * Cache Strategy:
- * - Activities: Cache for 15 minutes (user might record new activity)
- * - Athlete profile: Cache for 1 hour (rarely changes)
- * - Stats: Cache for 30 minutes (updated after activities)
- * - Computed metrics: Derived from cached data, no additional API calls
- */
+
 
 import type { Activity, Athlete, Stats } from "../hooks";
 
@@ -26,18 +15,15 @@ interface NexprCache {
   lastSync: number | null;
 }
 
-// Cache durations in milliseconds
 const CACHE_DURATIONS = {
-  athlete: 60 * 60 * 1000,       // 1 hour
-  activities: 15 * 60 * 1000,    // 15 minutes
-  stats: 30 * 60 * 1000,         // 30 minutes
+  athlete: 60 * 60 * 1000,       
+  activities: 15 * 60 * 1000,    
+  stats: 30 * 60 * 1000,         
 } as const;
 
 const CACHE_KEY = "nexpr_cache_v1";
 
-/**
- * Load cache from localStorage
- */
+// Reads the Nexpr cache object from localStorage
 export function loadCache(): NexprCache {
   if (typeof window === "undefined") {
     return { athlete: null, activities: null, stats: null, lastSync: null };
@@ -54,9 +40,7 @@ export function loadCache(): NexprCache {
   }
 }
 
-/**
- * Save cache to localStorage
- */
+// Writes the Nexpr cache object to localStorage
 export function saveCache(cache: NexprCache): void {
   if (typeof window === "undefined") return;
   
@@ -67,17 +51,13 @@ export function saveCache(cache: NexprCache): void {
   }
 }
 
-/**
- * Check if a cache entry is still valid
- */
+// Returns true if the cache entry has not expired
 export function isCacheValid<T>(entry: CacheEntry<T> | null): boolean {
   if (!entry) return false;
   return Date.now() < entry.expiresAt;
 }
 
-/**
- * Create a cache entry with expiration
- */
+// Wraps data in a timed cache entry
 export function createCacheEntry<T>(
   data: T,
   duration: number
@@ -90,9 +70,7 @@ export function createCacheEntry<T>(
   };
 }
 
-/**
- * Get cached athlete data if valid
- */
+// Returns cached athlete data or null if stale
 export function getCachedAthlete(): Athlete | null {
   const cache = loadCache();
   if (isCacheValid(cache.athlete)) {
@@ -101,18 +79,14 @@ export function getCachedAthlete(): Athlete | null {
   return null;
 }
 
-/**
- * Cache athlete data
- */
+// Stores athlete data in the local cache
 export function cacheAthlete(athlete: Athlete): void {
   const cache = loadCache();
   cache.athlete = createCacheEntry(athlete, CACHE_DURATIONS.athlete);
   saveCache(cache);
 }
 
-/**
- * Get cached activities if valid
- */
+// Returns cached activities or null if stale
 export function getCachedActivities(): Activity[] | null {
   const cache = loadCache();
   if (isCacheValid(cache.activities)) {
@@ -121,9 +95,7 @@ export function getCachedActivities(): Activity[] | null {
   return null;
 }
 
-/**
- * Cache activities data
- */
+// Stores activities in the local cache
 export function cacheActivities(activities: Activity[]): void {
   const cache = loadCache();
   cache.activities = createCacheEntry(activities, CACHE_DURATIONS.activities);
@@ -131,10 +103,7 @@ export function cacheActivities(activities: Activity[]): void {
   saveCache(cache);
 }
 
-/**
- * Merge new activities with cached ones (for incremental updates)
- * Only adds activities that don't already exist
- */
+// Merges new activities into the cache without duplicates
 export function mergeActivities(newActivities: Activity[]): Activity[] {
   const cached = getCachedActivities() || [];
   const existingIds = new Set(cached.map(a => a.id));
@@ -148,9 +117,7 @@ export function mergeActivities(newActivities: Activity[]): Activity[] {
   return merged;
 }
 
-/**
- * Get cached stats if valid
- */
+// Returns cached stats or null if stale
 export function getCachedStats(): Stats | null {
   const cache = loadCache();
   if (isCacheValid(cache.stats)) {
@@ -159,43 +126,32 @@ export function getCachedStats(): Stats | null {
   return null;
 }
 
-/**
- * Cache stats data
- */
+// Stores stats in the local cache
 export function cacheStats(stats: Stats): void {
   const cache = loadCache();
   cache.stats = createCacheEntry(stats, CACHE_DURATIONS.stats);
   saveCache(cache);
 }
 
-/**
- * Get time since last sync
- */
+// Returns milliseconds since the last activity sync
 export function getTimeSinceLastSync(): number | null {
   const cache = loadCache();
   if (!cache.lastSync) return null;
   return Date.now() - cache.lastSync;
 }
 
-/**
- * Check if we should fetch fresh data
- * Returns true if cache is stale or empty
- */
+// Returns true if the activities cache is stale or empty
 export function shouldFetchActivities(): boolean {
   return !isCacheValid(loadCache().activities);
 }
 
-/**
- * Clear all cached data (for logout)
- */
+// Removes all Nexpr cached data from localStorage
 export function clearCache(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(CACHE_KEY);
 }
 
-/**
- * Get cache status for debugging/UI
- */
+// Returns a debug summary of the current cache state
 export function getCacheStatus(): {
   hasAthlete: boolean;
   hasActivities: boolean;

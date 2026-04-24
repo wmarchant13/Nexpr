@@ -1,9 +1,4 @@
-/**
- * Goals Page
- *
- * User-inputtable distance/time goals for the year.
- * Automatically marks goals complete when a matching Strava activity is logged.
- */
+
 
 import React, { useState, useMemo, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
@@ -44,6 +39,7 @@ interface DistanceGoal {
   year: number;
 }
 
+// Parses MM:SS or HH:MM:SS input to total seconds
 function parseTimeInput(input: string): number | null {
   const parts = input.trim().split(":").map(Number);
   if (parts.some(isNaN) || parts.length < 2 || parts.length > 3) return null;
@@ -57,6 +53,7 @@ function parseTimeInput(input: string): number | null {
   return h * 3600 + m * 60 + s;
 }
 
+// Distance goals page with target time management
 function GoalsPage() {
   const { data: athlete } = useAthlete();
   const { data: activities, isLoading } = useActivities(1, 100);
@@ -72,7 +69,7 @@ function GoalsPage() {
 
   const goals = dbGoals as DistanceGoal[];
 
-  // Best time this year per distance (from actual activities)
+  
   const bestTimesThisYear = useMemo<
     Record<RaceDistanceKey, number | undefined>
   >(() => {

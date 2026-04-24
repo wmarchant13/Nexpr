@@ -1,13 +1,13 @@
-import React from "react";
 import { useStravaLogin } from "../../hooks";
 import styles from "./LoginPage.module.scss";
 
+// Landing and login page with Strava connect button
 export default function LoginPage() {
   const { mutate: login, isPending } = useStravaLogin();
 
   return (
     <div className={styles.page}>
-      {/* Muted background video */}
+      {}
       <video
         className={styles.videoBg}
         src="/assets/group-running.mp4"
@@ -18,13 +18,13 @@ export default function LoginPage() {
         aria-hidden="true"
       />
 
-      {/* Dark scrim over video */}
+      {}
       <div className={styles.scrim} aria-hidden="true" />
 
-      {/* Grain overlay */}
+      {}
       <div className={styles.grain} aria-hidden="true" />
 
-      {/* Sign-in box */}
+      {}
       <div className={styles.box}>
         <div className={styles.wordmark}>
           <img

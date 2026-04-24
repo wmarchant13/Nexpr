@@ -1,56 +1,56 @@
-/**
- * Fueling Insights Component
- * 
- * Displays fueling analysis for a single activity and aggregate patterns.
- * Uses React Query hooks for data fetching from Neon PostgreSQL.
- */
+
 
 import React, { useMemo } from "react";
-import type { Activity } from "../../hooks";
-import { useFuelingEntry, useAllFuelingEntries, type FuelingEntry } from "../../hooks";
-import type { FuelingAnalysis, FuelingProfile, FuelingInsight } from "../../store/fueling";
-import { 
-  analyzeFueledRun, 
+import type { Activity } from "../../../hooks";
+import { useFuelingEntry, useAllFuelingEntries } from "../../../hooks";
+import type { FuelingInsight } from "../../../store/fueling";
+import {
+  analyzeFueledRun,
   buildFuelingProfile,
   FUELING_TOOLTIP,
-} from "../../store/fueling";
-import styles from "./Fueling.module.scss";
-
-// ============================================================================
-// Single Activity Fueling Card
-// ============================================================================
+} from "../../../store/fueling";
+import styles from "./FuelingInsights.module.scss";
 
 interface FuelingCardProps {
   activity: Activity;
   effortScore?: number;
 }
 
+// Displays fueling analysis for a single activity
 export function FuelingCard({ activity, effortScore = 5 }: FuelingCardProps) {
   const { data: entry, isLoading } = useFuelingEntry(activity.id);
-  
+
   const analysis = useMemo(() => {
     if (!entry) return null;
     return analyzeFueledRun(activity, entry, effortScore);
   }, [activity, entry, effortScore]);
-  
+
   if (isLoading || !analysis) return null;
-  
-  const { fueling, performance, effectivenessScore, fuelingLevel, performanceCategory, insights } = analysis;
-  const carbsDisplay = fueling.carbsGrams ?? (fueling.gelsCount ? fueling.gelsCount * 25 : 0);
-  
+
+  const {
+    fueling,
+    performance,
+    effectivenessScore,
+    fuelingLevel,
+    performanceCategory,
+    insights,
+  } = analysis;
+  const carbsDisplay =
+    fueling.carbsGrams ?? (fueling.gelsCount ? fueling.gelsCount * 25 : 0);
+
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
         <span className={styles.cardIcon}>⚡</span>
         <h4 className={styles.cardTitle}>Fueling Analysis</h4>
-        <div 
+        <div
           className={`${styles.effectivenessBadge} ${styles[performanceCategory]}`}
           title={`Effectiveness: ${effectivenessScore}/10`}
         >
           {effectivenessScore.toFixed(1)}
         </div>
       </div>
-      
+
       <div className={styles.cardStats}>
         <div className={styles.statItem}>
           <span className={styles.statValue}>{carbsDisplay}g</span>
@@ -75,30 +75,38 @@ export function FuelingCard({ activity, effortScore = 5 }: FuelingCardProps) {
           <span className={styles.statLabel}>Level</span>
         </div>
       </div>
-      
+
       <div className={styles.performanceRow}>
         <div className={styles.perfMetric}>
           <span className={styles.perfLabel}>Stability</span>
           <div className={styles.perfBar}>
-            <div 
+            <div
               className={styles.perfFill}
               style={{ width: `${performance.paceStability}%` }}
             />
           </div>
-          <span className={styles.perfValue}>{Math.round(performance.paceStability)}%</span>
+          <span className={styles.perfValue}>
+            {Math.round(performance.paceStability)}%
+          </span>
         </div>
         <div className={styles.perfMetric}>
           <span className={styles.perfLabel}>Fade</span>
-          <span className={`${styles.perfValue} ${performance.fadePercentage > 5 ? styles.negative : styles.positive}`}>
-            {performance.fadePercentage > 0 ? "+" : ""}{performance.fadePercentage.toFixed(1)}%
+          <span
+            className={`${styles.perfValue} ${performance.fadePercentage > 5 ? styles.negative : styles.positive}`}
+          >
+            {performance.fadePercentage > 0 ? "+" : ""}
+            {performance.fadePercentage.toFixed(1)}%
           </span>
         </div>
       </div>
-      
+
       {insights.length > 0 && (
         <div className={styles.cardInsights}>
-          {insights.slice(0, 2).map(insight => (
-            <div key={insight.id} className={`${styles.insight} ${styles[insight.type]}`}>
+          {insights.slice(0, 2).map((insight) => (
+            <div
+              key={insight.id}
+              className={`${styles.insight} ${styles[insight.type]}`}
+            >
               <span className={styles.insightTitle}>{insight.title}</span>
               <span className={styles.insightDesc}>{insight.description}</span>
             </div>
@@ -109,23 +117,25 @@ export function FuelingCard({ activity, effortScore = 5 }: FuelingCardProps) {
   );
 }
 
-// ============================================================================
-// Fueling Profile Summary
-// ============================================================================
-
 interface FuelingProfileCardProps {
   activities: Activity[];
   effortMap: Map<number, { score: number }>;
   athleteId: number;
 }
 
-export function FuelingProfileCard({ activities, effortMap, athleteId }: FuelingProfileCardProps) {
-  const { data: fuelingEntries = [], isLoading } = useAllFuelingEntries(athleteId);
-  
+// Displays aggregate fueling profile across all runs
+export function FuelingProfileCard({
+  activities,
+  effortMap,
+  athleteId,
+}: FuelingProfileCardProps) {
+  const { data: fuelingEntries = [], isLoading } =
+    useAllFuelingEntries(athleteId);
+
   const profile = useMemo(() => {
     return buildFuelingProfile(activities, effortMap, fuelingEntries);
   }, [activities, effortMap, fuelingEntries]);
-  
+
   if (isLoading) {
     return (
       <div className={styles.profileCard}>
@@ -139,7 +149,7 @@ export function FuelingProfileCard({ activities, effortMap, athleteId }: Fueling
       </div>
     );
   }
-  
+
   if (profile.totalFueledRuns === 0) {
     return (
       <div className={styles.profileCard}>
@@ -150,13 +160,14 @@ export function FuelingProfileCard({ activities, effortMap, athleteId }: Fueling
         <div className={styles.emptyState}>
           <p>No fueling data logged yet.</p>
           <p className={styles.emptyHint}>
-            Log fueling on your long runs to discover what strategies work best for you.
+            Log fueling on your long runs to discover what strategies work best
+            for you.
           </p>
         </div>
       </div>
     );
   }
-  
+
   return (
     <div className={styles.profileCard}>
       <div className={styles.profileHeader}>
@@ -166,8 +177,8 @@ export function FuelingProfileCard({ activities, effortMap, athleteId }: Fueling
           {profile.totalFueledRuns} runs logged
         </span>
       </div>
-      
-      {/* Optimal Ranges */}
+
+      {}
       {(profile.optimalCarbRange || profile.optimalHydrationRange) && (
         <div className={styles.optimalSection}>
           <h4 className={styles.sectionTitle}>Your Optimal Ranges</h4>
@@ -176,7 +187,8 @@ export function FuelingProfileCard({ activities, effortMap, athleteId }: Fueling
               <div className={styles.rangeItem}>
                 <span className={styles.rangeLabel}>Carbs</span>
                 <span className={styles.rangeValue}>
-                  {Math.round(profile.optimalCarbRange.min)}–{Math.round(profile.optimalCarbRange.max)}g
+                  {Math.round(profile.optimalCarbRange.min)}–
+                  {Math.round(profile.optimalCarbRange.max)}g
                 </span>
               </div>
             )}
@@ -184,34 +196,42 @@ export function FuelingProfileCard({ activities, effortMap, athleteId }: Fueling
               <div className={styles.rangeItem}>
                 <span className={styles.rangeLabel}>Hydration</span>
                 <span className={styles.rangeValue}>
-                  {Math.round(profile.optimalHydrationRange.min)}–{Math.round(profile.optimalHydrationRange.max)}ml
+                  {Math.round(profile.optimalHydrationRange.min)}–
+                  {Math.round(profile.optimalHydrationRange.max)}ml
                 </span>
               </div>
             )}
           </div>
         </div>
       )}
-      
-      {/* Clusters Comparison */}
+
+      {}
       {profile.clusters.length >= 2 && (
         <div className={styles.clusterSection}>
           <h4 className={styles.sectionTitle}>Performance by Fueling Level</h4>
           <div className={styles.clusterGrid}>
-            {profile.clusters.slice(0, 2).map(cluster => (
+            {profile.clusters.slice(0, 2).map((cluster) => (
               <div key={cluster.id} className={styles.clusterCard}>
                 <span className={styles.clusterLabel}>{cluster.label}</span>
                 <div className={styles.clusterStats}>
                   <div className={styles.clusterStat}>
-                    <span className={styles.clusterValue}>{cluster.runCount}</span>
+                    <span className={styles.clusterValue}>
+                      {cluster.runCount}
+                    </span>
                     <span className={styles.clusterUnit}>runs</span>
                   </div>
                   <div className={styles.clusterStat}>
-                    <span className={styles.clusterValue}>{Math.round(cluster.avgPaceStability)}%</span>
+                    <span className={styles.clusterValue}>
+                      {Math.round(cluster.avgPaceStability)}%
+                    </span>
                     <span className={styles.clusterUnit}>stability</span>
                   </div>
                   <div className={styles.clusterStat}>
-                    <span className={`${styles.clusterValue} ${cluster.avgFade > 5 ? styles.negative : ""}`}>
-                      {cluster.avgFade > 0 ? "+" : ""}{cluster.avgFade.toFixed(1)}%
+                    <span
+                      className={`${styles.clusterValue} ${cluster.avgFade > 5 ? styles.negative : ""}`}
+                    >
+                      {cluster.avgFade > 0 ? "+" : ""}
+                      {cluster.avgFade.toFixed(1)}%
                     </span>
                     <span className={styles.clusterUnit}>fade</span>
                   </div>
@@ -221,34 +241,37 @@ export function FuelingProfileCard({ activities, effortMap, athleteId }: Fueling
           </div>
         </div>
       )}
-      
-      {/* Insights */}
+
+      {}
       {profile.insights.length > 0 && (
         <div className={styles.insightsSection}>
           <h4 className={styles.sectionTitle}>Patterns</h4>
           <div className={styles.insightsList}>
-            {profile.insights.slice(0, 3).map(insight => (
+            {profile.insights.slice(0, 3).map((insight) => (
               <InsightRow key={insight.id} insight={insight} />
             ))}
           </div>
         </div>
       )}
-      
-      {/* Footer */}
+
+      {}
       <div className={styles.profileFooter}>
-        <span className={styles.disclaimer}>{FUELING_TOOLTIP.notNutritionApp}</span>
+        <span className={styles.disclaimer}>
+          {FUELING_TOOLTIP.notNutritionApp}
+        </span>
       </div>
     </div>
   );
 }
 
+// Insight Row
 function InsightRow({ insight }: { insight: FuelingInsight }) {
   const iconMap: Record<string, string> = {
     correlation: "📊",
     pattern: "🔄",
     recommendation: "💡",
   };
-  
+
   return (
     <div className={`${styles.insightRow} ${styles[insight.type]}`}>
       <span className={styles.insightIcon}>{iconMap[insight.type] || "•"}</span>
@@ -261,8 +284,4 @@ function InsightRow({ insight }: { insight: FuelingInsight }) {
   );
 }
 
-// ============================================================================
-// Exports
-// ============================================================================
-
-export { FuelingInput } from "./FuelingInput";
+export { FuelingInput } from "../FuelingInput";

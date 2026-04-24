@@ -12,22 +12,18 @@ import {
 } from "../../store/symptomLog";
 import styles from "./SymptomLog.module.scss";
 
-// ─── TYPES ───────────────────────────────────────────────────────────────────
-
 export interface SymptomLogProps {
-  /** Strava activity UUID (not the raw numeric ID — never in URLs). */
+  
   activityId: string;
-  /** ISO date string for the activity being annotated. */
+  
   activityDate: string;
-  /** Full symptom history — used for structural alert detection. */
+  
   existingEntries?: SymptomEntry[];
-  /** Called with the completed entry on successful submission. */
+  
   onSave: (entry: SymptomEntry) => void;
-  /** Called with the entry ID to delete. */
+  
   onDelete?: (id: string) => void;
 }
-
-// ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 const PAIN_SCALE_LABELS: Record<number, string> = {
   1: "Minimal",
@@ -37,8 +33,7 @@ const PAIN_SCALE_LABELS: Record<number, string> = {
   5: "Severe",
 };
 
-// ─── COMPONENT ───────────────────────────────────────────────────────────────
-
+// Mechanical stress log form and entry list for an activity
 function SymptomLog({
   activityId,
   activityDate,
@@ -54,18 +49,19 @@ function SymptomLog({
   const [locationError, setLocationError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
 
-  // Only show alerts for triggered (>= 3/5) locations
+  
   const triggeredAlerts = useMemo(
     () => detectStructuralAlerts(existingEntries).filter((a) => a.triggered),
     [existingEntries],
   );
 
-  // Entries for this specific activity (shown below the form as a log)
+  
   const activityEntries = useMemo(
     () => existingEntries.filter((e) => e.activityId === activityId),
     [existingEntries, activityId],
   );
 
+  // Handles submit
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
@@ -87,7 +83,7 @@ function SymptomLog({
       notes: notes.trim() || undefined,
     });
 
-    // Reset form
+    
     setLocation("");
     setNotes("");
     setPainScale(1);
@@ -97,7 +93,7 @@ function SymptomLog({
 
   return (
     <div className={styles.root}>
-      {/* ── Structural Alert Banner ─────────────────────────────────────── */}
+      {}
       {triggeredAlerts.length > 0 && (
         <div className={styles.alertBanner} role="alert" aria-live="polite">
           <span className={styles.alertIcon} aria-hidden="true">
@@ -115,7 +111,7 @@ function SymptomLog({
         </div>
       )}
 
-      {/* ── Mechanical Stress Form ──────────────────────────────────────── */}
+      {}
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <header className={styles.formHeader}>
           <span className={styles.formKicker}>Mechanical Stress Log</span>
@@ -124,7 +120,7 @@ function SymptomLog({
           </p>
         </header>
 
-        {/* Location */}
+        {}
         <div className={styles.field}>
           <label htmlFor="symptom-location" className={styles.label}>
             Anatomical Location
@@ -149,7 +145,7 @@ function SymptomLog({
           )}
         </div>
 
-        {/* Trigger */}
+        {}
         <div className={styles.field}>
           <label htmlFor="symptom-trigger" className={styles.label}>
             Trigger
@@ -168,7 +164,7 @@ function SymptomLog({
           </select>
         </div>
 
-        {/* Warm-up Behaviour */}
+        {}
         <div className={styles.field}>
           <label htmlFor="symptom-warmup" className={styles.label}>
             Warm-up Behaviour
@@ -189,7 +185,7 @@ function SymptomLog({
           </select>
         </div>
 
-        {/* Pain Scale */}
+        {}
         <div className={styles.field}>
           <span className={styles.label} id="pain-scale-label">
             Pain Scale
@@ -217,7 +213,7 @@ function SymptomLog({
           </div>
         </div>
 
-        {/* Notes */}
+        {}
         <div className={styles.field}>
           <label htmlFor="symptom-notes" className={styles.label}>
             Notes <span className={styles.optional}>(optional)</span>
@@ -244,7 +240,7 @@ function SymptomLog({
         </div>
       </form>
 
-      {/* ── Activity Entry Log ──────────────────────────────────────────── */}
+      {}
       {activityEntries.length > 0 && (
         <ul className={styles.entryList} aria-label="Logged stress points">
           {activityEntries.map((entry) => (

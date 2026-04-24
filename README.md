@@ -1,12 +1,98 @@
 # Nexpr
 
-**Unlock your next PR** — A data-driven running performance platform.
+Data-driven running performance platform. Connect your Strava account to track pace trends, predict PRs, log fueling, and make smarter training decisions.
 
-## Overview
+> Independent app — not affiliated with or endorsed by Strava.
 
-Nexpr transforms your activity data into actionable training insights. Using advanced analytics, it tracks your training momentum, predicts your race potential, and provides daily recommendations to help you reach your next personal record.
+## Features
 
-*Uses Strava activity data. Nexpr is an independent app and is not affiliated with or endorsed by Strava.*
+| Page | What it does |
+|---|---|
+| **Log** | Recent runs with effort classification (easy/moderate/hard), weather, and weekly mileage |
+| **Miles** | Full activity list with per-run fueling log and mechanical stress tracker |
+| **Breakdown** | Fitness metrics, VDOT score, race predictions, injury risk analysis |
+| **Goals** | Distance goal tracking with projected completion times via the Oracle engine |
+| **Journal** | Weekly reflection notes tied to training blocks |
+| **Kit** | VDOT calculator and Marathon Diagnostics tools |
+
+**Oracle** — goal-race probability engine. Enter a target time and get a probability score plus the specific training levers that move the needle most.
+
+**Fueling Analysis** — log carbs, hydration, and caffeine per run to surface correlations between nutrition and performance over time.
+
+**Mechanical Stress Log** — track recurring pain points per activity to detect structural alert patterns before they become injuries.
+
+## Stack
+
+- [TanStack Start](https://tanstack.com/start) — React SSR + server functions
+- [TanStack Router](https://tanstack.com/router) — file-based routing
+- [Neon Postgres](https://neon.tech) — serverless database (sessions, goals, symptom log, reflections)
+- [Strava API](https://developers.strava.com) — activity data source
+- [OpenWeatherMap API](https://openweathermap.org/api) — current conditions
+- Vite · Bun · TypeScript · SCSS Modules · Recharts
+
+## Local Development
+
+```bash
+# 1. Install
+bun install
+
+# 2. Configure
+cp .env.example .env
+# Fill in all values — see Environment Variables below
+
+# 3. Init the database
+bun run scripts/init-db.ts
+
+# 4. Start
+bun dev
+```
+
+## Environment Variables
+
+| Variable | Description | How to get it |
+|---|---|---|
+| `DATABASE_URL` | Neon Postgres connection string | [console.neon.tech](https://console.neon.tech) |
+| `STRAVA_CLIENT_ID` | Strava OAuth app client ID | [strava.com/settings/api](https://www.strava.com/settings/api) |
+| `STRAVA_CLIENT_SECRET` | Strava OAuth app client secret | same as above |
+| `STRAVA_REDIRECT_URI` | OAuth callback URL | `https://yourdomain.com/auth/strava/callback` |
+| `STRAVA_WEBHOOK_VERIFY_TOKEN` | Random token for webhook registration | `openssl rand -hex 32` |
+| `SESSION_SECRET` | Secret for signing session cookies | `openssl rand -hex 32` |
+| `OPENWEATHER_API_KEY` | OpenWeatherMap API key | [openweathermap.org](https://openweathermap.org/api) |
+
+## Deploy to Vercel
+
+1. Import this repository into [Vercel](https://vercel.com)
+2. Set all environment variables from the table above in the Vercel dashboard
+3. Add `NITRO_PRESET=vercel` as a Vercel environment variable (enables Nitro's Vercel output format)
+4. Vercel will use `vercel.json` automatically — no other config needed
+
+The build outputs to `.vercel/output/` (Vercel Build Output API format).
+
+## Strava Webhook Setup
+
+Register the webhook once after deploying:
+
+```bash
+curl -X POST https://www.strava.com/api/v3/push_subscriptions \
+  -F client_id=YOUR_CLIENT_ID \
+  -F client_secret=YOUR_CLIENT_SECRET \
+  -F callback_url=https://yourdomain.com/api/strava/webhook \
+  -F verify_token=YOUR_STRAVA_WEBHOOK_VERIFY_TOKEN
+```
+
+The webhook handles `athlete.deauthorize` events to delete app data on disconnect.
+
+## Rate Limiting
+
+All requests are limited to **120/minute per IP**. Auth endpoints (`/auth/*`) use a stricter **15/minute** limit. Responses include `X-RateLimit-Limit` and `X-RateLimit-Remaining` headers.
+
+## Security
+
+- Session cookies are `httpOnly`, `sameSite=lax`, and `secure` in production
+- All server function inputs are validated at the boundary (`src/utils/server/validation.ts`)
+- Bot traffic is blocked at the middleware layer via `isbot`
+- Secrets are read exclusively from environment variables — nothing is hardcoded
+
 
 ## Features
 

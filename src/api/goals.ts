@@ -24,7 +24,7 @@ export interface GoalInput {
   year: number;
 }
 
-//Get athlete's goals
+// Fetches all distance goals for an athlete
 export const getGoals = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
@@ -48,7 +48,7 @@ export const getGoals = createServerFn({ method: "GET" })
     }));
   });
 
-//Save goal for athlete
+// Inserts a new distance goal
 export const saveGoal = createServerFn({ method: "POST" })
   .inputValidator((input: GoalInput) => input)
   .handler(async ({ data }) => {
@@ -85,7 +85,7 @@ export const saveGoal = createServerFn({ method: "POST" })
     return { id: row.id };
   });
 
-//Delete a goal from database
+// Removes a distance goal by id
 export const deleteGoal = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string; athleteId: number }) => input)
   .handler(async ({ data }) => {

@@ -9,10 +9,6 @@
  * Equations: Daniels & Gilbert (1979) oxygen-cost model.
  */
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
 export type TrainingZone = "E" | "M" | "T" | "I" | "R";
 
 export interface VDOTResult {
@@ -22,17 +18,16 @@ export interface VDOTResult {
 }
 
 export interface TrainingPaces {
-  // Seconds per mile
-  easyLow: number; // bottom of easy range
-  easyHigh: number; // top of easy range (conversational)
-  marathon: number; // M pace
-  threshold: number; // T pace (comfortably hard)
-  interval: number; // I pace (VO2max — ~3k–5k effort)
-  repetition: number; // R pace (fast, neuromuscular — ~mile effort)
+  easyLow: number;
+  easyHigh: number;
+  marathon: number;
+  threshold: number;
+  interval: number;
+  repetition: number;
 }
 
 export interface RacePredictions {
-  "1500m": number; // seconds
+  "1500m": number;
   mile: number;
   "5K": number;
   "10K": number;
@@ -42,15 +37,10 @@ export interface RacePredictions {
 
 export type RaceDistance = keyof RacePredictions;
 
-// ============================================================================
-// DANIELS/GILBERT OXYGEN COST MODEL
-// ============================================================================
-
-// Fraction of VO2max sustainable at a given race duration (minutes)
-// Based on percent utilisation curve from Daniels & Gilbert (1979)
+// Models percent VO2max utilization at a given duration
 function percentVO2Max(durationMinutes: number): number {
   const t = durationMinutes;
-  // Percent of VO2max as a function of race duration
+
   return (
     0.8 +
     0.1894393 * Math.exp(-0.012778 * t) +
@@ -58,57 +48,42 @@ function percentVO2Max(durationMinutes: number): number {
   );
 }
 
-// Oxygen cost of running at velocity v (ml/kg/min), v in meters per minute
+// Converts running velocity (m/min) to VO2 demand
 function vo2FromVelocity(v: number): number {
   return -4.6 + 0.182258 * v + 0.000104 * v * v;
 }
 
-// Inverse: velocity from VO2 demand (meters per minute)
+// Inverts VO2 demand back to running velocity
 function velocityFromVo2(vo2: number): number {
-  // Quadratic solve: 0.000104v² + 0.182258v - (4.60 + vo2) = 0
   const a = 0.000104;
   const b = 0.182258;
   const c = -(4.6 + vo2);
   return (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
 }
 
-// ============================================================================
-// VDOT FROM RACE PERFORMANCE
-// ============================================================================
-
-/**
- * Compute VDOT from a race result.
- * @param distanceMeters - race distance in meters
- * @param timeSeconds - finish time in seconds
- */
+// Computes VDOT score from a race distance and time
 export function computeVDOT(
   distanceMeters: number,
   timeSeconds: number,
 ): number {
   const minutes = timeSeconds / 60;
-  const velocityMpm = distanceMeters / minutes; // meters per minute
+  const velocityMpm = distanceMeters / minutes;
   const vo2 = vo2FromVelocity(velocityMpm);
   const pct = percentVO2Max(minutes);
   const vdot = vo2 / pct;
-  // Round to 1 decimal
+
   return Math.round(vdot * 10) / 10;
 }
 
-// ============================================================================
-// TRAINING PACES FROM VDOT
-// ============================================================================
-
-// The training zones correspond to specific %VO2max or %HRmax ranges per Daniels.
-// We express them as pace adjustments from the VDOT-equivalent velocity.
-
 const ZONE_VO2_FRACTIONS: Record<TrainingZone, [number, number]> = {
-  E: [0.59, 0.74], // 59–74% VO2max — Easy/recovery
-  M: [0.75, 0.84], // 75–84% VO2max — Marathon pace
-  T: [0.83, 0.88], // 83–88% VO2max — Lactate threshold / Tempo
-  I: [0.95, 1.0], // 95–100% VO2max — Interval / VO2max
-  R: [1.05, 1.1], // Repetition — above VO2max, speed/economy
+  E: [0.59, 0.74],
+  M: [0.75, 0.84],
+  T: [0.83, 0.88],
+  I: [0.95, 1.0],
+  R: [1.05, 1.1],
 };
 
+// Converts a VO2max fraction + vdot to pace in sec/mile
 function paceSecondsPerMile(vo2MaxFraction: number, vdot: number): number {
   const targetVo2 = vdot * vo2MaxFraction;
   const velocityMpm = velocityFromVo2(targetVo2);
@@ -118,6 +93,7 @@ function paceSecondsPerMile(vo2MaxFraction: number, vdot: number): number {
   return secondsPerMile;
 }
 
+// Computes all Daniels training zone paces for a VDOT
 export function computeTrainingPaces(vdot: number): TrainingPaces {
   const [eLow, eHigh] = ZONE_VO2_FRACTIONS.E;
   const [, mHigh] = ZONE_VO2_FRACTIONS.M;
@@ -126,18 +102,14 @@ export function computeTrainingPaces(vdot: number): TrainingPaces {
   const [rLow] = ZONE_VO2_FRACTIONS.R;
 
   return {
-    easyLow: paceSecondsPerMile(eHigh, vdot), // slower = higher pace value at low fraction
-    easyHigh: paceSecondsPerMile(eLow, vdot), // faster ceiling of easy
+    easyLow: paceSecondsPerMile(eHigh, vdot),
+    easyHigh: paceSecondsPerMile(eLow, vdot),
     marathon: paceSecondsPerMile(mHigh, vdot),
     threshold: paceSecondsPerMile(tLow, vdot),
     interval: paceSecondsPerMile(iLow, vdot),
     repetition: paceSecondsPerMile(rLow, vdot),
   };
 }
-
-// ============================================================================
-// RACE PREDICTIONS FROM VDOT
-// ============================================================================
 
 const RACE_DISTANCES_METERS: Record<RaceDistance, number> = {
   "1500m": 1500,
@@ -148,16 +120,16 @@ const RACE_DISTANCES_METERS: Record<RaceDistance, number> = {
   Marathon: 42195,
 };
 
-// Binary search: find race time that produces target VDOT at given distance
+// Binary-searches for the race time matching a given VDOT
 function predictRaceTime(distanceMeters: number, vdot: number): number {
-  // Bracket in minutes
   let lo = 1;
   let hi = 600;
   for (let i = 0; i < 60; i++) {
+    // Mid
     const mid = (lo + hi) / 2;
     const v = computeVDOT(distanceMeters, mid * 60);
     if (v > vdot) {
-      lo = mid; // too fast — need more time
+      lo = mid;
     } else {
       hi = mid;
     }
@@ -165,6 +137,7 @@ function predictRaceTime(distanceMeters: number, vdot: number): number {
   return Math.round(((lo + hi) / 2) * 60);
 }
 
+// Predicts race times for all standard distances
 export function computeRacePredictions(vdot: number): RacePredictions {
   const predictions = {} as RacePredictions;
 
@@ -177,10 +150,7 @@ export function computeRacePredictions(vdot: number): RacePredictions {
   return predictions;
 }
 
-// ============================================================================
-// FULL VDOT CALCULATION
-// ============================================================================
-
+// Returns full VDOT result including paces and race predictions
 export function calculateVDOT(
   distanceMeters: number,
   timeSeconds: number,
@@ -191,11 +161,7 @@ export function calculateVDOT(
   return { vdot, trainingPaces, racePredictions };
 }
 
-// ============================================================================
-// FORMATTING HELPERS
-// ============================================================================
-
-/** Format seconds as M:SS or H:MM:SS */
+// Formats total seconds as H:MM:SS or M:SS race time
 export function formatRaceTime(totalSeconds: number): string {
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
@@ -206,14 +172,14 @@ export function formatRaceTime(totalSeconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-/** Format seconds-per-mile as M:SS /mi */
+// Formats seconds-per-mile as M:SS pace string
 export function formatPacePerMile(secondsPerMile: number): string {
   const m = Math.floor(secondsPerMile / 60);
   const s = Math.round(secondsPerMile % 60);
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-/** Parse user time input (MM:SS, M:SS, H:MM:SS) to seconds. Returns null if invalid. */
+// Parses a user time input string to total seconds
 export function parseVDOTTimeInput(input: string): number | null {
   const trimmed = input.trim();
   const parts = trimmed.split(":").map(Number);
@@ -231,7 +197,6 @@ export function parseVDOTTimeInput(input: string): number | null {
   return null;
 }
 
-/** Standard distance options for the calculator UI */
 export const VDOT_DISTANCE_OPTIONS: { label: string; meters: number }[] = [
   { label: "1500m", meters: 1500 },
   { label: "Mile", meters: 1609.344 },
@@ -241,7 +206,6 @@ export const VDOT_DISTANCE_OPTIONS: { label: string; meters: number }[] = [
   { label: "Marathon", meters: 42195 },
 ];
 
-/** Training zone labels and descriptions */
 export const TRAINING_ZONE_INFO: Record<
   TrainingZone,
   { label: string; description: string; color: string }

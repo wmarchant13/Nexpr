@@ -1,9 +1,4 @@
-/**
- * App Layout Route
- * 
- * Parent route for all authenticated pages.
- * Provides the consistent app shell with navigation.
- */
+
 
 import { createFileRoute, redirect, Outlet } from "@tanstack/react-router";
 import { getViewerSession } from "../api/auth";

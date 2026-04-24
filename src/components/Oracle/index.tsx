@@ -1,9 +1,4 @@
-/**
- * The Oracle Component
- *
- * Ask the one question every runner has.
- * Get a real, probabilistic answer.
- */
+
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import type { Activity } from "../../hooks";
@@ -20,10 +15,6 @@ import {
   type RaceDistance,
 } from "../../store/oracle";
 import styles from "./Oracle.module.scss";
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
 
 const DISTANCES: RaceDistance[] = ["5K", "10K", "Half Marathon", "Marathon"];
 
@@ -102,19 +93,15 @@ const URGENCY_COLOR: Record<LeverUrgency, string> = {
   medium: "#60a5fa",
 };
 
-// Ring geometry
 const RING_RADIUS = 68;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
-
-// ============================================================================
-// ORACLE PANEL
-// ============================================================================
 
 interface OraclePanelProps {
   activities: Activity[];
   stravaPRs?: PRRecord[];
 }
 
+// Oracle Panel
 export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
   const [selectedDistance, setSelectedDistance] =
     useState<RaceDistance>("Marathon");
@@ -125,7 +112,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
   const [animatedProbability, setAnimatedProbability] = useState(0);
   const animFrameRef = useRef<number | null>(null);
 
-  // Animate the ring when result changes
+  
   useEffect(() => {
     if (!result) {
       setAnimatedProbability(0);
@@ -133,6 +120,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
     }
     const target = result.probability;
     let current = 0;
+    // Step
     const step = () => {
       current = Math.min(current + 2, target);
       setAnimatedProbability(current);
@@ -189,11 +177,12 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
   );
 
   const verdictConfig = result ? VERDICT_CONFIG[result.verdict] : null;
+  // Ring Dash
   const ringDash = (animatedProbability / 100) * RING_CIRCUMFERENCE;
 
   return (
     <div className={styles.container}>
-      {/* Header */}
+      {}
       <div className={styles.header}>
         <div className={styles.titleRow}>
           <span className={styles.tag}>Decision Engine</span>
@@ -205,9 +194,9 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
         </p>
       </div>
 
-      {/* Query Builder */}
+      {}
       <div className={styles.queryBlock}>
-        {/* Distance selector */}
+        {}
         <div className={styles.distanceRow}>
           {DISTANCES.map((d) => (
             <button
@@ -221,7 +210,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
           ))}
         </div>
 
-        {/* Preset buttons */}
+        {}
         <div className={styles.presetRow}>
           {DISTANCE_PRESETS[selectedDistance].map((p) => (
             <button
@@ -234,7 +223,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
           ))}
         </div>
 
-        {/* Input row */}
+        {}
         <div className={styles.inputRow}>
           <div className={styles.inputField}>
             <label className={styles.inputLabel}>Target time</label>
@@ -281,7 +270,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
         </div>
       </div>
 
-      {/* Empty state */}
+      {}
       {!result && (
         <div className={styles.emptyState}>
           <span className={styles.emptyOrb}>◎</span>
@@ -294,12 +283,12 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
         </div>
       )}
 
-      {/* Result */}
+      {}
       {result && verdictConfig && (
         <div className={styles.result}>
-          {/* Top section: ring + verdict */}
+          {}
           <div className={styles.resultTop}>
-            {/* Probability ring */}
+            {}
             <div className={styles.ringWrapper}>
               <svg
                 className={styles.ring}
@@ -307,7 +296,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
                 fill="none"
                 aria-label={`${result.probability}% probability`}
               >
-                {/* Glow filter */}
+                {}
                 <defs>
                   <filter
                     id="ring-glow"
@@ -324,7 +313,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
                   </filter>
                 </defs>
 
-                {/* Background track */}
+                {}
                 <circle
                   cx="90"
                   cy="90"
@@ -333,7 +322,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
                   strokeWidth="10"
                   fill="none"
                 />
-                {/* Progress arc */}
+                {}
                 <circle
                   cx="90"
                   cy="90"
@@ -347,7 +336,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
                   filter="url(#ring-glow)"
                 />
 
-                {/* Probability number */}
+                {}
                 <text
                   x="90"
                   y="84"
@@ -368,7 +357,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
                 </text>
               </svg>
 
-              {/* Confidence band */}
+              {}
               <div className={styles.confidenceBand}>
                 <span className={styles.bandEdge}>
                   {result.probabilityLow}%
@@ -382,7 +371,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
                       background: verdictConfig.color,
                     }}
                   />
-                  {/* Current marker */}
+                  {}
                   <div
                     className={styles.bandMarker}
                     style={{
@@ -398,9 +387,9 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
               <span className={styles.bandCaption}>confidence range</span>
             </div>
 
-            {/* Verdict + projections */}
+            {}
             <div className={styles.verdictWrapper}>
-              {/* Verdict pill */}
+              {}
               <div
                 className={styles.verdictBadge}
                 style={{
@@ -413,7 +402,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
 
               <p className={styles.verdictText}>{result.verdictText}</p>
 
-              {/* Time projections */}
+              {}
               <div className={styles.projections}>
                 <div className={styles.proj}>
                   <span className={styles.projLabel}>Pessimistic</span>
@@ -441,7 +430,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
                 </div>
               </div>
 
-              {/* Gap chip */}
+              {}
               {result.projectedSeconds > 0 && (
                 <div
                   className={`${styles.gapChip} ${result.gapPositive ? styles.gapAhead : styles.gapBehind}`}
@@ -454,7 +443,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
             </div>
           </div>
 
-          {/* Levers */}
+          {}
           {result.levers.length > 0 && (
             <div className={styles.levers}>
               <p className={styles.leversTitle}>Move the needle</p>
@@ -466,7 +455,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
             </div>
           )}
 
-          {/* Data confidence + PR context */}
+          {}
           <div className={styles.footer}>
             <div className={styles.confidenceRow}>
               <span className={styles.confidenceLabel}>Data confidence</span>
@@ -500,10 +489,7 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
   );
 }
 
-// ============================================================================
-// LEVER CARD
-// ============================================================================
-
+// Single lever card inside the Oracle result display
 function LeverCard({ lever, index }: { lever: OracleLever; index: number }) {
   const color = URGENCY_COLOR[lever.urgency];
   return (

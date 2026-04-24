@@ -1,9 +1,4 @@
-/**
- * Tools Page
- *
- * A collection of running calculators and planning utilities.
- * First tool: VDOT Calculator (Daniels' Running Formula).
- */
+
 
 import React, { useState, useMemo, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
@@ -21,12 +16,9 @@ import {
 } from "../../store/vdot";
 import styles from "./Tools.module.scss";
 
-// ============================================================================
-// VDOT CALCULATOR
-// ============================================================================
-
 const ZONE_ORDER: TrainingZone[] = ["E", "M", "T", "I", "R"];
 
+// V D O T Calculator
 function VDOTCalculator() {
   const [distanceMeters, setDistanceMeters] = useState(5000);
   const [timeInput, setTimeInput] = useState("");
@@ -40,7 +32,8 @@ function VDOTCalculator() {
       setError("Enter a valid time — e.g. 19:30 or 1:45:00");
       return;
     }
-    // Sanity check: pace must be at least 3:00/mi (exceptionally fast)
+    
+    // Pace Per Mile
     const pacePerMile = (seconds / distanceMeters) * 1609.344;
     if (pacePerMile < 180) {
       setError("That pace isn't physically possible — check your time.");
@@ -72,7 +65,7 @@ function VDOTCalculator() {
 
   return (
     <section className={styles.tool}>
-      {/* Tool Header */}
+      {}
       <div className={styles.toolHeader}>
         <div className={styles.toolMeta}>
           <span className={styles.toolTag}>Daniels' Running Formula</span>
@@ -268,6 +261,7 @@ function VDOTCalculator() {
 // PAGE
 // ============================================================================
 
+// Performance tools page (VDOT calculator, Marathon Diagnostics)
 function ToolsPage() {
   const { data: activities } = useActivities(1, 100);
   const { data: stravaPRs } = useStravaPRs(activities);

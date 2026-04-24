@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getWeather } from "../../api/weather";
 import styles from "./WeatherWidget.module.scss";
 
+// Compact current-conditions weather display
 export default function WeatherWidget() {
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(
     null,
@@ -22,7 +23,7 @@ export default function WeatherWidget() {
           setLocationReady(true);
         },
         () => {
-          // fallback to Brooklyn
+          
           setCoords({ lat: 40.6782, lon: -73.9442 });
           setLocationReady(true);
         },

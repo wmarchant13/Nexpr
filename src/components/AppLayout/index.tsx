@@ -1,10 +1,3 @@
-/**
- * Nexpr App Layout
- *
- * Wraps authenticated pages with consistent header and navigation.
- * Provides the premium app shell experience.
- */
-
 import { Outlet, useNavigate } from "@tanstack/react-router";
 import TabNav from "../TabNav";
 import PartnerFooter from "../PartnerFooter";
@@ -12,6 +5,7 @@ import WeatherWidget from "../WeatherWidget";
 import { useAthlete, useLogout } from "../../hooks";
 import styles from "./AppLayout.module.scss";
 
+// Root layout shell with header, nav, and main content area
 export default function AppLayout() {
   const { data: athlete } = useAthlete();
   const { mutate: logout } = useLogout();
@@ -19,7 +13,6 @@ export default function AppLayout() {
 
   return (
     <div className={styles.layout}>
-      {/**Background Images */}
       <div className={styles.backgroundLayer} aria-hidden="true">
         <img
           src="/assets/pexels-caique-araujo-101156227-15875672.jpg"
@@ -43,7 +36,6 @@ export default function AppLayout() {
         />
         <div className={styles.backgroundScrim} />
       </div>
-      {/**Header across app */}
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.brand}>
@@ -56,7 +48,6 @@ export default function AppLayout() {
           </div>
           <TabNav />
           <div className={styles.headerRight}>
-            {/**OpenWeather widget */}
             <WeatherWidget />
             {athlete && (
               <button
@@ -77,12 +68,10 @@ export default function AppLayout() {
           </div>
         </div>
       </header>
-      {/**Content */}
       <main className={styles.main}>
         <div className={styles.contentShell}>
           <Outlet />
         </div>
-        {/**Footer */}
         <div className={styles.footerWrapper}>
           <PartnerFooter />
         </div>

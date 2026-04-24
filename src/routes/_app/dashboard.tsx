@@ -1,8 +1,4 @@
-/**
- * Dashboard Page
- *
- * Editorial training overview — typographic stats, no charts.
- */
+
 
 import React, { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -21,6 +17,7 @@ export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
 });
 
+// Dashboard Page
 function DashboardPage() {
   const {
     data: athlete,
@@ -57,7 +54,7 @@ function DashboardPage() {
     return buildLifetimeRunSnapshot(stats);
   }, [stats]);
 
-  // Today's date stamp
+  
   const dateStamp = new Date().toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -99,7 +96,7 @@ function DashboardPage() {
     <div className={styles.page}>
       <div className={styles.container}>
 
-        {/* ── Hero ── */}
+        {}
         <section className={styles.hero}>
           <p className={styles.dateStamp}>{dateStamp}</p>
           <h1 className={styles.heroGreeting}>
@@ -109,7 +106,7 @@ function DashboardPage() {
           </h1>
         </section>
 
-        {/* ── 28-Day Stats ── */}
+        {}
         <section className={styles.statsSection}>
           <p className={styles.statsSectionLabel}>28-Day Block</p>
           <div className={styles.statsRow}>
@@ -132,7 +129,7 @@ function DashboardPage() {
           </div>
         </section>
 
-        {/* ── Recent Work ── */}
+        {}
         <section className={styles.recentSection}>
           <div className={styles.sectionHeader}>
             <p className={styles.sectionTitle}>Recent Work</p>
@@ -163,7 +160,7 @@ function DashboardPage() {
           </div>
         </section>
 
-        {/* ── All Time ── */}
+        {}
         {lifetimeStats && (
           <section className={styles.lifetimeSection}>
             <p className={styles.sectionTitle}>All Time</p>

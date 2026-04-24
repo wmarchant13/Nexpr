@@ -1,7 +1,4 @@
-/**
- * Store barrel export
- * Central point for all data layer functionality
- */
+
 
 export * from "./cache";
 export * from "./predictions";

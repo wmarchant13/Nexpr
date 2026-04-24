@@ -1,36 +1,18 @@
-/**
- * Marathon Diagnostics Service
- *
- * Business logic for the Apex Performance Lab's two core diagnostic engines:
- *   1. Volume Progression Analysis — 4-week rolling average with flag system
- *   2. Fueling Efficiency Calculator — g/h carbs, sodium, caffeine breakdown
- *
- * All functions are pure (no side effects) to allow easy testing and memoisation.
- *
- * Spec references (copilot-instructions.md):
- *   § 2A — Volume & Long Run Correlation
- *   § 2B — Fueling & Absorption Breakdown
- */
-
 import type { Activity } from "../hooks";
 
-// ─── VOLUME ANALYSIS ─────────────────────────────────────────────────────────
-
-/** A single week of training, derived from the raw activity list. */
 export interface WeeklySnapshot {
-  /** ISO date string for the Monday that opens this training week. */
   weekStart: string;
-  /** Sum of all run distances in the week (miles). */
+
   totalMiles: number;
-  /** Longest single run of the week (miles). */
+
   longRunMiles: number;
-  /** Number of individual runs logged. */
+
   runCount: number;
 }
 
 export type VolumeFlagType =
-  | "LACK_OF_ENDURANCE_SPECIFICITY" // Weekly mileage up >10% but long run static
-  | "LONG_RUN_OVERRELIANCE"; // Long run > 33% of weekly total
+  | "LACK_OF_ENDURANCE_SPECIFICITY"
+  | "LONG_RUN_OVERRELIANCE";
 
 export interface VolumeFlag {
   type: VolumeFlagType;
@@ -45,25 +27,20 @@ export interface VolumeFlag {
 }
 
 export interface VolumeAnalysis {
-  /** All derived weekly snapshots, oldest → newest. */
   weeks: WeeklySnapshot[];
-  /** The most recent week (may be partial if current week is in progress). */
+
   currentWeek: WeeklySnapshot | null;
-  /** 4-week rolling average of total miles (prior to current week). */
+
   rollingAvg4Week: number;
-  /** 4-week rolling average of long-run distance. */
+
   longRunRollingAvg: number;
-  /** Percentage change: current week vs rolling average. */
+
   weekOverWeekChangePct: number;
-  /** Any triggered diagnostic flags. */
+
   flags: VolumeFlag[];
 }
 
-// ─── FUELING EFFICIENCY ───────────────────────────────────────────────────────
-
-/** A single nutrition intake event timed against run duration. */
 export interface TimedFuelingEvent {
-  /** Seconds from run start when this was consumed. */
   timestampSeconds: number;
   carbsGrams: number;
   sodiumMg: number;
@@ -89,32 +66,27 @@ export interface FuelingEfficiency {
   carbsRating: CarbsRating;
 }
 
-// ─── INTERNAL HELPERS ────────────────────────────────────────────────────────
-
-/** Returns the ISO date string (YYYY-MM-DD) of the Monday for a given date. */
+// Returns the Monday key for a given date
 function getWeekMonday(date: Date): string {
   const d = new Date(date);
-  const dayOfWeek = d.getUTCDay(); // 0 = Sunday, 1 = Monday …
+  const dayOfWeek = d.getUTCDay();
   const offsetToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
   d.setUTCDate(d.getUTCDate() + offsetToMonday);
   return d.toISOString().slice(0, 10);
 }
 
+// Converts meters to miles
 function metersToMiles(meters: number): number {
   return meters / 1609.344;
 }
 
+// Rounds a number to N decimal places
 function roundTo(value: number, decimals: number): number {
   const factor = Math.pow(10, decimals);
   return Math.round(value * factor) / factor;
 }
 
-// ─── PUBLIC API ───────────────────────────────────────────────────────────────
-
-/**
- * Groups a flat activity list into weekly snapshots, sorted oldest → newest.
- * Only considers runs (sport_type === "Run" or legacy type === "Run").
- */
+// Aggregates run activities into weekly mileage snapshots
 export function deriveWeeklySnapshots(
   activities: Activity[],
 ): WeeklySnapshot[] {
@@ -152,14 +124,7 @@ export function deriveWeeklySnapshots(
     .sort((a, b) => a.weekStart.localeCompare(b.weekStart));
 }
 
-/**
- * Runs the volume progression diagnostic against the most recent week.
- *
- * Rules (§ 2A of copilot-instructions.md):
- *   — Weekly mileage increases > 10% vs 4-week rolling avg AND the long run is
- *     static (within 0.5 mi of rolling avg) → flag "LACK_OF_ENDURANCE_SPECIFICITY"
- *   — Long run exceeds 33% of weekly total → flag "LONG_RUN_OVERRELIANCE"
- */
+// Analyzes weekly mileage trends and raises training flags
 export function analyzeVolumeProgression(
   activities: Activity[],
 ): VolumeAnalysis {
@@ -178,7 +143,6 @@ export function analyzeVolumeProgression(
 
   const currentWeek = weeks[weeks.length - 1];
 
-  // Use up to the 4 weeks immediately prior to the current week
   const priorWeeks = weeks.slice(-5, -1);
 
   const rollingAvg4Week =
@@ -206,7 +170,6 @@ export function analyzeVolumeProgression(
     longRunPct: roundTo(longRunPct, 1),
   };
 
-  // Flag 1: Volume spike without long-run progression
   const longRunIsStatic =
     Math.abs(currentWeek.longRunMiles - longRunRollingAvg) <= 0.5;
 
@@ -222,7 +185,6 @@ export function analyzeVolumeProgression(
     });
   }
 
-  // Flag 2: Long run dominates weekly volume
   if (longRunPct > 33) {
     flags.push({
       type: "LONG_RUN_OVERRELIANCE",
@@ -253,6 +215,7 @@ export function analyzeVolumeProgression(
  *   75–150 min: 30–60 g/h optimal
  *   > 150 min:  60–90 g/h optimal (dual-transporter glucose + fructose 2:1 blend)
  */
+// Rates carb intake per hour and returns fueling efficiency
 export function calculateFuelingEfficiency(
   events: TimedFuelingEvent[],
   durationMinutes: number,

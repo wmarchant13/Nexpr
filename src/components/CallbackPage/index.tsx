@@ -10,6 +10,7 @@ interface CallbackSearch {
   error_description?: string;
 }
 
+// Status Layout
 function StatusLayout({
   children,
   centered = false,
@@ -25,6 +26,7 @@ function StatusLayout({
   );
 }
 
+// OAuth callback page that exchanges the Strava code for a session
 export default function CallbackPage() {
   const search = useSearch({ from: "/auth/strava/callback" }) as CallbackSearch;
   const [status, setStatus] = React.useState<"loading" | "success" | "error">("loading");
@@ -57,8 +59,8 @@ export default function CallbackPage() {
         },
       });
     }
-    // mutate is stable; search params won't change after mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
+    
   }, [search.code, search.error, search.error_description]);
 
   if (search.error) {

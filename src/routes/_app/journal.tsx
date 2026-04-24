@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_app/journal")({
   component: JournalPage,
 });
 
+// Weekly reflection journal page
 function JournalPage() {
   const { data: athlete } = useAthlete();
   const { data: reflections = [], isLoading } = useReflections(athlete?.id);
@@ -47,6 +48,7 @@ function JournalPage() {
   const [warningSigns, setWarningSigns] = useState("");
   const [changeNext, setChangeNext] = useState("");
 
+  // Open Form
   function openForm() {
     setFeltBetter(thisWeeksEntry?.whatFeltBetter ?? "");
     setFeltWorse(thisWeeksEntry?.whatFeltWorse ?? "");
@@ -55,6 +57,7 @@ function JournalPage() {
     setIsEditing(true);
   }
 
+  // Handles submit
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!athlete?.id) return;
@@ -80,6 +83,7 @@ function JournalPage() {
     );
   }
 
+  // Handles delete
   function handleDelete(weekStart: string) {
     if (!athlete?.id) return;
     deleteReflection.mutate(
@@ -120,7 +124,6 @@ function JournalPage() {
           </p>
         </header>
 
-        {/* ── This Week ── */}
         <section className={styles.thisWeekSection}>
           <div className={styles.thisWeekHeader}>
             <div>
@@ -160,7 +163,9 @@ function JournalPage() {
                   />
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.fieldLabel}>Warning signs to watch</label>
+                  <label className={styles.fieldLabel}>
+                    Warning signs to watch
+                  </label>
                   <textarea
                     className={styles.textarea}
                     rows={2}
@@ -170,7 +175,9 @@ function JournalPage() {
                   />
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.fieldLabel}>One change next week</label>
+                  <label className={styles.fieldLabel}>
+                    One change next week
+                  </label>
                   <textarea
                     className={styles.textarea}
                     rows={2}
@@ -210,12 +217,9 @@ function JournalPage() {
             </div>
           )}
 
-          {justSaved && (
-            <p className={styles.savedNote}>Entry saved.</p>
-          )}
+          {justSaved && <p className={styles.savedNote}>Entry saved.</p>}
         </section>
 
-        {/* ── Past Entries ── */}
         {pastEntries.length > 0 && (
           <section className={styles.pastSection}>
             <h2 className={styles.pastTitle}>Past Entries</h2>
@@ -226,9 +230,7 @@ function JournalPage() {
                   <div key={entry.id} className={styles.entryCard}>
                     <button
                       className={styles.entryCardHeader}
-                      onClick={() =>
-                        setExpandedId(isOpen ? null : entry.id)
-                      }
+                      onClick={() => setExpandedId(isOpen ? null : entry.id)}
                     >
                       <span className={styles.entryWeek}>
                         Week of {formatWeekLabel(entry.weekStart)}
@@ -279,6 +281,7 @@ interface ReflectionBodyProps {
   };
 }
 
+// Reflection Body
 function ReflectionBody({ entry }: ReflectionBodyProps) {
   const rows = [
     { label: "Better", value: entry.whatFeltBetter },

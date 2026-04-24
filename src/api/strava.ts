@@ -69,7 +69,7 @@ type StravaBestEffortsResponse = {
   }>;
 };
 
-//Get an athlete that connects via OAUTH
+// Fetches the authenticated athlete's profile
 export const getAthlete = createServerFn({ method: "GET" }).handler(
   async (): Promise<StravaAthlete> => {
     const { accessToken } = await requireStravaAccess();
@@ -79,6 +79,7 @@ export const getAthlete = createServerFn({ method: "GET" }).handler(
   },
 );
 
+// Fetches a paginated list of athlete activities
 export const getActivities = createServerFn({ method: "GET" })
   .inputValidator((input: { page?: number; perPage?: number }) => input)
   .handler(async ({ data }): Promise<StravaActivity[]> => {
@@ -100,6 +101,7 @@ export const getActivities = createServerFn({ method: "GET" })
     );
   });
 
+// Fetches lifetime running stats for the athlete
 export const getStats = createServerFn({ method: "GET" }).handler(
   async (): Promise<StravaStats> => {
     const { athleteId, accessToken } = await requireStravaAccess();
@@ -113,6 +115,7 @@ export const getStats = createServerFn({ method: "GET" }).handler(
   },
 );
 
+// Fetches full details for a single activity
 export const getActivityDetails = createServerFn({ method: "GET" })
   .inputValidator((input: { activityId: number }) => input)
   .handler(async ({ data }): Promise<StravaActivityDetails> => {
@@ -124,6 +127,7 @@ export const getActivityDetails = createServerFn({ method: "GET" })
     );
   });
 
+// Fetches best efforts logged on a single activity
 export const getActivityBestEfforts = createServerFn({ method: "GET" })
   .inputValidator((input: { activityId: number }) => input)
   .handler(async ({ data }): Promise<StravaBestEffortsResponse> => {

@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import styles from "./TabNav.module.scss";
 
@@ -18,17 +17,19 @@ const TABS: Tab[] = [
   { path: "/profile", label: "Profile", shortLabel: "Me" },
 ];
 
+// Primary navigation tab bar for desktop and mobile
 export default function TabNav() {
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
 
+  // Returns true if active
   const isActive = (path: string) =>
     currentPath === path ||
     (path !== "/dashboard" && currentPath.startsWith(path));
 
   return (
     <>
-      {/* Desktop nav — rendered in header center column */}
+      {}
       <nav className={styles.desktopNav}>
         {TABS.map((tab) => (
           <Link
@@ -42,7 +43,7 @@ export default function TabNav() {
         ))}
       </nav>
 
-      {/* Mobile bottom bar — fixed position, outside normal flow */}
+      {}
       <nav className={styles.mobileNav}>
         {TABS.map((tab) => (
           <Link
