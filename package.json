@@ -8,7 +8,7 @@
     "build": "NITRO_PRESET=cloudflare-pages vite build",
     "preview": "vite preview",
     "start": "node .output/server/index.mjs",
-    "deploy": "NITRO_PRESET=cloudflare-pages bun run build && wrangler pages deploy .output/public",
+    "deploy": "NITRO_PRESET=cloudflare-pages bun run build && wrangler deploy",
     "cf:preview": "wrangler pages dev .output/public",
     "type-check": "tsc --noEmit"
   },
