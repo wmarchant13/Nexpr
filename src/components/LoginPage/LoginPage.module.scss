@@ -169,3 +169,11 @@
   margin: 0;
   line-height: 1.6;
 }
+
+.errorNote {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #ff4d4d;
+  margin: 4px 0 0;
+  text-align: center;
+}

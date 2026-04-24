@@ -3,7 +3,7 @@ import styles from "./LoginPage.module.scss";
 
 // Landing and login page with Strava connect button
 export default function LoginPage() {
-  const { mutate: login, isPending } = useStravaLogin();
+  const { mutate: login, isPending, error } = useStravaLogin();
 
   return (
     <div className={styles.page}>
@@ -66,6 +66,12 @@ export default function LoginPage() {
         <p className={styles.legalNote}>
           We only read your activity data. We never post on your behalf.
         </p>
+
+        {error && (
+          <p className={styles.errorNote}>
+            {error instanceof Error ? error.message : "Something went wrong. Please try again."}
+          </p>
+        )}
       </div>
     </div>
   );
