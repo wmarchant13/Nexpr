@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "NITRO_PRESET=cloudflare-pages vite build",
     "preview": "vite preview",
     "start": "node .output/server/index.mjs",
+    "deploy": "NITRO_PRESET=cloudflare-pages bun run build && wrangler pages deploy .output/public",
+    "cf:preview": "wrangler pages dev .output/public",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -29,7 +31,8 @@
     "nitro": "^3.0.0",
     "sass": "^1.99.0",
     "typescript": "^5.4.2",
-    "vite": "^7.0.0"
+    "vite": "^7.0.0",
+    "wrangler": "^4.85.0"
   },
   "bunfmt": {
     "printWidth": 100

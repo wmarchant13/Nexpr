@@ -3,7 +3,7 @@ dist/
 .output/
 .nitro/
 .tanstack/
-.vercel/
+.wrangler/
 
 # Environment variables & secrets
 .env
