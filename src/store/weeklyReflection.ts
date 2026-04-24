@@ -26,6 +26,24 @@ export interface WeeklyReflection {
 
 export const REFLECTION_STORAGE_KEY = "nexpr_weekly_reflections_v1";
 
+function formatDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseWeekStartDate(weekStart: string): Date | null {
+  const normalized = normalizeWeekStart(weekStart);
+  const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+
+  const [, year, month, day] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  date.setHours(0, 0, 0, 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function loadReflections(): WeeklyReflection[] {
   if (typeof window === "undefined") return [];
   try {
@@ -55,12 +73,29 @@ export function getCurrentWeekStart(): string {
   const diff = day === 0 ? -6 : 1 - day; // shift to Monday
   const monday = new Date(today);
   monday.setDate(today.getDate() + diff);
-  return monday.toISOString().slice(0, 10);
+  monday.setHours(0, 0, 0, 0);
+  return formatDateKey(monday);
+}
+
+/** Normalizes a week-start value to YYYY-MM-DD. */
+export function normalizeWeekStart(weekStart: string): string {
+  if (!weekStart) return "";
+
+  const directMatch = weekStart.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (directMatch) return directMatch[1];
+
+  const parsed = new Date(weekStart);
+  if (Number.isNaN(parsed.getTime())) return weekStart;
+
+  parsed.setHours(0, 0, 0, 0);
+  return formatDateKey(parsed);
 }
 
 /** Formats a week-start ISO string as a readable label. */
 export function formatWeekLabel(weekStart: string): string {
-  const d = new Date(weekStart + "T00:00:00");
+  const d = parseWeekStartDate(weekStart);
+  if (!d) return "Unknown week";
+
   return d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",

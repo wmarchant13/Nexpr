@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { neon } from "@neondatabase/serverless";
+import { normalizeWeekStart } from "../store/weeklyReflection";
 
 function getDb() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -40,7 +41,7 @@ export const getReflections = createServerFn({ method: "GET" })
     `;
     return (rows as ReflectionRow[]).map((r) => ({
       id: r.id,
-      weekStart: r.week_start,
+      weekStart: normalizeWeekStart(String(r.week_start)),
       whatFeltBetter: r.what_felt_better ?? "",
       whatFeltWorse: r.what_felt_worse ?? "",
       warningSigns: r.warning_signs ?? "",
@@ -54,12 +55,13 @@ export const saveReflection = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const sql = getDb();
     const now = new Date().toISOString();
+    const weekStart = normalizeWeekStart(data.weekStart);
     await sql`
       INSERT INTO weekly_reflections
         (id, athlete_id, week_start, what_felt_better, what_felt_worse,
          warning_signs, change_next_week, created_at, updated_at)
       VALUES
-        (${data.id}, ${data.athleteId}, ${data.weekStart},
+        (${data.id}, ${data.athleteId}, ${weekStart},
          ${data.whatFeltBetter}, ${data.whatFeltWorse},
          ${data.warningSigns}, ${data.changeNextWeek}, ${now}, ${now})
       ON CONFLICT (athlete_id, week_start) DO UPDATE SET
@@ -76,9 +78,10 @@ export const deleteReflection = createServerFn({ method: "POST" })
   .inputValidator((input: { weekStart: string; athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const weekStart = normalizeWeekStart(data.weekStart);
     await sql`
       DELETE FROM weekly_reflections
-      WHERE athlete_id = ${data.athleteId} AND week_start = ${data.weekStart}
+      WHERE athlete_id = ${data.athleteId} AND week_start = ${weekStart}
     `;
     return { success: true };
   });

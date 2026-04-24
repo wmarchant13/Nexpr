@@ -82,7 +82,20 @@ function JournalPage() {
 
   function handleDelete(weekStart: string) {
     if (!athlete?.id) return;
-    deleteReflection.mutate({ weekStart, athleteId: athlete.id });
+    deleteReflection.mutate(
+      { weekStart, athleteId: athlete.id },
+      {
+        onSuccess: () => {
+          if (weekStart === currentWeekStart) {
+            setIsEditing(false);
+            setFeltBetter("");
+            setFeltWorse("");
+            setWarningSigns("");
+            setChangeNext("");
+          }
+        },
+      },
+    );
   }
 
   if (isLoading) {
@@ -183,6 +196,13 @@ function JournalPage() {
           ) : thisWeeksEntry ? (
             <div className={styles.currentEntry}>
               <ReflectionBody entry={thisWeeksEntry} />
+              <button
+                type="button"
+                className={styles.deleteButton}
+                onClick={() => handleDelete(thisWeeksEntry.weekStart)}
+              >
+                Delete entry
+              </button>
             </div>
           ) : (
             <div className={styles.emptyThis}>
@@ -222,6 +242,7 @@ function JournalPage() {
                       <div className={styles.entryBody}>
                         <ReflectionBody entry={entry} />
                         <button
+                          type="button"
                           className={styles.deleteButton}
                           onClick={() => handleDelete(entry.weekStart)}
                         >

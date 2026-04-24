@@ -7,6 +7,8 @@
 
 import React, { useState, useMemo, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useActivities, useAthlete, useStravaPRs } from "../../hooks";
+import { OraclePanel } from "../../components/Oracle";
 import {
   calculateVDOT,
   parseVDOTTimeInput,
@@ -267,17 +269,27 @@ function VDOTCalculator() {
 // ============================================================================
 
 function ToolsPage() {
+  const { data: activities } = useActivities(1, 100);
+  const { data: stravaPRs } = useStravaPRs(activities);
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
         {/* Page Header */}
         <header className={styles.header}>
           <span className={styles.kicker}>Calculators & Planning</span>
-          <h1 className={styles.title}>Tools</h1>
+          <h1 className={styles.title}>Kit</h1>
           <p className={styles.subtitle}>
             Data-driven calculators to support smarter training decisions.
           </p>
         </header>
+
+        {/* Oracle */}
+        {activities && (
+          <section className={styles.oracleSection}>
+            <OraclePanel activities={activities} stravaPRs={stravaPRs} />
+          </section>
+        )}
 
         <VDOTCalculator />
       </div>

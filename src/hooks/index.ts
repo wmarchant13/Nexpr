@@ -20,7 +20,7 @@ import {
 } from "../api/weeklyReflection";
 import type { PRRecord, RaceDistance } from "../store/predictions";
 import type { SymptomEntry } from "../store/symptomLog";
-import type { WeeklyReflection } from "../store/weeklyReflection";
+import { normalizeWeekStart, type WeeklyReflection } from "../store/weeklyReflection";
 import {
   getCachedAthlete,
   cacheAthlete,
@@ -1527,7 +1527,10 @@ export const useReflections = (athleteId: number | undefined) => {
     queryFn: async () => {
       if (!athleteId) return [] as WeeklyReflection[];
       const result = await getReflections({ data: { athleteId } });
-      return result as WeeklyReflection[];
+      return (result as WeeklyReflection[]).map((entry) => ({
+        ...entry,
+        weekStart: normalizeWeekStart(entry.weekStart),
+      }));
     },
     enabled: !!athleteId,
     staleTime: 2 * 60 * 1000,
@@ -1542,7 +1545,7 @@ export const useSaveReflection = () => {
         data: {
           id: input.id,
           athleteId: input.athleteId,
-          weekStart: input.weekStart,
+          weekStart: normalizeWeekStart(input.weekStart),
           whatFeltBetter: input.whatFeltBetter,
           whatFeltWorse: input.whatFeltWorse,
           warningSigns: input.warningSigns,
@@ -1550,9 +1553,24 @@ export const useSaveReflection = () => {
         },
       }),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["reflections", variables.athleteId],
+      const { athleteId, ...entry } = variables;
+      const normalizedEntry = {
+        ...entry,
+        weekStart: normalizeWeekStart(entry.weekStart),
+      };
+      const queryKey = ["reflections", athleteId];
+      // Immediately update the cache so the UI reflects the save without
+      // waiting for the refetch to complete.
+      queryClient.setQueryData<WeeklyReflection[]>(queryKey, (old = []) => {
+        const idx = old.findIndex(
+          (r) => normalizeWeekStart(r.weekStart) === normalizedEntry.weekStart,
+        );
+        if (idx >= 0) {
+          return old.map((r, i) => (i === idx ? normalizedEntry : r));
+        }
+        return [...old, normalizedEntry];
       });
+      void queryClient.invalidateQueries({ queryKey });
     },
   });
 };

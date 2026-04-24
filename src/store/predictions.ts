@@ -6,9 +6,9 @@
  * from cached activity data - no additional API calls.
  * 
  * Key Metrics:
- * - Momentum (rolling training volume, ~42 day average)
- * - Freshness (recent training intensity, ~7 day average)
- * - Readiness (momentum - freshness, indicates race potential)
+ * - Momentum (4-week average weekly mileage)
+ * - Freshness (rolling 7-day miles vs 28-day weekly baseline)
+ * - Readiness (acute/chronic score from rolling mileage)
  * - PR Probability based on current training trajectory
  * 
  * Note: These are Nexpr-specific metrics derived from activity data.
@@ -38,9 +38,9 @@ export interface PRRecord {
 }
 
 export interface FitnessMetrics {
-  momentum: number;     // Rolling training volume (~42 day avg)
-  freshness: number;    // Recent training intensity (~7 day avg)
-  readiness: number;    // momentum - freshness (race potential indicator)
+  momentum: number;     // 4-week average weekly mileage
+  freshness: number;    // Rolling 7-day miles vs 28-day weekly baseline (%)
+  readiness: number;    // Acute/chronic readiness score (0-100)
   trend: "building" | "maintaining" | "recovering" | "declining";
   rampRate: number;     // Weekly momentum change percentage
 }
@@ -62,6 +62,16 @@ export interface WeeklyLoad {
   runCount: number;
   totalMiles: number;
   avgIntensity: number;
+  avgPace: number;
+}
+
+export interface InjuryRiskWarning {
+  id: string;
+  severity: "warning" | "alert";
+  title: string;
+  message: string;
+  value: number;
+  context?: string;
 }
 
 export interface TrainingRecommendation {
@@ -73,110 +83,117 @@ export interface TrainingRecommendation {
 }
 
 /**
- * Calculate training load for a single activity
- * Uses duration × relative intensity (HR or pace-based)
+ * Returns the ISO date string (YYYY-MM-DD) of the Monday for a given date.
  */
-function calculateActivityLoad(activity: Activity, avgPace: number): number {
-  const durationMinutes = activity.moving_time / 60;
-  const distanceMiles = kmToMiles(mToKm(activity.distance));
-  const activityPace = distanceMiles > 0 ? durationMinutes / distanceMiles : 0;
-  
-  // Intensity factor: faster pace = higher intensity
-  // Normalized so average pace = 1.0
-  const intensityFactor = avgPace > 0 ? avgPace / activityPace : 1;
-  
-  // Heart rate bonus if available
-  const hrFactor = activity.average_heartrate 
-    ? Math.min(1.5, activity.average_heartrate / 140) 
-    : 1;
-  
-  // Load = duration × intensity × HR factor
-  return durationMinutes * intensityFactor * hrFactor;
+function formatDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateKey(dateKey: string): Date {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function getWeekMonday(date: Date): string {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return formatDateKey(d);
+}
+
+function isHardRun(activity: Activity, baselinePace: number): boolean {
+  const miles = kmToMiles(mToKm(activity.distance));
+  if (miles <= 0) return false;
+
+  if (activity.average_heartrate && activity.average_heartrate > 155) {
+    return true;
+  }
+
+  if (baselinePace <= 0) return false;
+
+  const pace = (activity.moving_time / 60) / miles;
+  return pace <= baselinePace * 0.95;
 }
 
 /**
- * Calculate training metrics using exponentially weighted moving averages
- * Note: These are Nexpr-specific metrics, not standardized formulas.
+ * Calculate fitness metrics from weekly mileage.
+ * - Momentum    = avg weekly miles over the last 4 completed weeks (W-1..W-4)
+ * - Freshness   = 1 - (acute / chronic), as %; positive = fresher than baseline
+ * - Readiness   = 0–100 score based on acute/chronic ratio
+ *                 Acute = rolling 7-day miles; Chronic = rolling 28-day avg weekly miles
+ *                 Readiness = clamp(0, 200 - 100 * (acute / chronic), 100)
  */
 export function calculateFitnessMetrics(activities: Activity[]): FitnessMetrics {
-  const runs = activities
-    .filter(a => a.type === "Run" || a.sport_type === "Run")
-    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
-  
+  const runs = activities.filter(a => a.type === "Run" || a.sport_type === "Run");
+
   if (runs.length === 0) {
-    return { 
-      momentum: 0, 
-      freshness: 0, 
-      readiness: 0, 
-      trend: "maintaining",
-      rampRate: 0 
-    };
+    return { momentum: 0, freshness: 0, readiness: 0, trend: "maintaining", rampRate: 0 };
   }
-  
-  // Calculate average pace for intensity normalization
-  const totalTime = runs.reduce((sum, r) => sum + r.moving_time, 0);
-  const totalDist = runs.reduce((sum, r) => sum + r.distance, 0);
-  const avgPace = (totalTime / 60) / kmToMiles(mToKm(totalDist));
-  
-  // Time constants for exponential smoothing
-  const LONG_WINDOW = 42;  // ~6 weeks for momentum
-  const SHORT_WINDOW = 7;   // 1 week for freshness
-  
-  const longDecay = Math.exp(-1 / LONG_WINDOW);
-  const shortDecay = Math.exp(-1 / SHORT_WINDOW);
-  
-  let momentum = 0;  // Long-term training volume
-  let freshness = 0; // Recent training intensity
-  
-  // Calculate daily activity scores and apply EWMA
+
+  // Build a map of weekStart (YYYY-MM-DD) → total miles
+  const weekMiles = new Map<string, number>();
+  for (const run of runs) {
+    const key = getWeekMonday(new Date(run.start_date));
+    const miles = kmToMiles(mToKm(run.distance));
+    weekMiles.set(key, (weekMiles.get(key) ?? 0) + miles);
+  }
+
   const now = new Date();
-  const dayScores = new Map<string, number>();
-  
-  runs.forEach(run => {
-    const dateKey = new Date(run.start_date).toISOString().slice(0, 10);
-    const score = calculateActivityLoad(run, avgPace);
-    dayScores.set(dateKey, (dayScores.get(dateKey) || 0) + score);
-  });
-  
-  // Process last 90 days
-  for (let i = 90; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    const dateKey = date.toISOString().slice(0, 10);
-    const dayScore = dayScores.get(dateKey) || 0;
-    
-    momentum = momentum * longDecay + dayScore * (1 - longDecay);
-    freshness = freshness * shortDecay + dayScore * (1 - shortDecay);
+  const thisMonday = getWeekMonday(now);
+
+  function mondayMinusWeeks(n: number): string {
+    const d = parseDateKey(thisMonday);
+    d.setDate(d.getDate() - n * 7);
+    d.setHours(0, 0, 0, 0);
+    return formatDateKey(d);
   }
-  
-  const readiness = momentum - freshness;
-  
-  // Calculate ramp rate (weekly momentum change)
-  let momentumWeekAgo = 0;
-  for (let i = 90; i >= 7; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    const dateKey = date.toISOString().slice(0, 10);
-    const dayScore = dayScores.get(dateKey) || 0;
-    momentumWeekAgo = momentumWeekAgo * longDecay + dayScore * (1 - longDecay);
+
+  // Momentum = avg of last 4 completed weeks (W-1..W-4)
+  const momentumWeeks = [1, 2, 3, 4].map(n => weekMiles.get(mondayMinusWeeks(n)) ?? 0);
+  const momentum = Math.round((momentumWeeks.reduce((s, v) => s + v, 0) / 4) * 10) / 10;
+
+  // Readiness: acute/chronic ratio → 0–100 score
+  // Acute = rolling 7-day mileage; Chronic avg = rolling 28-day total / 4
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const twentyEightDaysAgo = new Date(now);
+  twentyEightDaysAgo.setDate(twentyEightDaysAgo.getDate() - 28);
+
+  let acute = 0;
+  let chronic28 = 0;
+  for (const run of runs) {
+    const date = new Date(run.start_date);
+    const miles = kmToMiles(mToKm(run.distance));
+    if (date >= sevenDaysAgo) acute += miles;
+    if (date >= twentyEightDaysAgo) chronic28 += miles;
   }
-  
-  const rampRate = momentumWeekAgo > 0 ? ((momentum - momentumWeekAgo) / momentumWeekAgo) * 100 : 0;
-  
-  // Determine trend
+  const chronicAvg = chronic28 / 4; // weekly avg over 28-day window
+  const ratio = chronicAvg > 0 ? acute / chronicAvg : 1;
+  const freshness = chronicAvg > 0
+    ? Math.round((1 - acute / chronicAvg) * 1000) / 10
+    : 0;
+  const readiness = Math.min(100, Math.max(0, Math.round((200 - 100 * ratio) * 10) / 10));
+
+  // Ramp rate: change from prior 4-week avg (W-2..W-5) to last completed week (W-1)
+  const lastWeekMiles = weekMiles.get(mondayMinusWeeks(1)) ?? 0;
+  const priorWeeks = [2, 3, 4, 5].map(n => weekMiles.get(mondayMinusWeeks(n)) ?? 0);
+  const priorAvg = priorWeeks.reduce((s, v) => s + v, 0) / 4;
+  const rampRate = priorAvg > 0
+    ? Math.round(((lastWeekMiles - priorAvg) / priorAvg) * 1000) / 10
+    : 0;
+
   let trend: FitnessMetrics["trend"];
   if (rampRate > 5) trend = "building";
   else if (rampRate < -5) trend = "declining";
-  else if (readiness > 10) trend = "recovering";
+  else if (readiness >= 70) trend = "recovering";
   else trend = "maintaining";
-  
-  return {
-    momentum: Math.round(momentum * 10) / 10,
-    freshness: Math.round(freshness * 10) / 10,
-    readiness: Math.round(readiness * 10) / 10,
-    trend,
-    rampRate: Math.round(rampRate * 10) / 10,
-  };
+
+  return { momentum, freshness, readiness, trend, rampRate };
 }
 
 /**
@@ -377,54 +394,169 @@ export function predictPRs(
  */
 export function calculateWeeklyLoads(activities: Activity[], weeks: number = 12): WeeklyLoad[] {
   const runs = activities.filter(a => a.type === "Run" || a.sport_type === "Run");
-  
-  // Calculate average pace for normalization
-  const totalTime = runs.reduce((sum, r) => sum + r.moving_time, 0);
-  const totalDist = runs.reduce((sum, r) => sum + r.distance, 0);
-  const avgPace = totalDist > 0 ? (totalTime / 60) / kmToMiles(mToKm(totalDist)) : 0;
-  
+
   const weeklyLoads: WeeklyLoad[] = [];
   const now = new Date();
-  
+
   for (let w = weeks - 1; w >= 0; w--) {
     const weekStart = new Date(now);
     weekStart.setDate(weekStart.getDate() - (w * 7) - now.getDay() + 1); // Monday
     weekStart.setHours(0, 0, 0, 0);
-    
+
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
-    
+
     const weekRuns = runs.filter(r => {
       const date = new Date(r.start_date);
       return date >= weekStart && date < weekEnd;
     });
-    
-    let totalLoad = 0;
+
     let totalMiles = 0;
-    let totalIntensity = 0;
-    
+    let totalMovingTime = 0;
     weekRuns.forEach(run => {
-      const load = calculateActivityLoad(run, avgPace);
-      totalLoad += load;
       totalMiles += kmToMiles(mToKm(run.distance));
-      
-      const runMiles = kmToMiles(mToKm(run.distance));
-      const runPace = runMiles > 0 ? (run.moving_time / 60) / runMiles : 0;
-      totalIntensity += avgPace > 0 ? avgPace / runPace : 1;
+      totalMovingTime += run.moving_time;
     });
-    
+
+    const avgPace = totalMiles > 0 ? (totalMovingTime / 60) / totalMiles : 0;
+
     weeklyLoads.push({
       weekStart,
-      totalLoad: Math.round(totalLoad),
+      totalLoad: 0,
       runCount: weekRuns.length,
       totalMiles: Math.round(totalMiles * 10) / 10,
-      avgIntensity: weekRuns.length > 0 
-        ? Math.round((totalIntensity / weekRuns.length) * 100) / 100 
-        : 0,
+      avgIntensity: 0,
+      avgPace: Math.round(avgPace * 100) / 100,
     });
   }
-  
+
   return weeklyLoads;
+}
+
+export function calculateInjuryRiskWarnings(activities: Activity[]): InjuryRiskWarning[] {
+  const runs = activities
+    .filter(a => a.type === "Run" || a.sport_type === "Run")
+    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+
+  if (runs.length === 0) return [];
+
+  const now = new Date();
+  const currentWeekStart = parseDateKey(getWeekMonday(now));
+  const currentWeekEnd = new Date(currentWeekStart);
+  currentWeekEnd.setDate(currentWeekEnd.getDate() + 7);
+
+  const previousWeekStart = new Date(currentWeekStart);
+  previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+
+  const baselineWeekStarts = [1, 2, 3, 4].map((offset) => {
+    const date = new Date(previousWeekStart);
+    date.setDate(date.getDate() - offset * 7);
+    return formatDateKey(date);
+  });
+
+  const currentWeekRuns = runs.filter((run) => {
+    const date = new Date(run.start_date);
+    return date >= currentWeekStart && date < currentWeekEnd;
+  });
+
+  const previousWeekRuns = runs.filter((run) => {
+    const date = new Date(run.start_date);
+    return date >= previousWeekStart && date < currentWeekStart;
+  });
+
+  const milesFor = (items: Activity[]) => items.reduce((sum, run) => sum + kmToMiles(mToKm(run.distance)), 0);
+  const baselinePace = (() => {
+    const totalMiles = milesFor(runs);
+    const totalTime = runs.reduce((sum, run) => sum + run.moving_time, 0);
+    return totalMiles > 0 ? (totalTime / 60) / totalMiles : 0;
+  })();
+
+  const currentWeekMiles = milesFor(currentWeekRuns);
+  const previousWeekMiles = milesFor(previousWeekRuns);
+
+  const weeklyMiles = new Map<string, number>();
+  const weeklyIntensity = new Map<string, number>();
+  for (const run of runs) {
+    const weekKey = getWeekMonday(new Date(run.start_date));
+    weeklyMiles.set(weekKey, (weeklyMiles.get(weekKey) ?? 0) + kmToMiles(mToKm(run.distance)));
+    if (isHardRun(run, baselinePace)) {
+      weeklyIntensity.set(weekKey, (weeklyIntensity.get(weekKey) ?? 0) + kmToMiles(mToKm(run.distance)));
+    }
+  }
+
+  const baselineMiles = baselineWeekStarts.map((weekKey) => weeklyMiles.get(weekKey) ?? 0);
+  const baselineMilesAvg = baselineMiles.reduce((sum, miles) => sum + miles, 0) / baselineMiles.length;
+
+  const currentWeekKey = formatDateKey(currentWeekStart);
+  const currentIntensityMiles = weeklyIntensity.get(currentWeekKey) ?? 0;
+  const currentIntensityPct = currentWeekMiles > 0 ? (currentIntensityMiles / currentWeekMiles) * 100 : 0;
+  const baselineIntensityPcts = baselineWeekStarts.map((weekKey) => {
+    const weekMiles = weeklyMiles.get(weekKey) ?? 0;
+    const hardMiles = weeklyIntensity.get(weekKey) ?? 0;
+    return weekMiles > 0 ? (hardMiles / weekMiles) * 100 : 0;
+  });
+  const baselineIntensityAvg = baselineIntensityPcts.reduce((sum, pct) => sum + pct, 0) / baselineIntensityPcts.length;
+
+  const warnings: InjuryRiskWarning[] = [];
+
+  const mileageSpikeVsLastWeek = previousWeekMiles > 0
+    ? ((currentWeekMiles - previousWeekMiles) / previousWeekMiles) * 100
+    : 0;
+  const mileageSpikeVsBaseline = baselineMilesAvg > 0
+    ? ((currentWeekMiles - baselineMilesAvg) / baselineMilesAvg) * 100
+    : 0;
+  const mileageSpike = Math.max(mileageSpikeVsLastWeek, mileageSpikeVsBaseline);
+
+  if (mileageSpike >= 10) {
+    warnings.push({
+      id: "mileage-spike",
+      severity: mileageSpike >= 20 ? "alert" : "warning",
+      title: "Mileage spike",
+      message: `You increased mileage +${Math.round(mileageSpike)}% this week — elevated injury risk.`,
+      value: Math.round(mileageSpike),
+      context: `${currentWeekMiles.toFixed(1)} mi this week`,
+    });
+  }
+
+  const intensityDelta = currentIntensityPct - baselineIntensityAvg;
+  if (intensityDelta >= 10) {
+    warnings.push({
+      id: "intensity-spike",
+      severity: intensityDelta >= 18 ? "alert" : "warning",
+      title: "Intensity spike",
+      message: `You increased intensity +${Math.round(intensityDelta)}% this week — elevated injury risk.`,
+      value: Math.round(intensityDelta),
+      context: `${Math.round(currentIntensityPct)}% hard-mile share`,
+    });
+  }
+
+  const recentHardRuns = runs.filter((run) => {
+    const date = new Date(run.start_date);
+    return date >= previousWeekStart && isHardRun(run, baselinePace);
+  });
+
+  let hardDaysStacked = 0;
+  for (let i = 0; i < recentHardRuns.length - 1; i++) {
+    const current = new Date(recentHardRuns[i].start_date);
+    const next = new Date(recentHardRuns[i + 1].start_date);
+    const gapDays = Math.round((next.getTime() - current.getTime()) / (1000 * 60 * 60 * 24));
+    if (gapDays <= 2) {
+      hardDaysStacked += 1;
+    }
+  }
+
+  if (hardDaysStacked >= 2) {
+    warnings.push({
+      id: "hard-day-cluster",
+      severity: "warning",
+      title: "Hard days stacked",
+      message: `You stacked ${hardDaysStacked + 1} hard days close together — recovery risk is elevated.`,
+      value: hardDaysStacked + 1,
+      context: "Hard efforts landed within 48 hours of each other",
+    });
+  }
+
+  return warnings;
 }
 
 /**

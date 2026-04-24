@@ -85,8 +85,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             --stamp:        #FFFFFF;
 
             /* ── Borders — white at low opacity ── */
-            --border:        rgba(255,255,255,0.10);
-            --border-strong: rgba(255,255,255,0.22);
+            --border:        rgba(255,255,255,0.14);
+            --border-strong: rgba(255,255,255,0.28);
 
             /* ── Semantic ── */
             --success:       #4ABA8A;

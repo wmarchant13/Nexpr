@@ -16607,7 +16607,7 @@ function getResponse() {
 }
 var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 async function getStartManifest(matchedRoutes) {
-  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-DeafmQSM.js");
+  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-DXkuModC.js");
   const startManifest = tsrStartManifest();
   const rootRoute = startManifest.routes[rootRouteId] = startManifest.routes[rootRouteId] || {};
   rootRoute.assets = rootRoute.assets || [];
@@ -16648,25 +16648,29 @@ const manifest = {
     functionName: "refreshStravaToken_createServerFn_handler",
     importer: () => import("./assets/auth-DT23Rxey.js")
   },
-  "ea3e6ffcf7f8567fd9ff559f16d3bf6185ca1c045c3183591d4c9704507a53cd": {
-    functionName: "getAthlete_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
+  "ba7a17cc1ee46a93bf3f79f1b643fa71335a8ccd5a5a7b5a1a9cf48ec5969278": {
+    functionName: "getReflections_createServerFn_handler",
+    importer: () => import("./assets/weeklyReflection-hEqsRgnE.js")
   },
-  "8d24b1404747be8b48fd30bdf931924de3d897236fcb5d242f53f38b7ca5789d": {
-    functionName: "getActivities_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
+  "858b8dbe1eb228d28a667df32e44470edad47fd9c22e5d3bc0c14aa61deb738b": {
+    functionName: "saveReflection_createServerFn_handler",
+    importer: () => import("./assets/weeklyReflection-hEqsRgnE.js")
   },
-  "730706da68dc73f668d21e04610a4a25811254b36a37cb962d4a7b09a7e8f8cc": {
-    functionName: "getStats_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
+  "164abd019d92a0755af7438684094425fc70cc77295d9b5b5fdb13bef5c62b48": {
+    functionName: "deleteReflection_createServerFn_handler",
+    importer: () => import("./assets/weeklyReflection-hEqsRgnE.js")
   },
-  "d0dcf447c449df6db5e163d5b2b382d4e245249f6e3b80bd8143757fc0d34a88": {
-    functionName: "getActivityDetails_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
+  "174860bd18522bdc4d26790a3e961b7ae29c59d09824be6e598b96c153424fa0": {
+    functionName: "getSymptomEntries_createServerFn_handler",
+    importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
   },
-  "4f644be0cd0afaddf91fb5f5aedfb03fb16c7060576abce514e6b4eb25e07abe": {
-    functionName: "getActivityBestEfforts_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
+  "1f0c87655eee5716746eaf6a5ee63d06b455d992f69a15741ebd23dacdead295": {
+    functionName: "saveSymptomEntry_createServerFn_handler",
+    importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
+  },
+  "1bb2ff0f202d3c6bc79f5540f37ab17a1c4e3f5339c827a41455a1fa63b2f94a": {
+    functionName: "deleteSymptomEntry_createServerFn_handler",
+    importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
   },
   "d4b717bb8eff092b5344897720732e5dfc1ab6acb21d83f0ba4dc8e4d74dfd9b": {
     functionName: "getFuelingEntry_createServerFn_handler",
@@ -16692,29 +16696,25 @@ const manifest = {
     functionName: "initFuelingTable_createServerFn_handler",
     importer: () => import("./assets/fueling-C7zNIiX1.js")
   },
-  "ba7a17cc1ee46a93bf3f79f1b643fa71335a8ccd5a5a7b5a1a9cf48ec5969278": {
-    functionName: "getReflections_createServerFn_handler",
-    importer: () => import("./assets/weeklyReflection-BSv55DXJ.js")
+  "ea3e6ffcf7f8567fd9ff559f16d3bf6185ca1c045c3183591d4c9704507a53cd": {
+    functionName: "getAthlete_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
   },
-  "858b8dbe1eb228d28a667df32e44470edad47fd9c22e5d3bc0c14aa61deb738b": {
-    functionName: "saveReflection_createServerFn_handler",
-    importer: () => import("./assets/weeklyReflection-BSv55DXJ.js")
+  "8d24b1404747be8b48fd30bdf931924de3d897236fcb5d242f53f38b7ca5789d": {
+    functionName: "getActivities_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
   },
-  "164abd019d92a0755af7438684094425fc70cc77295d9b5b5fdb13bef5c62b48": {
-    functionName: "deleteReflection_createServerFn_handler",
-    importer: () => import("./assets/weeklyReflection-BSv55DXJ.js")
+  "730706da68dc73f668d21e04610a4a25811254b36a37cb962d4a7b09a7e8f8cc": {
+    functionName: "getStats_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
   },
-  "174860bd18522bdc4d26790a3e961b7ae29c59d09824be6e598b96c153424fa0": {
-    functionName: "getSymptomEntries_createServerFn_handler",
-    importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
+  "d0dcf447c449df6db5e163d5b2b382d4e245249f6e3b80bd8143757fc0d34a88": {
+    functionName: "getActivityDetails_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
   },
-  "1f0c87655eee5716746eaf6a5ee63d06b455d992f69a15741ebd23dacdead295": {
-    functionName: "saveSymptomEntry_createServerFn_handler",
-    importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
-  },
-  "1bb2ff0f202d3c6bc79f5540f37ab17a1c4e3f5339c827a41455a1fa63b2f94a": {
-    functionName: "deleteSymptomEntry_createServerFn_handler",
-    importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
+  "4f644be0cd0afaddf91fb5f5aedfb03fb16c7060576abce514e6b4eb25e07abe": {
+    functionName: "getActivityBestEfforts_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
   },
   "6edb924367ebf9c232f31aac73ff403438f903a75fa294ae9dc158646c650ab9": {
     functionName: "getGoals_createServerFn_handler",
@@ -17486,7 +17486,7 @@ var baseManifestPromise;
 var cachedFinalManifestPromise;
 async function loadEntries() {
   const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-    import("./assets/router-uvfgC5be.js").then((n2) => n2.q),
+    import("./assets/router-DUYDvYZ4.js").then((n2) => n2.q),
     import("./assets/start-HYkvq4Ni.js"),
     import("./assets/__23tanstack-start-plugin-adapters-Cwee5PKy.js")
   ]);

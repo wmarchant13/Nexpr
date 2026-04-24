@@ -17,9 +17,7 @@
 .backgroundScrim {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(to bottom, rgba(5, 5, 5, 0.28), rgba(5, 5, 5, 0.5)),
-    radial-gradient(circle at center, rgba(5, 5, 5, 0.04), rgba(5, 5, 5, 0.38));
+  background: rgba(5, 5, 5, 0.72);
 }
 
 .backgroundTile {
@@ -27,8 +25,8 @@
   object-fit: cover;
   border: 1px solid rgba(255, 255, 255, 0.92);
   background: #0f0f0f;
-  filter: contrast(1.08) saturate(0.92);
-  opacity: 0.98;
+  filter: blur(3px) contrast(0.9) saturate(0.7);
+  opacity: 0.38;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
