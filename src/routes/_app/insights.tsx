@@ -36,6 +36,8 @@ import { analyzeVolumeProgression } from "../../store/MarathonDiagnostics";
 import { FuelingProfileCard } from "../../components/Fueling";
 import styles from "./Insights.module.scss";
 
+const CHART_ACCENT = "#86A7C8";
+
 export const Route = createFileRoute("/_app/insights")({
   component: InsightsPage,
 });
@@ -214,18 +216,6 @@ function InsightsPage() {
             <div className={styles.chartContainer}>
               <ResponsiveContainer width="100%" height={280}>
                 <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient
-                      id="loadGradient"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="0%" stopColor="#C4A668" stopOpacity={0.30} />
-                      <stop offset="100%" stopColor="#C4A668" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
                   <XAxis
                     dataKey="week"
@@ -252,9 +242,9 @@ function InsightsPage() {
                   <Area
                     type="monotone"
                     dataKey="miles"
-                    stroke="#C4A668"
+                    stroke={CHART_ACCENT}
                     strokeWidth={2}
-                    fill="url(#loadGradient)"
+                    fill="rgba(134,167,200,0.16)"
                     name="Weekly Mileage"
                   />
                 </AreaChart>
@@ -301,9 +291,9 @@ function InsightsPage() {
                   <Line
                     type="monotone"
                     dataKey="avgPace"
-                    stroke="#C4A668"
+                    stroke={CHART_ACCENT}
                     strokeWidth={2}
-                    dot={{ r: 2, fill: "#C4A668" }}
+                    dot={{ r: 2, fill: CHART_ACCENT }}
                     activeDot={{ r: 4 }}
                     connectNulls={false}
                     name="Avg Pace"
@@ -362,7 +352,7 @@ function InsightsPage() {
                   />
                   <Bar
                     dataKey="longRun"
-                    fill="#C4A668"
+                    fill={CHART_ACCENT}
                     radius={[2, 2, 0, 0]}
                     name="Long Run"
                   />

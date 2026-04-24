@@ -17,7 +17,7 @@
 .backgroundScrim {
   position: absolute;
   inset: 0;
-  background: rgba(5, 5, 5, 0.72);
+  background: rgba(5, 5, 5, 0.64);
 }
 
 .backgroundTile {
@@ -25,8 +25,8 @@
   object-fit: cover;
   border: 1px solid rgba(255, 255, 255, 0.92);
   background: #0f0f0f;
-  filter: blur(3px) contrast(0.9) saturate(0.7);
-  opacity: 0.38;
+  filter: blur(2.5px) contrast(0.94) saturate(0.82);
+  opacity: 0.46;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
@@ -199,12 +199,12 @@
 
   .backgroundScrim {
     background:
-      linear-gradient(to bottom, rgba(5, 5, 5, 0.4), rgba(5, 5, 5, 0.62)),
-      radial-gradient(circle at center, rgba(5, 5, 5, 0.08), rgba(5, 5, 5, 0.5));
+      linear-gradient(to bottom, rgba(5, 5, 5, 0.34), rgba(5, 5, 5, 0.56)),
+      radial-gradient(circle at center, rgba(5, 5, 5, 0.05), rgba(5, 5, 5, 0.44));
   }
 
   .backgroundTile {
-    opacity: 0.86;
+    opacity: 0.92;
   }
 
   .tileNorthwest {

@@ -16607,7 +16607,7 @@ function getResponse() {
 }
 var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 async function getStartManifest(matchedRoutes) {
-  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-DXkuModC.js");
+  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-D_nTUA_n.js");
   const startManifest = tsrStartManifest();
   const rootRoute = startManifest.routes[rootRouteId] = startManifest.routes[rootRouteId] || {};
   rootRoute.assets = rootRoute.assets || [];
@@ -16632,10 +16632,6 @@ async function getStartManifest(matchedRoutes) {
   };
 }
 const manifest = {
-  "2b69a754b18836ff97a38b6b49951c68f2e85b7a535bec6c5615a0991a4b36eb": {
-    functionName: "getWeather_createServerFn_handler",
-    importer: () => import("./assets/weather-BlzBdeo2.js")
-  },
   "57e57f9ad3a052abb4ff80e36000664d4271aaf52959c15686bf6cd3dd155e55": {
     functionName: "getStravaAuthUrl_createServerFn_handler",
     importer: () => import("./assets/auth-DT23Rxey.js")
@@ -16647,6 +16643,26 @@ const manifest = {
   "9d83f4c10be9a0051dbe5803dfbe0bf8a9ef204b527c9a88ad31cc0928670431": {
     functionName: "refreshStravaToken_createServerFn_handler",
     importer: () => import("./assets/auth-DT23Rxey.js")
+  },
+  "ea3e6ffcf7f8567fd9ff559f16d3bf6185ca1c045c3183591d4c9704507a53cd": {
+    functionName: "getAthlete_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
+  },
+  "8d24b1404747be8b48fd30bdf931924de3d897236fcb5d242f53f38b7ca5789d": {
+    functionName: "getActivities_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
+  },
+  "730706da68dc73f668d21e04610a4a25811254b36a37cb962d4a7b09a7e8f8cc": {
+    functionName: "getStats_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
+  },
+  "d0dcf447c449df6db5e163d5b2b382d4e245249f6e3b80bd8143757fc0d34a88": {
+    functionName: "getActivityDetails_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
+  },
+  "4f644be0cd0afaddf91fb5f5aedfb03fb16c7060576abce514e6b4eb25e07abe": {
+    functionName: "getActivityBestEfforts_createServerFn_handler",
+    importer: () => import("./assets/strava-x0Ma_IY5.js")
   },
   "ba7a17cc1ee46a93bf3f79f1b643fa71335a8ccd5a5a7b5a1a9cf48ec5969278": {
     functionName: "getReflections_createServerFn_handler",
@@ -16672,6 +16688,18 @@ const manifest = {
     functionName: "deleteSymptomEntry_createServerFn_handler",
     importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
   },
+  "6edb924367ebf9c232f31aac73ff403438f903a75fa294ae9dc158646c650ab9": {
+    functionName: "getGoals_createServerFn_handler",
+    importer: () => import("./assets/goals-XVuLVxHG.js")
+  },
+  "d0a3cea3e149f0bc22b69d604bc41b8ed6f31bf0b50f2eee63d1ddea0f5c00cb": {
+    functionName: "saveGoal_createServerFn_handler",
+    importer: () => import("./assets/goals-XVuLVxHG.js")
+  },
+  "c1e38edad2d2a04e49b3277c1a8dd1cffc21a5ab39c1c01d7e903f034a5c124b": {
+    functionName: "deleteGoal_createServerFn_handler",
+    importer: () => import("./assets/goals-XVuLVxHG.js")
+  },
   "d4b717bb8eff092b5344897720732e5dfc1ab6acb21d83f0ba4dc8e4d74dfd9b": {
     functionName: "getFuelingEntry_createServerFn_handler",
     importer: () => import("./assets/fueling-C7zNIiX1.js")
@@ -16696,37 +16724,9 @@ const manifest = {
     functionName: "initFuelingTable_createServerFn_handler",
     importer: () => import("./assets/fueling-C7zNIiX1.js")
   },
-  "ea3e6ffcf7f8567fd9ff559f16d3bf6185ca1c045c3183591d4c9704507a53cd": {
-    functionName: "getAthlete_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
-  },
-  "8d24b1404747be8b48fd30bdf931924de3d897236fcb5d242f53f38b7ca5789d": {
-    functionName: "getActivities_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
-  },
-  "730706da68dc73f668d21e04610a4a25811254b36a37cb962d4a7b09a7e8f8cc": {
-    functionName: "getStats_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
-  },
-  "d0dcf447c449df6db5e163d5b2b382d4e245249f6e3b80bd8143757fc0d34a88": {
-    functionName: "getActivityDetails_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
-  },
-  "4f644be0cd0afaddf91fb5f5aedfb03fb16c7060576abce514e6b4eb25e07abe": {
-    functionName: "getActivityBestEfforts_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
-  },
-  "6edb924367ebf9c232f31aac73ff403438f903a75fa294ae9dc158646c650ab9": {
-    functionName: "getGoals_createServerFn_handler",
-    importer: () => import("./assets/goals-XVuLVxHG.js")
-  },
-  "d0a3cea3e149f0bc22b69d604bc41b8ed6f31bf0b50f2eee63d1ddea0f5c00cb": {
-    functionName: "saveGoal_createServerFn_handler",
-    importer: () => import("./assets/goals-XVuLVxHG.js")
-  },
-  "c1e38edad2d2a04e49b3277c1a8dd1cffc21a5ab39c1c01d7e903f034a5c124b": {
-    functionName: "deleteGoal_createServerFn_handler",
-    importer: () => import("./assets/goals-XVuLVxHG.js")
+  "2b69a754b18836ff97a38b6b49951c68f2e85b7a535bec6c5615a0991a4b36eb": {
+    functionName: "getWeather_createServerFn_handler",
+    importer: () => import("./assets/weather-BlzBdeo2.js")
   }
 };
 async function getServerFnById(id, access) {
@@ -17486,7 +17486,7 @@ var baseManifestPromise;
 var cachedFinalManifestPromise;
 async function loadEntries() {
   const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-    import("./assets/router-DUYDvYZ4.js").then((n2) => n2.q),
+    import("./assets/router-Cc0qZmf_.js").then((n2) => n2.q),
     import("./assets/start-HYkvq4Ni.js"),
     import("./assets/__23tanstack-start-plugin-adapters-Cwee5PKy.js")
   ]);
