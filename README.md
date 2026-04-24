@@ -15,14 +15,14 @@ Nexpr is a data-driven running platform that helps athletes turn training data i
 
 ## Core Views
 
-| View | Purpose |
-|---|---|
-| Dashboard | High-level performance snapshot and recent activity |
-| Activities | Full run history with context and filters |
-| Insights | Fitness metrics, predictions, and trend analysis |
-| Goals | Goal progress and forecasted outcomes |
-| Journal | Weekly reflection and training notes |
-| Tools | VDOT and marathon diagnostics utilities |
+| View       | Purpose                                             |
+| ---------- | --------------------------------------------------- |
+| Dashboard  | High-level performance snapshot and recent activity |
+| Activities | Full run history with context and filters           |
+| Insights   | Fitness metrics, predictions, and trend analysis    |
+| Goals      | Goal progress and forecasted outcomes               |
+| Journal    | Weekly reflection and training notes                |
+| Tools      | VDOT and marathon diagnostics utilities             |
 
 ## Stack
 
@@ -38,7 +38,3 @@ Nexpr is a data-driven running platform that helps athletes turn training data i
 - Bun
 - SCSS Modules
 - Recharts
-
-## License
-
-MIT
