@@ -2,8 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequiredEnv } from "../utils/server/env";
 import { requireNumber } from "../utils/server/validation";
 
-
-
 function getWindDir(deg: number): string {
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
   return dirs[Math.round(deg / 45) % 8];
@@ -19,6 +17,7 @@ export interface WeatherData {
   icon: string;
 }
 
+//Using OpenWeather API key grab weather from current location
 export const getWeather = createServerFn({ method: "GET" })
   .inputValidator((input: { lat: number; lon: number }) => input)
   .handler(async ({ data }): Promise<WeatherData> => {

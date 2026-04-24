@@ -1,6 +1,6 @@
 {
   "name": "nexpr",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "Unlock your next PR - Data-driven running performance platform",
   "type": "module",
   "scripts": {

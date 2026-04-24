@@ -5,7 +5,6 @@
  * Provides the premium app shell experience.
  */
 
-import React from "react";
 import { Outlet, useNavigate } from "@tanstack/react-router";
 import TabNav from "../TabNav";
 import PartnerFooter from "../PartnerFooter";
@@ -20,6 +19,7 @@ export default function AppLayout() {
 
   return (
     <div className={styles.layout}>
+      {/**Background Images */}
       <div className={styles.backgroundLayer} aria-hidden="true">
         <img
           src="/assets/pexels-caique-araujo-101156227-15875672.jpg"
@@ -43,7 +43,7 @@ export default function AppLayout() {
         />
         <div className={styles.backgroundScrim} />
       </div>
-
+      {/**Header across app */}
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.brand}>
@@ -54,10 +54,9 @@ export default function AppLayout() {
             />
             <span className={styles.wordmarkSub}>EST. 2026 · BUFFALO, NY</span>
           </div>
-
           <TabNav />
-
           <div className={styles.headerRight}>
+            {/**OpenWeather widget */}
             <WeatherWidget />
             {athlete && (
               <button
@@ -78,11 +77,12 @@ export default function AppLayout() {
           </div>
         </div>
       </header>
-
+      {/**Content */}
       <main className={styles.main}>
         <div className={styles.contentShell}>
           <Outlet />
         </div>
+        {/**Footer */}
         <div className={styles.footerWrapper}>
           <PartnerFooter />
         </div>

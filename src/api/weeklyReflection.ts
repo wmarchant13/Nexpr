@@ -1,7 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { normalizeWeekStart } from "../store/weeklyReflection";
 import { getDb } from "../utils/server/env";
-import { requireDateKey, requireNumber, requireString, requireUuidLike } from "../utils/server/validation";
+import {
+  requireDateKey,
+  requireNumber,
+  requireString,
+  requireUuidLike,
+} from "../utils/server/validation";
 
 export interface ReflectionRow {
   id: string;
@@ -25,11 +30,15 @@ export interface ReflectionInput {
   changeNextWeek: string;
 }
 
+//Reflections for journal
 export const getReflections = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
+    const athleteId = requireNumber(data.athleteId, "athleteId", {
+      integer: true,
+      min: 1,
+    });
     const rows = await sql`
       SELECT * FROM weekly_reflections
       WHERE athlete_id = ${athleteId}
@@ -52,12 +61,31 @@ export const saveReflection = createServerFn({ method: "POST" })
     const sql = getDb();
     const now = new Date().toISOString();
     const id = requireUuidLike(data.id, "id");
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
-    const weekStart = normalizeWeekStart(requireDateKey(data.weekStart, "weekStart"));
-    const whatFeltBetter = requireString(data.whatFeltBetter, "whatFeltBetter", { maxLength: 1000, optional: true });
-    const whatFeltWorse = requireString(data.whatFeltWorse, "whatFeltWorse", { maxLength: 1000, optional: true });
-    const warningSigns = requireString(data.warningSigns, "warningSigns", { maxLength: 1000, optional: true });
-    const changeNextWeek = requireString(data.changeNextWeek, "changeNextWeek", { maxLength: 1000, optional: true });
+    const athleteId = requireNumber(data.athleteId, "athleteId", {
+      integer: true,
+      min: 1,
+    });
+    const weekStart = normalizeWeekStart(
+      requireDateKey(data.weekStart, "weekStart"),
+    );
+    const whatFeltBetter = requireString(
+      data.whatFeltBetter,
+      "whatFeltBetter",
+      { maxLength: 1000, optional: true },
+    );
+    const whatFeltWorse = requireString(data.whatFeltWorse, "whatFeltWorse", {
+      maxLength: 1000,
+      optional: true,
+    });
+    const warningSigns = requireString(data.warningSigns, "warningSigns", {
+      maxLength: 1000,
+      optional: true,
+    });
+    const changeNextWeek = requireString(
+      data.changeNextWeek,
+      "changeNextWeek",
+      { maxLength: 1000, optional: true },
+    );
     await sql`
       INSERT INTO weekly_reflections
         (id, athlete_id, week_start, what_felt_better, what_felt_worse,
@@ -80,8 +108,13 @@ export const deleteReflection = createServerFn({ method: "POST" })
   .inputValidator((input: { weekStart: string; athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
-    const weekStart = normalizeWeekStart(requireDateKey(data.weekStart, "weekStart"));
+    const athleteId = requireNumber(data.athleteId, "athleteId", {
+      integer: true,
+      min: 1,
+    });
+    const weekStart = normalizeWeekStart(
+      requireDateKey(data.weekStart, "weekStart"),
+    );
     await sql`
       DELETE FROM weekly_reflections
       WHERE athlete_id = ${athleteId} AND week_start = ${weekStart}

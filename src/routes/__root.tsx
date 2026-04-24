@@ -2,6 +2,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   HeadContent,
+  Link,
   Outlet,
   Scripts,
   createRootRoute,
@@ -42,8 +43,67 @@ export const Route = createRootRoute({
     ],
   }),
   component: RootComponent,
+  notFoundComponent: RootNotFound,
   shellComponent: RootDocument,
 });
+
+function RootNotFound() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: "48px 24px",
+      }}
+    >
+      <div
+        style={{
+          width: "min(100%, 540px)",
+          border: "1px solid var(--border)",
+          background: "var(--bg-subtle)",
+          padding: "32px",
+          textAlign: "center",
+        }}
+      >
+        <p
+          style={{
+            margin: 0,
+            color: "var(--fg-muted)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.75rem",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+          }}
+        >
+          Page Not Found
+        </p>
+        <h1 style={{ margin: "12px 0 0", fontSize: "clamp(2rem, 6vw, 3.5rem)" }}>
+          Nothing lives here.
+        </h1>
+        <p style={{ margin: "16px 0 0", color: "var(--fg-secondary)" }}>
+          The route you requested does not exist anymore or was moved during the recent app
+          cleanup.
+        </p>
+        <Link
+          to="/"
+          style={{
+            display: "inline-flex",
+            marginTop: "24px",
+            padding: "12px 18px",
+            border: "1px solid var(--border-strong)",
+            textTransform: "uppercase",
+            letterSpacing: "0.12em",
+            fontSize: "0.75rem",
+            fontFamily: "var(--font-mono)",
+          }}
+        >
+          Return Home
+        </Link>
+      </div>
+    </main>
+  );
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (

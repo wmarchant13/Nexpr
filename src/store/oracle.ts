@@ -13,14 +13,16 @@
 
 import type { Activity } from "../hooks";
 import { kmToMiles, mToKm } from "../hooks";
+import type { RaceDistance } from "./predictions";
 import {
   calculateFitnessMetrics,
   findPRs,
   calculateWeeklyLoads,
   type FitnessMetrics,
   type PRRecord,
-  type RaceDistance,
 } from "./predictions";
+
+export type { RaceDistance } from "./predictions";
 
 // ============================================================================
 // TYPES

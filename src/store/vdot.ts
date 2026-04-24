@@ -166,12 +166,15 @@ function predictRaceTime(distanceMeters: number, vdot: number): number {
 }
 
 export function computeRacePredictions(vdot: number): RacePredictions {
-  return Object.fromEntries(
-    Object.entries(RACE_DISTANCES_METERS).map(([distance, meters]) => [
-      distance,
-      predictRaceTime(meters, vdot),
-    ]),
-  ) as RacePredictions;
+  const predictions = {} as RacePredictions;
+
+  for (const [distance, meters] of Object.entries(
+    RACE_DISTANCES_METERS,
+  ) as Array<[RaceDistance, number]>) {
+    predictions[distance] = predictRaceTime(meters, vdot);
+  }
+
+  return predictions;
 }
 
 // ============================================================================

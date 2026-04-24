@@ -1,5 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
+import {
+  deleteCookie,
+  getCookie,
+  setCookie,
+} from "@tanstack/react-start/server";
 import { getRequiredEnv } from "../utils/server/env";
 import { requireString, requireUrlOrigin } from "../utils/server/validation";
 import {
@@ -8,6 +12,7 @@ import {
   getCurrentStravaSession,
 } from "../utils/server/stravaSession";
 
+//OAUTH FINAL VARS
 const STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize";
 const STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token";
 const STRAVA_REQUESTED_SCOPE = "read,activity:read_all,profile:read_all";
@@ -27,6 +32,7 @@ function generateState(): string {
   return crypto.randomUUID().replace(/-/g, "");
 }
 
+//Gather the auth url using a generated state and cookie
 export const getStravaAuthUrl = createServerFn({ method: "GET" })
   .inputValidator((input: { origin: string }) => input)
   .handler(async ({ data }) => {
@@ -49,10 +55,14 @@ export const getStravaAuthUrl = createServerFn({ method: "GET" })
     };
   });
 
+//Connect to Strava
 export const exchangeStravaCode = createServerFn({ method: "POST" })
   .inputValidator((input: { code: string; state?: string }) => input)
   .handler(async ({ data }) => {
-    const code = requireString(data.code, "code", { minLength: 8, maxLength: 512 });
+    const code = requireString(data.code, "code", {
+      minLength: 8,
+      maxLength: 512,
+    });
     const returnedState = requireString(data.state ?? "", "state", {
       minLength: 8,
       maxLength: 128,
@@ -61,7 +71,9 @@ export const exchangeStravaCode = createServerFn({ method: "POST" })
     deleteCookie(STRAVA_OAUTH_STATE_COOKIE, oauthStateCookieOptions());
 
     if (!expectedState || expectedState !== returnedState) {
-      throw new Error("OAuth state mismatch. Please try connecting Strava again.");
+      throw new Error(
+        "OAuth state mismatch. Please try connecting Strava again.",
+      );
     }
 
     const params = new URLSearchParams({
@@ -107,19 +119,25 @@ export const exchangeStravaCode = createServerFn({ method: "POST" })
     };
   });
 
-export const getViewerSession = createServerFn({ method: "GET" }).handler(async () => {
-  const session = await getCurrentStravaSession();
-  if (!session) {
-    return { authenticated: false as const, athleteId: null };
-  }
+//If there is a current session grab it
+export const getViewerSession = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const session = await getCurrentStravaSession();
+    if (!session) {
+      return { authenticated: false as const, athleteId: null };
+    }
 
-  return {
-    authenticated: true as const,
-    athleteId: session.athleteId,
-  };
-});
+    return {
+      authenticated: true as const,
+      athleteId: session.athleteId,
+    };
+  },
+);
 
-export const logoutStravaSession = createServerFn({ method: "POST" }).handler(async () => {
-  await clearCurrentStravaSession();
-  return { ok: true as const };
-});
+//Logout of a current session
+export const logoutStravaSession = createServerFn({ method: "POST" }).handler(
+  async () => {
+    await clearCurrentStravaSession();
+    return { ok: true as const };
+  },
+);

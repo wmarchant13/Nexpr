@@ -1,5 +1,5 @@
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
-import { getDb, getRequiredEnv } from "./env";
+import { firstRow, getDb, getRequiredEnv } from "./env";
 
 const STRAVA_SESSION_COOKIE = "nexpr_strava_session";
 const SESSION_REFRESH_WINDOW_MS = 5 * 60 * 1000;
@@ -63,7 +63,7 @@ function toSession(row: StoredSessionRow): StravaSession {
 
 async function persistUpdatedTokens(sessionId: string, payload: SessionTokenPayload) {
   const db = getDb();
-  const [row] = await db<StoredSessionRow[]>`
+  const row = firstRow<StoredSessionRow>(await db`
     UPDATE strava_sessions
     SET access_token = ${payload.accessToken},
         refresh_token = ${payload.refreshToken},
@@ -72,7 +72,7 @@ async function persistUpdatedTokens(sessionId: string, payload: SessionTokenPayl
         updated_at = NOW()
     WHERE id = ${sessionId}
     RETURNING id, athlete_id, access_token, refresh_token, expires_at, granted_scope
-  `;
+  `);
 
   if (!row) {
     throw new Error("Strava session no longer exists");
@@ -112,7 +112,7 @@ async function refreshStoredSession(session: StravaSession): Promise<StravaSessi
 
 export async function createStravaSession(payload: SessionTokenPayload) {
   const db = getDb();
-  const [row] = await db<StoredSessionRow[]>`
+  const row = firstRow<StoredSessionRow>(await db`
     INSERT INTO strava_sessions (
       athlete_id,
       access_token,
@@ -128,7 +128,7 @@ export async function createStravaSession(payload: SessionTokenPayload) {
       ${payload.grantedScope ?? ""}
     )
     RETURNING id, athlete_id, access_token, refresh_token, expires_at, granted_scope
-  `;
+  `);
 
   if (!row) {
     throw new Error("Failed to create Strava session");
@@ -146,12 +146,12 @@ export async function getCurrentStravaSession(): Promise<StravaSession | null> {
   }
 
   const db = getDb();
-  const [row] = await db<StoredSessionRow[]>`
+  const row = firstRow<StoredSessionRow>(await db`
     SELECT id, athlete_id, access_token, refresh_token, expires_at, granted_scope
     FROM strava_sessions
     WHERE id = ${sessionId}
     LIMIT 1
-  `;
+  `);
 
   return row ? toSession(row) : null;
 }

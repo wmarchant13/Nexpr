@@ -1,20 +1,21 @@
 /**
  * Fueling API Server Functions
- * 
+ *
  * Server-side functions for persisting fueling data to Neon PostgreSQL.
  * Uses @neondatabase/serverless for edge-compatible connections.
  */
 
 import { createServerFn } from "@tanstack/react-start";
-import { getDb } from "../utils/server/env";
-import { optionalString, requireEnumValue, requireNumber } from "../utils/server/validation";
+import { getDb, toRows } from "../utils/server/env";
+import {
+  optionalString,
+  requireEnumValue,
+  requireNumber,
+} from "../utils/server/validation";
 
 const FUELING_TIMINGS = ["none", "light", "moderate", "heavy"] as const;
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
+//Types
 export interface FuelingEntryRow {
   id: number;
   athlete_id: number;
@@ -44,30 +45,29 @@ export interface FuelingEntryInput {
   note?: string;
 }
 
-// ============================================================================
-// SERVER FUNCTIONS
-// ============================================================================
-
-/**
- * Get fueling entry for a specific activity.
- */
+// Get fueling entry for a specific activity.
 export const getFuelingEntry = createServerFn({ method: "GET" })
   .inputValidator((input: { activityId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
-    const activityId = requireNumber(data.activityId, "activityId", { integer: true, min: 1 });
-    
-    const rows = await sql`
+    const activityId = requireNumber(data.activityId, "activityId", {
+      integer: true,
+      min: 1,
+    });
+
+    const rows = toRows<FuelingEntryRow>(
+      await sql`
       SELECT * FROM fueling_entries 
       WHERE activity_id = ${activityId}
       LIMIT 1
-    `;
-    
+    `,
+    );
+
     if (rows.length === 0) {
       return null;
     }
-    
-    const row = rows[0] as FuelingEntryRow;
+
+    const row = rows[0];
     return {
       activityId: row.activity_id,
       carbsGrams: row.carbs_grams ?? undefined,
@@ -93,15 +93,20 @@ export const getAllFuelingEntries = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
-    
-    const rows = await sql`
+    const athleteId = requireNumber(data.athleteId, "athleteId", {
+      integer: true,
+      min: 1,
+    });
+
+    const rows = toRows<FuelingEntryRow>(
+      await sql`
       SELECT * FROM fueling_entries 
       WHERE athlete_id = ${athleteId}
       ORDER BY created_at DESC
-    `;
-    
-    return (rows as FuelingEntryRow[]).map((row) => ({
+    `,
+    );
+
+    return rows.map((row) => ({
       activityId: row.activity_id,
       carbsGrams: row.carbs_grams ?? undefined,
       gelsCount: row.gels_count ?? undefined,
@@ -126,19 +131,62 @@ export const saveFuelingEntry = createServerFn({ method: "POST" })
   .inputValidator((input: FuelingEntryInput) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
-    const activityId = requireNumber(data.activityId, "activityId", { integer: true, min: 1 });
-    const carbsGrams = data.carbsGrams == null ? null : requireNumber(data.carbsGrams, "carbsGrams", { integer: true, min: 0, max: 500 });
-    const gelsCount = data.gelsCount == null ? null : requireNumber(data.gelsCount, "gelsCount", { integer: true, min: 0, max: 20 });
-    const hydrationMl = data.hydrationMl == null ? null : requireNumber(data.hydrationMl, "hydrationMl", { integer: true, min: 0, max: 5000 });
-    const caffeineCount = data.caffeineCount == null ? null : requireNumber(data.caffeineCount, "caffeineCount", { integer: true, min: 0, max: 10 });
-    const timingBefore = data.timingBefore == null ? null : requireEnumValue(data.timingBefore, "timingBefore", FUELING_TIMINGS);
-    const timingDuring = data.timingDuring == null ? null : requireEnumValue(data.timingDuring, "timingDuring", FUELING_TIMINGS);
-    const timingAfter = data.timingAfter == null ? null : requireEnumValue(data.timingAfter, "timingAfter", FUELING_TIMINGS);
+    const athleteId = requireNumber(data.athleteId, "athleteId", {
+      integer: true,
+      min: 1,
+    });
+    const activityId = requireNumber(data.activityId, "activityId", {
+      integer: true,
+      min: 1,
+    });
+    const carbsGrams =
+      data.carbsGrams == null
+        ? null
+        : requireNumber(data.carbsGrams, "carbsGrams", {
+            integer: true,
+            min: 0,
+            max: 500,
+          });
+    const gelsCount =
+      data.gelsCount == null
+        ? null
+        : requireNumber(data.gelsCount, "gelsCount", {
+            integer: true,
+            min: 0,
+            max: 20,
+          });
+    const hydrationMl =
+      data.hydrationMl == null
+        ? null
+        : requireNumber(data.hydrationMl, "hydrationMl", {
+            integer: true,
+            min: 0,
+            max: 5000,
+          });
+    const caffeineCount =
+      data.caffeineCount == null
+        ? null
+        : requireNumber(data.caffeineCount, "caffeineCount", {
+            integer: true,
+            min: 0,
+            max: 10,
+          });
+    const timingBefore =
+      data.timingBefore == null
+        ? null
+        : requireEnumValue(data.timingBefore, "timingBefore", FUELING_TIMINGS);
+    const timingDuring =
+      data.timingDuring == null
+        ? null
+        : requireEnumValue(data.timingDuring, "timingDuring", FUELING_TIMINGS);
+    const timingAfter =
+      data.timingAfter == null
+        ? null
+        : requireEnumValue(data.timingAfter, "timingAfter", FUELING_TIMINGS);
     const note = optionalString(data.note, "note", 1000);
-    
+
     const now = new Date().toISOString();
-    
+
     await sql`
       INSERT INTO fueling_entries (
         athlete_id,
@@ -178,7 +226,7 @@ export const saveFuelingEntry = createServerFn({ method: "POST" })
         note = EXCLUDED.note,
         updated_at = ${now}
     `;
-    
+
     return { success: true, activityId };
   });
 
@@ -189,72 +237,84 @@ export const deleteFuelingEntry = createServerFn({ method: "POST" })
   .inputValidator((input: { athleteId: number; activityId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
-    const activityId = requireNumber(data.activityId, "activityId", { integer: true, min: 1 });
-    
+    const athleteId = requireNumber(data.athleteId, "athleteId", {
+      integer: true,
+      min: 1,
+    });
+    const activityId = requireNumber(data.activityId, "activityId", {
+      integer: true,
+      min: 1,
+    });
+
     await sql`
       DELETE FROM fueling_entries 
       WHERE activity_id = ${activityId}
         AND athlete_id = ${athleteId}
     `;
-    
+
     return { success: true, activityId };
   });
 
-/**
- * Delete ALL fueling entries for an athlete.
- * Called on disconnect/logout to comply with Strava API data deletion requirements.
- */
-export const deleteAllFuelingEntries = createServerFn({ method: "POST" })
-  .inputValidator((input: { athleteId: number }) => input)
-  .handler(async ({ data }) => {
-    const sql = getDb();
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
-    
-    const result = await sql`
-      DELETE FROM fueling_entries 
-      WHERE athlete_id = ${athleteId}
-      RETURNING id
-    `;
-    
-    return { success: true, deletedCount: result.length };
-  });
+// /**
+//  * Delete ALL fueling entries for an athlete.
+//  * Called on disconnect/logout to comply with Strava API data deletion requirements.
+//  */
+// export const deleteAllFuelingEntries = createServerFn({ method: "POST" })
+//   .inputValidator((input: { athleteId: number }) => input)
+//   .handler(async ({ data }) => {
+//     const sql = getDb();
+//     const athleteId = requireNumber(data.athleteId, "athleteId", {
+//       integer: true,
+//       min: 1,
+//     });
 
-/**
- * Initialize the fueling_entries table.
- * Call this once to set up the schema.
- */
-export const initFuelingTable = createServerFn({ method: "POST" })
-  .handler(async () => {
-    const sql = getDb();
-    
-    await sql`
-      CREATE TABLE IF NOT EXISTS fueling_entries (
-        id SERIAL PRIMARY KEY,
-        athlete_id BIGINT NOT NULL,
-        activity_id BIGINT NOT NULL UNIQUE,
-        carbs_grams INT,
-        gels_count INT,
-        hydration_ml INT,
-        caffeine_count INT,
-        timing_before VARCHAR(20),
-        timing_during VARCHAR(20),
-        timing_after VARCHAR(20),
-        note TEXT,
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
-      )
-    `;
-    
-    await sql`
-      CREATE INDEX IF NOT EXISTS idx_fueling_athlete 
-      ON fueling_entries(athlete_id)
-    `;
-    
-    await sql`
-      CREATE INDEX IF NOT EXISTS idx_fueling_activity 
-      ON fueling_entries(activity_id)
-    `;
-    
-    return { success: true, message: "Fueling table initialized" };
-  });
+//     const result = toRows<{ id: number }>(
+//       await sql`
+//       DELETE FROM fueling_entries
+//       WHERE athlete_id = ${athleteId}
+//       RETURNING id
+//     `,
+//     );
+
+//     return { success: true, deletedCount: result.length };
+//   });
+
+// /**
+//  * Initialize the fueling_entries table.
+//  * Call this once to set up the schema.
+//  */
+// export const initFuelingTable = createServerFn({ method: "POST" }).handler(
+//   async () => {
+//     const sql = getDb();
+
+//     await sql`
+//       CREATE TABLE IF NOT EXISTS fueling_entries (
+//         id SERIAL PRIMARY KEY,
+//         athlete_id BIGINT NOT NULL,
+//         activity_id BIGINT NOT NULL UNIQUE,
+//         carbs_grams INT,
+//         gels_count INT,
+//         hydration_ml INT,
+//         caffeine_count INT,
+//         timing_before VARCHAR(20),
+//         timing_during VARCHAR(20),
+//         timing_after VARCHAR(20),
+//         note TEXT,
+//         created_at TIMESTAMP DEFAULT NOW(),
+//         updated_at TIMESTAMP DEFAULT NOW()
+//       )
+//     `;
+
+//     await sql`
+//       CREATE INDEX IF NOT EXISTS idx_fueling_athlete
+//       ON fueling_entries(athlete_id)
+//     `;
+
+//     await sql`
+//       CREATE INDEX IF NOT EXISTS idx_fueling_activity
+//       ON fueling_entries(activity_id)
+//     `;
+
+//     return { success: true, message: "Fueling table initialized" };
+//   },
+// );

@@ -38,11 +38,15 @@ export interface SymptomInput {
   notes?: string;
 }
 
+//Get symptoms if logged for an activity
 export const getSymptomEntries = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
+    const athleteId = requireNumber(data.athleteId, "athleteId", {
+      integer: true,
+      min: 1,
+    });
     const rows = await sql`
       SELECT * FROM symptom_log
       WHERE athlete_id = ${athleteId}
@@ -60,18 +64,36 @@ export const getSymptomEntries = createServerFn({ method: "GET" })
     }));
   });
 
+//Save a symptom entry to database
 export const saveSymptomEntry = createServerFn({ method: "POST" })
   .inputValidator((input: SymptomInput) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
     const id = requireUuidLike(data.id, "id");
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
-    const activityId = requireNumber(data.activityId, "activityId", { integer: true, min: 1 });
+    const athleteId = requireNumber(data.athleteId, "athleteId", {
+      integer: true,
+      min: 1,
+    });
+    const activityId = requireNumber(data.activityId, "activityId", {
+      integer: true,
+      min: 1,
+    });
     const date = requireDateKey(data.date, "date");
-    const location = requireString(data.location, "location", { minLength: 2, maxLength: 80 });
+    const location = requireString(data.location, "location", {
+      minLength: 2,
+      maxLength: 80,
+    });
     const trigger = requireEnumValue(data.trigger, "trigger", SYMPTOM_TRIGGERS);
-    const warmUpBehavior = requireEnumValue(data.warmUpBehavior, "warmUpBehavior", WARMUP_BEHAVIORS);
-    const painScale = requireNumber(data.painScale, "painScale", { integer: true, min: 1, max: 5 }) as 1 | 2 | 3 | 4 | 5;
+    const warmUpBehavior = requireEnumValue(
+      data.warmUpBehavior,
+      "warmUpBehavior",
+      WARMUP_BEHAVIORS,
+    );
+    const painScale = requireNumber(data.painScale, "painScale", {
+      integer: true,
+      min: 1,
+      max: 5,
+    }) as 1 | 2 | 3 | 4 | 5;
     const notes = optionalString(data.notes, "notes", 1000);
     await sql`
       INSERT INTO symptom_log
@@ -84,12 +106,16 @@ export const saveSymptomEntry = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+//Delete a symptom entry from the database
 export const deleteSymptomEntry = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string; athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
     const id = requireUuidLike(data.id, "id");
-    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
+    const athleteId = requireNumber(data.athleteId, "athleteId", {
+      integer: true,
+      min: 1,
+    });
     await sql`
       DELETE FROM symptom_log
       WHERE id = ${id} AND athlete_id = ${athleteId}

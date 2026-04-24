@@ -17,3 +17,11 @@ export function getDb() {
 
   return cachedDb;
 }
+
+export function toRows<T>(result: unknown): T[] {
+  return result as T[];
+}
+
+export function firstRow<T>(result: unknown): T | undefined {
+  return toRows<T>(result)[0];
+}
