@@ -10,6 +10,8 @@ import {
   clearCurrentStravaSession,
   createStravaSession,
   getCurrentStravaSession,
+  requireCurrentStravaSession,
+  deleteAthleteAppData,
 } from "../utils/server/stravaSession";
 
 const STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize";
@@ -138,6 +140,16 @@ export const getViewerSession = createServerFn({ method: "GET" }).handler(
 // Clears the current Strava session
 export const logoutStravaSession = createServerFn({ method: "POST" }).handler(
   async () => {
+    await clearCurrentStravaSession();
+    return { ok: true as const };
+  },
+);
+
+// Deletes all app data for the signed-in athlete and clears current session
+export const deleteMyAppData = createServerFn({ method: "POST" }).handler(
+  async () => {
+    const session = await requireCurrentStravaSession();
+    await deleteAthleteAppData(session.athleteId);
     await clearCurrentStravaSession();
     return { ok: true as const };
   },

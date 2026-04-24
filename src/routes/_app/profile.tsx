@@ -4,6 +4,7 @@ import {
   useAthlete,
   useStats,
   useLogout,
+  useDeleteMyData,
   buildLifetimeRunSnapshot,
 } from "../../hooks";
 import { getCacheStatus, clearCache } from "../../store/cache";
@@ -18,6 +19,7 @@ function ProfilePage() {
   const { data: athlete, isLoading: athleteLoading } = useAthlete();
   const { data: stats } = useStats(athlete?.id ?? null);
   const { mutate: logout } = useLogout();
+  const { mutateAsync: deleteMyData, isPending: deleteMyDataPending } = useDeleteMyData();
   const avatarUrl = athlete?.profile || athlete?.profile_medium || "";
 
   const lifetimeStats = useMemo(() => {
@@ -31,6 +33,14 @@ function ProfilePage() {
   const handleClearCache = () => {
     clearCache();
     window.location.reload();
+  };
+
+  const handleDeleteMyData = async () => {
+    const confirmed = window.confirm(
+      "Delete all Nexpr data from the database for your account? This cannot be undone.",
+    );
+    if (!confirmed) return;
+    await deleteMyData();
   };
 
   if (athleteLoading) {
@@ -178,6 +188,33 @@ function ProfilePage() {
             >
               Disconnect & Logout
             </button>
+
+            <button
+              onClick={handleDeleteMyData}
+              disabled={deleteMyDataPending}
+              className={`${styles.settingButton} ${styles.danger}`}
+            >
+              {deleteMyDataPending
+                ? "Deleting your data..."
+                : "Delete All My App Data"}
+            </button>
+
+            <div className={styles.revokeHelp}>
+              <p className={styles.revokeHelpTitle}>Revoke Strava Access</p>
+              <ol className={styles.revokeList}>
+                <li>Open Strava settings for connected apps.</li>
+                <li>Find Nexpr in your authorized apps.</li>
+                <li>Click revoke access.</li>
+              </ol>
+              <a
+                href="https://www.strava.com/settings/apps"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.revokeLink}
+              >
+                Open Strava App Settings
+              </a>
+            </div>
           </div>
         </section>
 

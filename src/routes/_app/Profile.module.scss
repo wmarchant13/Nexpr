@@ -259,6 +259,43 @@
   }
 }
 
+.revokeHelp {
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(17, 17, 17, 0.02);
+}
+
+.revokeHelpTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.revokeList {
+  margin: 0 0 10px 18px;
+  padding: 0;
+  color: var(--ink-60);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.revokeLink {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: var(--accent);
+  }
+}
+
 /* ── App Info ── */
 .appInfo {
   padding-top: 48px;

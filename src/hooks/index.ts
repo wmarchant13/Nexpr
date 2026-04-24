@@ -5,6 +5,7 @@ import {
   exchangeStravaCode,
   getViewerSession,
   logoutStravaSession,
+  deleteMyAppData,
 } from "../api/auth";
 import {
   getAthlete,
@@ -177,6 +178,27 @@ export const useLogout = () => {
       
       
       
+      clearCache();
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("athlete");
+        localStorage.removeItem("nexpr_best_efforts_v1");
+      }
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
+      }
+    },
+  });
+};
+
+// Mutation hook: removes all app data for current athlete and logs out
+export const useDeleteMyData = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      await deleteMyAppData();
       clearCache();
       if (typeof window !== "undefined") {
         localStorage.removeItem("athlete");
