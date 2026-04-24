@@ -1,23 +1,18 @@
 import { neon } from "@neondatabase/serverless";
 
-let cachedDb: ReturnType<typeof neon> | null = null;
-
 // Returns required env var value or throws if missing
+// Checks process.env (local) and globalThis.__env__ (Cloudflare Worker bindings)
 export function getRequiredEnv(name: string): string {
-  const value = process.env[name]?.trim();
+  const value = (process.env[name] ?? (globalThis as Record<string, any>).__env__?.[name])?.trim();
   if (!value) {
     throw new Error(`${name} is not configured`);
   }
   return value;
 }
 
-// Returns the singleton Neon DB connection
+// Returns a Neon DB connection (always fresh to support Cloudflare Workers env binding)
 export function getDb() {
-  if (!cachedDb) {
-    cachedDb = neon(getRequiredEnv("DATABASE_URL"));
-  }
-
-  return cachedDb;
+  return neon(getRequiredEnv("DATABASE_URL"));
 }
 
 // Casts an unknown query result to a typed row array
