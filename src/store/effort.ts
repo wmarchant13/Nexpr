@@ -247,7 +247,7 @@ export function saveBaselineCache(baseline: RunnerBaseline): void {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(baseline));
   } catch {
-    console.warn("Failed to cache effort baseline");
+    // Ignore storage failures and keep baseline in memory only.
   }
 }
 

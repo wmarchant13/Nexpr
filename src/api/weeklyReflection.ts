@@ -1,12 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { neon } from "@neondatabase/serverless";
 import { normalizeWeekStart } from "../store/weeklyReflection";
-
-function getDb() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) throw new Error("DATABASE_URL is not set");
-  return neon(databaseUrl);
-}
+import { getDb } from "../utils/server/env";
+import { requireDateKey, requireNumber, requireString, requireUuidLike } from "../utils/server/validation";
 
 export interface ReflectionRow {
   id: string;
@@ -34,9 +29,10 @@ export const getReflections = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
     const rows = await sql`
       SELECT * FROM weekly_reflections
-      WHERE athlete_id = ${data.athleteId}
+      WHERE athlete_id = ${athleteId}
       ORDER BY week_start DESC
     `;
     return (rows as ReflectionRow[]).map((r) => ({
@@ -55,15 +51,21 @@ export const saveReflection = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const sql = getDb();
     const now = new Date().toISOString();
-    const weekStart = normalizeWeekStart(data.weekStart);
+    const id = requireUuidLike(data.id, "id");
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
+    const weekStart = normalizeWeekStart(requireDateKey(data.weekStart, "weekStart"));
+    const whatFeltBetter = requireString(data.whatFeltBetter, "whatFeltBetter", { maxLength: 1000, optional: true });
+    const whatFeltWorse = requireString(data.whatFeltWorse, "whatFeltWorse", { maxLength: 1000, optional: true });
+    const warningSigns = requireString(data.warningSigns, "warningSigns", { maxLength: 1000, optional: true });
+    const changeNextWeek = requireString(data.changeNextWeek, "changeNextWeek", { maxLength: 1000, optional: true });
     await sql`
       INSERT INTO weekly_reflections
         (id, athlete_id, week_start, what_felt_better, what_felt_worse,
          warning_signs, change_next_week, created_at, updated_at)
       VALUES
-        (${data.id}, ${data.athleteId}, ${weekStart},
-         ${data.whatFeltBetter}, ${data.whatFeltWorse},
-         ${data.warningSigns}, ${data.changeNextWeek}, ${now}, ${now})
+        (${id}, ${athleteId}, ${weekStart},
+         ${whatFeltBetter}, ${whatFeltWorse},
+         ${warningSigns}, ${changeNextWeek}, ${now}, ${now})
       ON CONFLICT (athlete_id, week_start) DO UPDATE SET
         what_felt_better = EXCLUDED.what_felt_better,
         what_felt_worse  = EXCLUDED.what_felt_worse,
@@ -78,10 +80,11 @@ export const deleteReflection = createServerFn({ method: "POST" })
   .inputValidator((input: { weekStart: string; athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
-    const weekStart = normalizeWeekStart(data.weekStart);
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
+    const weekStart = normalizeWeekStart(requireDateKey(data.weekStart, "weekStart"));
     await sql`
       DELETE FROM weekly_reflections
-      WHERE athlete_id = ${data.athleteId} AND week_start = ${weekStart}
+      WHERE athlete_id = ${athleteId} AND week_start = ${weekStart}
     `;
     return { success: true };
   });

@@ -518,6 +518,12 @@
   border-bottom: 2px solid var(--border);
 }
 
+.errorNote {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  color: var(--danger);
+}
+
 .rangeGrid {
   display: flex;
   gap: 1.5rem;

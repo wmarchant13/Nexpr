@@ -19,6 +19,7 @@ import { Route as AppGoalsRouteImport } from './routes/_app/goals'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppActivitiesRouteImport } from './routes/_app/activities'
 import { Route as AuthStravaCallbackRouteImport } from './routes/auth.strava.callback'
+import { Route as ApiStravaWebhookRouteImport } from './routes/api.strava.webhook'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -69,6 +70,11 @@ const AuthStravaCallbackRoute = AuthStravaCallbackRouteImport.update({
   path: '/auth/strava/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStravaWebhookRoute = ApiStravaWebhookRouteImport.update({
+  id: '/api/strava/webhook',
+  path: '/api/strava/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/journal': typeof AppJournalRoute
   '/profile': typeof AppProfileRoute
   '/tools': typeof AppToolsRoute
+  '/api/strava/webhook': typeof ApiStravaWebhookRoute
   '/auth/strava/callback': typeof AuthStravaCallbackRoute
 }
 export interface FileRoutesByTo {
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/journal': typeof AppJournalRoute
   '/profile': typeof AppProfileRoute
   '/tools': typeof AppToolsRoute
+  '/api/strava/webhook': typeof ApiStravaWebhookRoute
   '/auth/strava/callback': typeof AuthStravaCallbackRoute
 }
 export interface FileRoutesById {
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/_app/journal': typeof AppJournalRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/tools': typeof AppToolsRoute
+  '/api/strava/webhook': typeof ApiStravaWebhookRoute
   '/auth/strava/callback': typeof AuthStravaCallbackRoute
 }
 export interface FileRouteTypes {
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/journal'
     | '/profile'
     | '/tools'
+    | '/api/strava/webhook'
     | '/auth/strava/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/journal'
     | '/profile'
     | '/tools'
+    | '/api/strava/webhook'
     | '/auth/strava/callback'
   id:
     | '__root__'
@@ -139,12 +150,14 @@ export interface FileRouteTypes {
     | '/_app/journal'
     | '/_app/profile'
     | '/_app/tools'
+    | '/api/strava/webhook'
     | '/auth/strava/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  ApiStravaWebhookRoute: typeof ApiStravaWebhookRoute
   AuthStravaCallbackRoute: typeof AuthStravaCallbackRoute
 }
 
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthStravaCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/strava/webhook': {
+      id: '/api/strava/webhook'
+      path: '/api/strava/webhook'
+      fullPath: '/api/strava/webhook'
+      preLoaderRoute: typeof ApiStravaWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -248,6 +268,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  ApiStravaWebhookRoute: ApiStravaWebhookRoute,
   AuthStravaCallbackRoute: AuthStravaCallbackRoute,
 }
 export const routeTree = rootRouteImport
@@ -255,10 +276,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.tsx'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

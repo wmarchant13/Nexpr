@@ -31,7 +31,7 @@ export default function CallbackPage() {
   const [errorMsg, setErrorMsg] = React.useState<string>("");
   const hasCalledRef = React.useRef(false);
 
-  const callbackMutation = useStravaCallback(search.code || "");
+  const callbackMutation = useStravaCallback(search.code || "", search.state);
   const { mutate } = callbackMutation;
 
   useEffect(() => {

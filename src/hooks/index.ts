@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getStravaAuthUrl, exchangeStravaCode, refreshStravaToken } from "../api/auth";
+import {
+  getStravaAuthUrl,
+  exchangeStravaCode,
+  getViewerSession,
+  logoutStravaSession,
+} from "../api/auth";
 import {
   getAthlete,
   getActivities,
@@ -31,48 +36,6 @@ import {
   clearCache,
   shouldFetchActivities,
 } from "../store/cache";
-
-function getAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("accessToken");
-}
-
-// Returns a valid (non-expired) access token, refreshing if needed.
-// Returns null if there is no token at all.
-let _refreshPromise: Promise<string | null> | null = null;
-async function getValidAccessToken(): Promise<string | null> {
-  if (typeof window === "undefined") return null;
-
-  const accessToken = localStorage.getItem("accessToken");
-  if (!accessToken) return null;
-
-  const expiresAt = parseInt(localStorage.getItem("tokenExpiresAt") ?? "0", 10);
-  // Refresh if token expires within the next 5 minutes
-  const needsRefresh = expiresAt > 0 && Date.now() / 1000 > expiresAt - 300;
-
-  if (!needsRefresh) return accessToken;
-
-  const refreshToken = localStorage.getItem("refreshToken");
-  if (!refreshToken) return accessToken; // can't refresh, try with what we have
-
-  // Deduplicate concurrent refresh calls
-  if (_refreshPromise) return _refreshPromise;
-
-  _refreshPromise = refreshStravaToken({ data: { refreshToken } })
-    .then((tokens) => {
-      localStorage.setItem("accessToken", tokens.accessToken);
-      localStorage.setItem("refreshToken", tokens.refreshToken);
-      localStorage.setItem("tokenExpiresAt", String(tokens.expiresAt));
-      _refreshPromise = null;
-      return tokens.accessToken;
-    })
-    .catch(() => {
-      _refreshPromise = null;
-      return accessToken; // fall back to old token and let the API call fail naturally
-    });
-
-  return _refreshPromise;
-}
 
 export interface Athlete {
   id: number;
@@ -127,19 +90,23 @@ export interface Stats {
   ytd_run_totals: ActivityTotals;
 }
 
+export const useViewerSession = () => {
+  return useQuery({
+    queryKey: ["viewer-session"],
+    queryFn: () => getViewerSession(),
+    staleTime: 60 * 1000,
+    retry: false,
+  });
+};
+
 // Auth Hooks
 export const useStravaLogin = () => {
   return useMutation({
     mutationFn: async () => {
-      // Pass the actual client origin so the redirect URI matches the running
-      // port (dev servers may not always be on 3000).
-      const origin =
-        typeof window !== "undefined"
-          ? window.location.origin
-          : (process.env.STRAVA_REDIRECT_URI?.replace(
-              "/auth/strava/callback",
-              "",
-            ) ?? "http://localhost:3000");
+      if (typeof window === "undefined") {
+        throw new Error("Strava login must start in the browser");
+      }
+      const origin = window.location.origin;
       const result = await getStravaAuthUrl({ data: { origin } });
       return result;
     },
@@ -149,13 +116,16 @@ export const useStravaLogin = () => {
   });
 };
 
-export const useStravaCallback = (code: string) => {
+export const useStravaCallback = (code: string, returnedState?: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
       if (!code) throw new Error("No code provided");
-      const result = await exchangeStravaCode({ data: { code } });
+      if (!returnedState) {
+        throw new Error("Missing OAuth state. Please try connecting Strava again.");
+      }
+      const result = await exchangeStravaCode({ data: { code, state: returnedState } });
       const grantedScopes = new Set(
         String(result.grantedScope ?? "")
           .split(/[\s,]+/)
@@ -172,15 +142,10 @@ export const useStravaCallback = (code: string) => {
         );
       }
 
-      if (result.accessToken && typeof window !== "undefined") {
+      if (typeof window !== "undefined") {
         // Reset stale Strava cache before applying newly authorized identity.
         clearCache();
-        localStorage.setItem("accessToken", result.accessToken);
-        localStorage.setItem("refreshToken", result.refreshToken || "");
-        localStorage.setItem("stravaGrantedScope", String(result.grantedScope ?? ""));
-        if (result.expiresAt) {
-          localStorage.setItem("tokenExpiresAt", String(result.expiresAt));
-        }
+        localStorage.removeItem("nexpr_best_efforts_v1");
         if (result.athlete) {
           localStorage.setItem("athlete", JSON.stringify(result.athlete));
           cacheAthlete(result.athlete as Athlete);
@@ -190,6 +155,7 @@ export const useStravaCallback = (code: string) => {
     },
     onSuccess: () => {
       // Invalidate all Strava data so the next page load fetches fresh data.
+      void queryClient.invalidateQueries({ queryKey: ["viewer-session"] });
       void queryClient.invalidateQueries({ queryKey: ["athlete"] });
       void queryClient.invalidateQueries({ queryKey: ["activities"] });
       void queryClient.invalidateQueries({ queryKey: ["stats"] });
@@ -201,15 +167,12 @@ export const useLogout = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
+      await logoutStravaSession();
       // Clear Strava-sourced cached data (required by Strava API Terms)
       // Note: Fueling data is user-created content within Nexpr, NOT Strava data,
       // so it is retained for the user's benefit.
       clearCache();
       if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("tokenExpiresAt");
-        localStorage.removeItem("stravaGrantedScope");
         localStorage.removeItem("athlete");
         localStorage.removeItem("nexpr_best_efforts_v1");
       }
@@ -236,17 +199,14 @@ export const useAthlete = () => {
         return cached;
       }
 
-      const accessToken = await getValidAccessToken();
-      if (!accessToken) throw new Error("No access token");
-
-      const result = await getAthlete({ data: { accessToken } });
+      const result = await getAthlete();
       const athlete = result as Athlete;
 
       // Cache the result
       cacheAthlete(athlete);
       return athlete;
     },
-    enabled: typeof window !== "undefined" && !!getAccessToken(),
+    enabled: typeof window !== "undefined",
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 60 * 60 * 1000,   // keep in memory 1 hour between navigations
     refetchOnWindowFocus: false,
@@ -274,11 +234,8 @@ export const useActivities = (page: number = 1, perPage: number = 30) => {
         }
       }
 
-      const accessToken = await getValidAccessToken();
-      if (!accessToken) throw new Error("No access token");
-
       const result = await getActivities({
-        data: { accessToken, page, perPage },
+        data: { page, perPage },
       });
       const activities = result as Activity[];
 
@@ -288,7 +245,7 @@ export const useActivities = (page: number = 1, perPage: number = 30) => {
 
       return activities;
     },
-    enabled: typeof window !== "undefined" && !!getAccessToken(),
+    enabled: typeof window !== "undefined",
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchInterval: false,
@@ -305,20 +262,16 @@ export const useStats = (athleteId: number | null) => {
       const cached = getCachedStats();
       if (cached) return cached;
 
-      const accessToken = await getValidAccessToken();
-      if (!accessToken || !athleteId)
-        throw new Error("Missing athlete context");
+      if (!athleteId) throw new Error("Missing athlete context");
 
-      const result = await getStats({
-        data: { accessToken, athleteId: athleteId.toString() },
-      });
+      const result = await getStats();
       const stats = result as Stats;
 
       cacheStats(stats);
       return stats;
     },
     enabled:
-      typeof window !== "undefined" && !!athleteId && !!getAccessToken(),
+      typeof window !== "undefined" && !!athleteId,
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -330,15 +283,13 @@ export const useActivityDetails = (activityId: number | null) => {
   return useQuery({
     queryKey: ["activityDetails", activityId],
     queryFn: async () => {
-      const accessToken = await getValidAccessToken();
-      if (!accessToken || !activityId) throw new Error("Missing context");
+      if (!activityId) throw new Error("Missing context");
       const result = await getActivityDetails({
-        data: { accessToken, activityId },
+        data: { activityId },
       });
       return result as any;
     },
-    enabled:
-      typeof window !== "undefined" && !!activityId && !!getAccessToken(),
+    enabled: typeof window !== "undefined" && !!activityId,
     staleTime: 60 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     retry: false,
@@ -1291,8 +1242,6 @@ export const useStravaPRs = (activities: Activity[] | undefined) => {
     queryKey: ["strava-prs", activities?.length ?? 0],
     queryFn: async (): Promise<PRRecord[]> => {
       if (!activities || activities.length === 0) return [];
-      const accessToken = await getValidAccessToken();
-      if (!accessToken) throw new Error("No access token");
 
       // All runs sorted most-recent first
       const runs = activities
@@ -1326,7 +1275,7 @@ export const useStravaPRs = (activities: Activity[] | undefined) => {
           const results = await Promise.all(
             batch.map((a) =>
               getActivityBestEfforts({
-                data: { accessToken, activityId: a.id },
+                data: { activityId: a.id },
               }),
             ),
           );
@@ -1402,7 +1351,7 @@ export const useStravaPRs = (activities: Activity[] | undefined) => {
     enabled:
       !!activities &&
       activities.length > 0 &&
-      typeof window !== "undefined" && !!getAccessToken(),
+      typeof window !== "undefined",
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,

@@ -16552,6 +16552,290 @@ function errorResponse(error, debug, errHeaders) {
     headers
   });
 }
+const COOKIE_MAX_AGE_LIMIT = 3456e4;
+function endIndex(str, min, len) {
+  const index = str.indexOf(";", min);
+  return index === -1 ? len : index;
+}
+function eqIndex(str, min, max) {
+  const index = str.indexOf("=", min);
+  return index < max ? index : -1;
+}
+function valueSlice(str, min, max) {
+  if (min === max) return "";
+  let start = min;
+  let end = max;
+  do {
+    const code = str.charCodeAt(start);
+    if (code !== 32 && code !== 9) break;
+  } while (++start < end);
+  while (end > start) {
+    const code = str.charCodeAt(end - 1);
+    if (code !== 32 && code !== 9) break;
+    end--;
+  }
+  return str.slice(start, end);
+}
+const NullObject = /* @__PURE__ */ (() => {
+  const C2 = function() {
+  };
+  C2.prototype = /* @__PURE__ */ Object.create(null);
+  return C2;
+})();
+function parse(str, options) {
+  const obj = new NullObject();
+  const len = str.length;
+  if (len < 2) return obj;
+  const dec = decode;
+  let index = 0;
+  do {
+    const eqIdx = eqIndex(str, index, len);
+    if (eqIdx === -1) break;
+    const endIdx = endIndex(str, index, len);
+    if (eqIdx > endIdx) {
+      index = str.lastIndexOf(";", eqIdx - 1) + 1;
+      continue;
+    }
+    const key = valueSlice(str, index, eqIdx);
+    const val = dec(valueSlice(str, eqIdx + 1, endIdx));
+    if (obj[key] === void 0) obj[key] = val;
+    index = endIdx + 1;
+  } while (index < len);
+  return obj;
+}
+function decode(str) {
+  if (!str.includes("%")) return str;
+  try {
+    return decodeURIComponent(str);
+  } catch {
+    return str;
+  }
+}
+const cookieNameRegExp = /^[\u0021-\u003A\u003C\u003E-\u007E]+$/;
+const cookieValueRegExp = /^[\u0021-\u003A\u003C-\u007E]*$/;
+const domainValueRegExp = /^([.]?[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)([.][a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+const pathValueRegExp = /^[\u0020-\u003A\u003C-\u007E]*$/;
+const __toString = Object.prototype.toString;
+function serialize(_a0, _a1, _a22) {
+  const isObj = typeof _a0 === "object" && _a0 !== null;
+  const cookie = isObj ? _a0 : {
+    ..._a22,
+    name: _a0,
+    value: ""
+  };
+  const enc = encodeURIComponent;
+  if (!cookieNameRegExp.test(cookie.name)) throw new TypeError(`argument name is invalid: ${cookie.name}`);
+  const value = cookie.value ? enc(cookie.value) : "";
+  if (!cookieValueRegExp.test(value)) throw new TypeError(`argument val is invalid: ${cookie.value}`);
+  if (!cookie.secure) {
+    if (cookie.partitioned) throw new TypeError(`Partitioned cookies must have the Secure attribute`);
+    if (cookie.sameSite && String(cookie.sameSite).toLowerCase() === "none") throw new TypeError(`SameSite=None cookies must have the Secure attribute`);
+    if (cookie.name.length > 9 && cookie.name.charCodeAt(0) === 95 && cookie.name.charCodeAt(1) === 95) {
+      const nameLower = cookie.name.toLowerCase();
+      if (nameLower.startsWith("__secure-") || nameLower.startsWith("__host-")) throw new TypeError(`${cookie.name} cookies must have the Secure attribute`);
+    }
+  }
+  if (cookie.name.length > 7 && cookie.name.charCodeAt(0) === 95 && cookie.name.charCodeAt(1) === 95 && cookie.name.toLowerCase().startsWith("__host-")) {
+    if (cookie.path !== "/") throw new TypeError(`__Host- cookies must have Path=/`);
+    if (cookie.domain) throw new TypeError(`__Host- cookies must not have a Domain attribute`);
+  }
+  let str = cookie.name + "=" + value;
+  if (cookie.maxAge !== void 0) {
+    if (!Number.isInteger(cookie.maxAge)) throw new TypeError(`option maxAge is invalid: ${cookie.maxAge}`);
+    str += "; Max-Age=" + Math.max(0, Math.min(cookie.maxAge, COOKIE_MAX_AGE_LIMIT));
+  }
+  if (cookie.domain) {
+    if (!domainValueRegExp.test(cookie.domain)) throw new TypeError(`option domain is invalid: ${cookie.domain}`);
+    str += "; Domain=" + cookie.domain;
+  }
+  if (cookie.path) {
+    if (!pathValueRegExp.test(cookie.path)) throw new TypeError(`option path is invalid: ${cookie.path}`);
+    str += "; Path=" + cookie.path;
+  }
+  if (cookie.expires) {
+    if (!isDate(cookie.expires) || !Number.isFinite(cookie.expires.valueOf())) throw new TypeError(`option expires is invalid: ${cookie.expires}`);
+    str += "; Expires=" + cookie.expires.toUTCString();
+  }
+  if (cookie.httpOnly) str += "; HttpOnly";
+  if (cookie.secure) str += "; Secure";
+  if (cookie.partitioned) str += "; Partitioned";
+  if (cookie.priority) switch (typeof cookie.priority === "string" ? cookie.priority.toLowerCase() : void 0) {
+    case "low":
+      str += "; Priority=Low";
+      break;
+    case "medium":
+      str += "; Priority=Medium";
+      break;
+    case "high":
+      str += "; Priority=High";
+      break;
+    default:
+      throw new TypeError(`option priority is invalid: ${cookie.priority}`);
+  }
+  if (cookie.sameSite) switch (typeof cookie.sameSite === "string" ? cookie.sameSite.toLowerCase() : cookie.sameSite) {
+    case true:
+    case "strict":
+      str += "; SameSite=Strict";
+      break;
+    case "lax":
+      str += "; SameSite=Lax";
+      break;
+    case "none":
+      str += "; SameSite=None";
+      break;
+    default:
+      throw new TypeError(`option sameSite is invalid: ${cookie.sameSite}`);
+  }
+  return str;
+}
+function isDate(val) {
+  return __toString.call(val) === "[object Date]";
+}
+const maxAgeRegExp = /^-?\d+$/;
+const _nullProto = /* @__PURE__ */ Object.getPrototypeOf({});
+function parseSetCookie(str, options) {
+  const len = str.length;
+  let _endIdx = len;
+  let eqIdx = -1;
+  for (let i = 0; i < len; i++) {
+    const c2 = str.charCodeAt(i);
+    if (c2 === 59) {
+      _endIdx = i;
+      break;
+    }
+    if (c2 === 61 && eqIdx === -1) eqIdx = i;
+  }
+  if (eqIdx >= _endIdx) eqIdx = -1;
+  const name = eqIdx === -1 ? "" : _trim(str, 0, eqIdx);
+  if (name && name in _nullProto) return void 0;
+  let value = eqIdx === -1 ? _trim(str, 0, _endIdx) : _trim(str, eqIdx + 1, _endIdx);
+  if (!name && !value) return void 0;
+  if (name.length + value.length > 4096) return void 0;
+  value = _decode(value, options == null ? void 0 : options.decode);
+  const setCookie2 = {
+    name,
+    value
+  };
+  let index = _endIdx + 1;
+  while (index < len) {
+    let endIdx = len;
+    let attrEqIdx = -1;
+    for (let i = index; i < len; i++) {
+      const c2 = str.charCodeAt(i);
+      if (c2 === 59) {
+        endIdx = i;
+        break;
+      }
+      if (c2 === 61 && attrEqIdx === -1) attrEqIdx = i;
+    }
+    if (attrEqIdx >= endIdx) attrEqIdx = -1;
+    const attr = attrEqIdx === -1 ? _trim(str, index, endIdx) : _trim(str, index, attrEqIdx);
+    const val = attrEqIdx === -1 ? void 0 : _trim(str, attrEqIdx + 1, endIdx);
+    if (val === void 0 || val.length <= 1024) switch (attr.toLowerCase()) {
+      case "httponly":
+        setCookie2.httpOnly = true;
+        break;
+      case "secure":
+        setCookie2.secure = true;
+        break;
+      case "partitioned":
+        setCookie2.partitioned = true;
+        break;
+      case "domain":
+        if (val) setCookie2.domain = (val.charCodeAt(0) === 46 ? val.slice(1) : val).toLowerCase();
+        break;
+      case "path":
+        setCookie2.path = val;
+        break;
+      case "max-age":
+        if (val && maxAgeRegExp.test(val)) setCookie2.maxAge = Math.min(Number(val), COOKIE_MAX_AGE_LIMIT);
+        break;
+      case "expires": {
+        if (!val) break;
+        const date = new Date(val);
+        if (Number.isFinite(date.valueOf())) {
+          const maxDate = new Date(Date.now() + COOKIE_MAX_AGE_LIMIT * 1e3);
+          setCookie2.expires = date > maxDate ? maxDate : date;
+        }
+        break;
+      }
+      case "priority": {
+        if (!val) break;
+        const priority = val.toLowerCase();
+        if (priority === "low" || priority === "medium" || priority === "high") setCookie2.priority = priority;
+        break;
+      }
+      case "samesite": {
+        if (!val) break;
+        const sameSite = val.toLowerCase();
+        if (sameSite === "lax" || sameSite === "strict" || sameSite === "none") setCookie2.sameSite = sameSite;
+        else setCookie2.sameSite = "lax";
+        break;
+      }
+      default: {
+        const attrLower = attr.toLowerCase();
+        if (attrLower && !(attrLower in _nullProto)) setCookie2[attrLower] = val;
+      }
+    }
+    index = endIdx + 1;
+  }
+  return setCookie2;
+}
+function _trim(str, start, end) {
+  if (start === end) return "";
+  let s = start;
+  let e = end;
+  while (s < e && (str.charCodeAt(s) === 32 || str.charCodeAt(s) === 9)) s++;
+  while (e > s && (str.charCodeAt(e - 1) === 32 || str.charCodeAt(e - 1) === 9)) e--;
+  return str.slice(s, e);
+}
+function _decode(value, decode2) {
+  if (!value.includes("%")) return value;
+  try {
+    return (decode2 || decodeURIComponent)(value);
+  } catch {
+    return value;
+  }
+}
+function parseCookies(event) {
+  return parse(event.req.headers.get("cookie") || "");
+}
+function setCookie(event, name, value, options) {
+  var _a3;
+  const newCookie = serialize({
+    name,
+    value,
+    path: "/",
+    ...options
+  });
+  const currentCookies = event.res.headers.getSetCookie();
+  if (currentCookies.length === 0) {
+    event.res.headers.set("set-cookie", newCookie);
+    return;
+  }
+  const newCookieKey = _getDistinctCookieKey(name, options || {});
+  event.res.headers.delete("set-cookie");
+  for (const cookie of currentCookies) {
+    const parsed = parseSetCookie(cookie);
+    if (!parsed) continue;
+    if (_getDistinctCookieKey((_a3 = cookie.split("=")) == null ? void 0 : _a3[0], parsed) === newCookieKey) continue;
+    event.res.headers.append("set-cookie", cookie);
+  }
+  event.res.headers.append("set-cookie", newCookie);
+}
+function deleteCookie(event, name, serializeOptions) {
+  setCookie(event, name, "", {
+    ...serializeOptions,
+    maxAge: 0
+  });
+}
+function _getDistinctCookieKey(name, options) {
+  return [
+    name,
+    options.domain || "",
+    options.path || "/"
+  ].join(";");
+}
 var GLOBAL_EVENT_STORAGE_KEY = Symbol.for("tanstack-start:event-storage");
 var globalObj$1 = globalThis;
 if (!globalObj$1[GLOBAL_EVENT_STORAGE_KEY]) globalObj$1[GLOBAL_EVENT_STORAGE_KEY] = new AsyncLocalStorage();
@@ -16602,12 +16886,27 @@ function getH3Event() {
   if (!event) throw new Error(`No StartEvent found in AsyncLocalStorage. Make sure you are using the function within the server runtime.`);
   return event.h3Event;
 }
+function getCookies() {
+  const cookies = parseCookies(getH3Event());
+  const definedCookies = /* @__PURE__ */ Object.create(null);
+  for (const [name, value] of Object.entries(cookies)) if (value !== void 0) definedCookies[name] = value;
+  return definedCookies;
+}
+function getCookie(name) {
+  return getCookies()[name];
+}
+function setCookie$1(name, value, options) {
+  setCookie(getH3Event(), name, value, options);
+}
+function deleteCookie$1(name, options) {
+  deleteCookie(getH3Event(), name, options);
+}
 function getResponse() {
   return getH3Event().res;
 }
 var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 async function getStartManifest(matchedRoutes) {
-  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-D_nTUA_n.js");
+  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-opFtWc2x.js");
   const startManifest = tsrStartManifest();
   const rootRoute = startManifest.routes[rootRouteId] = startManifest.routes[rootRouteId] || {};
   rootRoute.assets = rootRoute.assets || [];
@@ -16634,99 +16933,103 @@ async function getStartManifest(matchedRoutes) {
 const manifest = {
   "57e57f9ad3a052abb4ff80e36000664d4271aaf52959c15686bf6cd3dd155e55": {
     functionName: "getStravaAuthUrl_createServerFn_handler",
-    importer: () => import("./assets/auth-DT23Rxey.js")
+    importer: () => import("./assets/auth-il1haR6_.js")
   },
   "fa770a19229d28f852abdf85c9ce2b503e8a91dbf68339ba2dd4cc0f8e9e2688": {
     functionName: "exchangeStravaCode_createServerFn_handler",
-    importer: () => import("./assets/auth-DT23Rxey.js")
+    importer: () => import("./assets/auth-il1haR6_.js")
   },
-  "9d83f4c10be9a0051dbe5803dfbe0bf8a9ef204b527c9a88ad31cc0928670431": {
-    functionName: "refreshStravaToken_createServerFn_handler",
-    importer: () => import("./assets/auth-DT23Rxey.js")
+  "12c806253c06b38b48a1f808e9884e422e070039ec3f0e2ad3c94095bc25e7a2": {
+    functionName: "getViewerSession_createServerFn_handler",
+    importer: () => import("./assets/auth-il1haR6_.js")
+  },
+  "0e06eed216c6d7d533ee46627dc702bf159fc4cf14948bc3e4fd709eed28c0fe": {
+    functionName: "logoutStravaSession_createServerFn_handler",
+    importer: () => import("./assets/auth-il1haR6_.js")
   },
   "ea3e6ffcf7f8567fd9ff559f16d3bf6185ca1c045c3183591d4c9704507a53cd": {
     functionName: "getAthlete_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
+    importer: () => import("./assets/strava-Belg3V9U.js")
   },
   "8d24b1404747be8b48fd30bdf931924de3d897236fcb5d242f53f38b7ca5789d": {
     functionName: "getActivities_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
+    importer: () => import("./assets/strava-Belg3V9U.js")
   },
   "730706da68dc73f668d21e04610a4a25811254b36a37cb962d4a7b09a7e8f8cc": {
     functionName: "getStats_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
+    importer: () => import("./assets/strava-Belg3V9U.js")
   },
   "d0dcf447c449df6db5e163d5b2b382d4e245249f6e3b80bd8143757fc0d34a88": {
     functionName: "getActivityDetails_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
+    importer: () => import("./assets/strava-Belg3V9U.js")
   },
   "4f644be0cd0afaddf91fb5f5aedfb03fb16c7060576abce514e6b4eb25e07abe": {
     functionName: "getActivityBestEfforts_createServerFn_handler",
-    importer: () => import("./assets/strava-x0Ma_IY5.js")
-  },
-  "ba7a17cc1ee46a93bf3f79f1b643fa71335a8ccd5a5a7b5a1a9cf48ec5969278": {
-    functionName: "getReflections_createServerFn_handler",
-    importer: () => import("./assets/weeklyReflection-hEqsRgnE.js")
-  },
-  "858b8dbe1eb228d28a667df32e44470edad47fd9c22e5d3bc0c14aa61deb738b": {
-    functionName: "saveReflection_createServerFn_handler",
-    importer: () => import("./assets/weeklyReflection-hEqsRgnE.js")
-  },
-  "164abd019d92a0755af7438684094425fc70cc77295d9b5b5fdb13bef5c62b48": {
-    functionName: "deleteReflection_createServerFn_handler",
-    importer: () => import("./assets/weeklyReflection-hEqsRgnE.js")
-  },
-  "174860bd18522bdc4d26790a3e961b7ae29c59d09824be6e598b96c153424fa0": {
-    functionName: "getSymptomEntries_createServerFn_handler",
-    importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
-  },
-  "1f0c87655eee5716746eaf6a5ee63d06b455d992f69a15741ebd23dacdead295": {
-    functionName: "saveSymptomEntry_createServerFn_handler",
-    importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
-  },
-  "1bb2ff0f202d3c6bc79f5540f37ab17a1c4e3f5339c827a41455a1fa63b2f94a": {
-    functionName: "deleteSymptomEntry_createServerFn_handler",
-    importer: () => import("./assets/symptomLog-DtwKIV_Z.js")
-  },
-  "6edb924367ebf9c232f31aac73ff403438f903a75fa294ae9dc158646c650ab9": {
-    functionName: "getGoals_createServerFn_handler",
-    importer: () => import("./assets/goals-XVuLVxHG.js")
-  },
-  "d0a3cea3e149f0bc22b69d604bc41b8ed6f31bf0b50f2eee63d1ddea0f5c00cb": {
-    functionName: "saveGoal_createServerFn_handler",
-    importer: () => import("./assets/goals-XVuLVxHG.js")
-  },
-  "c1e38edad2d2a04e49b3277c1a8dd1cffc21a5ab39c1c01d7e903f034a5c124b": {
-    functionName: "deleteGoal_createServerFn_handler",
-    importer: () => import("./assets/goals-XVuLVxHG.js")
+    importer: () => import("./assets/strava-Belg3V9U.js")
   },
   "d4b717bb8eff092b5344897720732e5dfc1ab6acb21d83f0ba4dc8e4d74dfd9b": {
     functionName: "getFuelingEntry_createServerFn_handler",
-    importer: () => import("./assets/fueling-C7zNIiX1.js")
+    importer: () => import("./assets/fueling-CCbSPh6S.js")
   },
   "1199207accc14a8e395c3417316c94ea71768341b9e08de0e559eeca47a19ade": {
     functionName: "getAllFuelingEntries_createServerFn_handler",
-    importer: () => import("./assets/fueling-C7zNIiX1.js")
+    importer: () => import("./assets/fueling-CCbSPh6S.js")
   },
   "b0d0031fefee53df20a99fa7d11311210f328bff448a475bfc66362c137e66a2": {
     functionName: "saveFuelingEntry_createServerFn_handler",
-    importer: () => import("./assets/fueling-C7zNIiX1.js")
+    importer: () => import("./assets/fueling-CCbSPh6S.js")
   },
   "7f8373a72639663422ed502fae2f6eb9fe9ee943ab66a8f03e75fb976d8a5001": {
     functionName: "deleteFuelingEntry_createServerFn_handler",
-    importer: () => import("./assets/fueling-C7zNIiX1.js")
+    importer: () => import("./assets/fueling-CCbSPh6S.js")
   },
   "40748d14528edbdfc99b86dbc84ed6e6408af7d2f4e11aa1e808ddcc983e3308": {
     functionName: "deleteAllFuelingEntries_createServerFn_handler",
-    importer: () => import("./assets/fueling-C7zNIiX1.js")
+    importer: () => import("./assets/fueling-CCbSPh6S.js")
   },
   "f027c4e2be6a878fa15b808ec855bf2d1429e5cd2b1467352b21be0cf8c385e5": {
     functionName: "initFuelingTable_createServerFn_handler",
-    importer: () => import("./assets/fueling-C7zNIiX1.js")
+    importer: () => import("./assets/fueling-CCbSPh6S.js")
+  },
+  "174860bd18522bdc4d26790a3e961b7ae29c59d09824be6e598b96c153424fa0": {
+    functionName: "getSymptomEntries_createServerFn_handler",
+    importer: () => import("./assets/symptomLog-C79GHExJ.js")
+  },
+  "1f0c87655eee5716746eaf6a5ee63d06b455d992f69a15741ebd23dacdead295": {
+    functionName: "saveSymptomEntry_createServerFn_handler",
+    importer: () => import("./assets/symptomLog-C79GHExJ.js")
+  },
+  "1bb2ff0f202d3c6bc79f5540f37ab17a1c4e3f5339c827a41455a1fa63b2f94a": {
+    functionName: "deleteSymptomEntry_createServerFn_handler",
+    importer: () => import("./assets/symptomLog-C79GHExJ.js")
+  },
+  "ba7a17cc1ee46a93bf3f79f1b643fa71335a8ccd5a5a7b5a1a9cf48ec5969278": {
+    functionName: "getReflections_createServerFn_handler",
+    importer: () => import("./assets/weeklyReflection-Dnqq6UPh.js")
+  },
+  "858b8dbe1eb228d28a667df32e44470edad47fd9c22e5d3bc0c14aa61deb738b": {
+    functionName: "saveReflection_createServerFn_handler",
+    importer: () => import("./assets/weeklyReflection-Dnqq6UPh.js")
+  },
+  "164abd019d92a0755af7438684094425fc70cc77295d9b5b5fdb13bef5c62b48": {
+    functionName: "deleteReflection_createServerFn_handler",
+    importer: () => import("./assets/weeklyReflection-Dnqq6UPh.js")
+  },
+  "6edb924367ebf9c232f31aac73ff403438f903a75fa294ae9dc158646c650ab9": {
+    functionName: "getGoals_createServerFn_handler",
+    importer: () => import("./assets/goals-DMApcmBV.js")
+  },
+  "d0a3cea3e149f0bc22b69d604bc41b8ed6f31bf0b50f2eee63d1ddea0f5c00cb": {
+    functionName: "saveGoal_createServerFn_handler",
+    importer: () => import("./assets/goals-DMApcmBV.js")
+  },
+  "c1e38edad2d2a04e49b3277c1a8dd1cffc21a5ab39c1c01d7e903f034a5c124b": {
+    functionName: "deleteGoal_createServerFn_handler",
+    importer: () => import("./assets/goals-DMApcmBV.js")
   },
   "2b69a754b18836ff97a38b6b49951c68f2e85b7a535bec6c5615a0991a4b36eb": {
     functionName: "getWeather_createServerFn_handler",
-    importer: () => import("./assets/weather-BlzBdeo2.js")
+    importer: () => import("./assets/weather-CntH5TyZ.js")
   }
 };
 async function getServerFnById(id, access) {
@@ -17486,8 +17789,8 @@ var baseManifestPromise;
 var cachedFinalManifestPromise;
 async function loadEntries() {
   const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-    import("./assets/router-Cc0qZmf_.js").then((n2) => n2.q),
-    import("./assets/start-HYkvq4Ni.js"),
+    import("./assets/router-DE_OX1z2.js").then((n2) => n2.z),
+    import("./assets/start-PSsGd1fL.js"),
     import("./assets/__23tanstack-start-plugin-adapters-Cwee5PKy.js")
   ]);
   return {
@@ -17813,7 +18116,7 @@ function createServerEntry(entry) {
 }
 const server = createServerEntry({ fetch: fetch$1 });
 export {
-  TSS_SERVER_FUNCTION as $,
+  getServerFnById as $,
   interpolatePath as A,
   nullReplaceEqualDeep as B,
   replaceEqualDeep as C,
@@ -17840,11 +18143,14 @@ export {
   getAssetCrossOrigin as X,
   resolveManifestAssetLink as Y,
   Outlet as Z,
-  createServerFn as _,
+  TSS_SERVER_FUNCTION as _,
   arraysEqual as a,
-  commonjsGlobal as a0,
-  getDefaultExportFromCjs as a1,
-  getServerFnById as a2,
+  createServerFn as a0,
+  setCookie$1 as a1,
+  getCookie as a2,
+  deleteCookie$1 as a3,
+  commonjsGlobal as a4,
+  getDefaultExportFromCjs as a5,
   isRedirect as b,
   createLRUCache as c,
   createServerEntry,

@@ -62,9 +62,7 @@ export function saveCache(cache: NexprCache): void {
   
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-  } catch (e) {
-    // Storage might be full - clear old cache
-    console.warn("Cache storage failed, clearing old data");
+  } catch {
     localStorage.removeItem(CACHE_KEY);
   }
 }

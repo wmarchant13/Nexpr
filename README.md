@@ -64,6 +64,14 @@ Nexpr aggressively minimizes Strava API calls:
 2. **React Query staleTime**: Prevents refetching fresh data
 3. **Derived Metrics**: All analytics computed from cached data—no additional API calls
 4. **Batch Fetching**: Single request for 200 activities covers most use cases
+5. **Server-side request dedupe**: Strava requests are deduplicated in-flight with short TTL caching to avoid duplicate bursts
+
+## Production Notes
+
+- Strava requests flow through a shared server client with rate-limit awareness and short-lived caching.
+- OAuth callback verifies `state` before exchanging the authorization code.
+- Server functions validate input before hitting Neon or third-party APIs.
+- User-authored app data is stored in Neon; Strava activity data is not persisted to Neon.
 
 ### Route Structure
 ```
@@ -94,8 +102,15 @@ Nexpr aggressively minimizes Strava API calls:
    ```env
    STRAVA_CLIENT_ID=your_client_id
    STRAVA_CLIENT_SECRET=your_client_secret
-   STRAVA_REDIRECT_URI=http://localhost:3000/auth/strava/callback
+   DATABASE_URL=postgresql://...
+   STRAVA_WEBHOOK_VERIFY_TOKEN=optional_if_using_webhooks
+   OPENWEATHER_API_KEY=optional_openweather_key
    ```
+
+   The OAuth callback URL is derived from the current app origin, so on Vercel
+   you only need to register `https://your-domain/auth/strava/callback` in the
+   Strava dashboard. No code change is needed when moving from localhost to
+   production.
 
 4. Start development server:
    ```bash

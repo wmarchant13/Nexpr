@@ -1,12 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
-import { neon } from "@neondatabase/serverless";
 import type { SymptomTrigger, WarmUpBehavior } from "../store/symptomLog";
+import { getDb } from "../utils/server/env";
+import {
+  optionalString,
+  requireDateKey,
+  requireEnumValue,
+  requireNumber,
+  requireString,
+  requireUuidLike,
+} from "../utils/server/validation";
 
-function getDb() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) throw new Error("DATABASE_URL is not set");
-  return neon(databaseUrl);
-}
+const SYMPTOM_TRIGGERS = ["during", "after", "next-day"] as const;
+const WARMUP_BEHAVIORS = ["improves", "same", "worsens"] as const;
 
 export interface SymptomRow {
   id: string;
@@ -37,9 +42,10 @@ export const getSymptomEntries = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
     const rows = await sql`
       SELECT * FROM symptom_log
-      WHERE athlete_id = ${data.athleteId}
+      WHERE athlete_id = ${athleteId}
       ORDER BY date DESC, created_at DESC
     `;
     return (rows as SymptomRow[]).map((r) => ({
@@ -58,13 +64,22 @@ export const saveSymptomEntry = createServerFn({ method: "POST" })
   .inputValidator((input: SymptomInput) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const id = requireUuidLike(data.id, "id");
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
+    const activityId = requireNumber(data.activityId, "activityId", { integer: true, min: 1 });
+    const date = requireDateKey(data.date, "date");
+    const location = requireString(data.location, "location", { minLength: 2, maxLength: 80 });
+    const trigger = requireEnumValue(data.trigger, "trigger", SYMPTOM_TRIGGERS);
+    const warmUpBehavior = requireEnumValue(data.warmUpBehavior, "warmUpBehavior", WARMUP_BEHAVIORS);
+    const painScale = requireNumber(data.painScale, "painScale", { integer: true, min: 1, max: 5 }) as 1 | 2 | 3 | 4 | 5;
+    const notes = optionalString(data.notes, "notes", 1000);
     await sql`
       INSERT INTO symptom_log
         (id, athlete_id, activity_id, date, location, trigger, warm_up_behavior, pain_scale, notes)
       VALUES
-        (${data.id}, ${data.athleteId}, ${data.activityId}, ${data.date},
-         ${data.location}, ${data.trigger}, ${data.warmUpBehavior},
-         ${data.painScale}, ${data.notes ?? null})
+        (${id}, ${athleteId}, ${activityId}, ${date},
+         ${location}, ${trigger}, ${warmUpBehavior},
+         ${painScale}, ${notes})
     `;
     return { success: true };
   });
@@ -73,9 +88,11 @@ export const deleteSymptomEntry = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string; athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const id = requireUuidLike(data.id, "id");
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
     await sql`
       DELETE FROM symptom_log
-      WHERE id = ${data.id} AND athlete_id = ${data.athleteId}
+      WHERE id = ${id} AND athlete_id = ${athleteId}
     `;
     return { success: true };
   });

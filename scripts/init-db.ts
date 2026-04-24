@@ -86,6 +86,21 @@ async function main() {
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_reflections_athlete ON weekly_reflections(athlete_id)`;
 
+  console.log("📦 Creating strava_sessions table...");
+  await sql`
+    CREATE TABLE IF NOT EXISTS strava_sessions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      athlete_id BIGINT NOT NULL,
+      access_token TEXT NOT NULL,
+      refresh_token TEXT NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      granted_scope TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_strava_sessions_athlete ON strava_sessions(athlete_id)`;
+
   console.log("✅ Database initialized successfully!");
 }
 

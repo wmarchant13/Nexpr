@@ -39,6 +39,7 @@ export function FuelingInput({
   const [isExpanded, setIsExpanded] = useState(false);
   const [entry, setEntry] = useState<Partial<FuelingEntry>>({});
   const [saved, setSaved] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Load existing entry from server
   const { data: existingEntry, isLoading } = useFuelingEntry(activityId);
@@ -59,6 +60,7 @@ export function FuelingInput({
 
   const handleSave = async () => {
     try {
+      setErrorMessage(null);
       await saveMutation.mutateAsync({
         athleteId,
         activityId,
@@ -78,18 +80,19 @@ export function FuelingInput({
       // Reset saved indicator after 2s
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      console.error("Failed to save fueling entry:", err);
+      setErrorMessage(err instanceof Error ? err.message : "Failed to save fueling entry");
     }
   };
 
   const handleDelete = async () => {
     try {
+      setErrorMessage(null);
       await deleteMutation.mutateAsync({ athleteId, activityId });
       setEntry({});
       setIsExpanded(false);
       onDelete?.();
     } catch (err) {
-      console.error("Failed to delete fueling entry:", err);
+      setErrorMessage(err instanceof Error ? err.message : "Failed to delete fueling entry");
     }
   };
 
@@ -322,6 +325,8 @@ export function FuelingInput({
           {saveMutation.isPending ? "Saving..." : saved ? "✓ Saved" : "Save"}
         </button>
       </div>
+
+      {errorMessage && <p className={styles.errorNote}>{errorMessage}</p>}
     </div>
   );
 }

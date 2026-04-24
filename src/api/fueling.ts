@@ -6,19 +6,10 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
-import { neon } from "@neondatabase/serverless";
+import { getDb } from "../utils/server/env";
+import { optionalString, requireEnumValue, requireNumber } from "../utils/server/validation";
 
-// ============================================================================
-// DATABASE CONNECTION
-// ============================================================================
-
-function getDb() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL environment variable is not set");
-  }
-  return neon(databaseUrl);
-}
+const FUELING_TIMINGS = ["none", "light", "moderate", "heavy"] as const;
 
 // ============================================================================
 // TYPES
@@ -64,10 +55,11 @@ export const getFuelingEntry = createServerFn({ method: "GET" })
   .inputValidator((input: { activityId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const activityId = requireNumber(data.activityId, "activityId", { integer: true, min: 1 });
     
     const rows = await sql`
       SELECT * FROM fueling_entries 
-      WHERE activity_id = ${data.activityId}
+      WHERE activity_id = ${activityId}
       LIMIT 1
     `;
     
@@ -101,10 +93,11 @@ export const getAllFuelingEntries = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
     
     const rows = await sql`
       SELECT * FROM fueling_entries 
-      WHERE athlete_id = ${data.athleteId}
+      WHERE athlete_id = ${athleteId}
       ORDER BY created_at DESC
     `;
     
@@ -133,6 +126,16 @@ export const saveFuelingEntry = createServerFn({ method: "POST" })
   .inputValidator((input: FuelingEntryInput) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
+    const activityId = requireNumber(data.activityId, "activityId", { integer: true, min: 1 });
+    const carbsGrams = data.carbsGrams == null ? null : requireNumber(data.carbsGrams, "carbsGrams", { integer: true, min: 0, max: 500 });
+    const gelsCount = data.gelsCount == null ? null : requireNumber(data.gelsCount, "gelsCount", { integer: true, min: 0, max: 20 });
+    const hydrationMl = data.hydrationMl == null ? null : requireNumber(data.hydrationMl, "hydrationMl", { integer: true, min: 0, max: 5000 });
+    const caffeineCount = data.caffeineCount == null ? null : requireNumber(data.caffeineCount, "caffeineCount", { integer: true, min: 0, max: 10 });
+    const timingBefore = data.timingBefore == null ? null : requireEnumValue(data.timingBefore, "timingBefore", FUELING_TIMINGS);
+    const timingDuring = data.timingDuring == null ? null : requireEnumValue(data.timingDuring, "timingDuring", FUELING_TIMINGS);
+    const timingAfter = data.timingAfter == null ? null : requireEnumValue(data.timingAfter, "timingAfter", FUELING_TIMINGS);
+    const note = optionalString(data.note, "note", 1000);
     
     const now = new Date().toISOString();
     
@@ -151,16 +154,16 @@ export const saveFuelingEntry = createServerFn({ method: "POST" })
         created_at,
         updated_at
       ) VALUES (
-        ${data.athleteId},
-        ${data.activityId},
-        ${data.carbsGrams ?? null},
-        ${data.gelsCount ?? null},
-        ${data.hydrationMl ?? null},
-        ${data.caffeineCount ?? null},
-        ${data.timingBefore ?? null},
-        ${data.timingDuring ?? null},
-        ${data.timingAfter ?? null},
-        ${data.note ?? null},
+        ${athleteId},
+        ${activityId},
+        ${carbsGrams},
+        ${gelsCount},
+        ${hydrationMl},
+        ${caffeineCount},
+        ${timingBefore},
+        ${timingDuring},
+        ${timingAfter},
+        ${note},
         ${now},
         ${now}
       )
@@ -176,7 +179,7 @@ export const saveFuelingEntry = createServerFn({ method: "POST" })
         updated_at = ${now}
     `;
     
-    return { success: true, activityId: data.activityId };
+    return { success: true, activityId };
   });
 
 /**
@@ -186,14 +189,16 @@ export const deleteFuelingEntry = createServerFn({ method: "POST" })
   .inputValidator((input: { athleteId: number; activityId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
+    const activityId = requireNumber(data.activityId, "activityId", { integer: true, min: 1 });
     
     await sql`
       DELETE FROM fueling_entries 
-      WHERE activity_id = ${data.activityId}
-        AND athlete_id = ${data.athleteId}
+      WHERE activity_id = ${activityId}
+        AND athlete_id = ${athleteId}
     `;
     
-    return { success: true, activityId: data.activityId };
+    return { success: true, activityId };
   });
 
 /**
@@ -204,10 +209,11 @@ export const deleteAllFuelingEntries = createServerFn({ method: "POST" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
     
     const result = await sql`
       DELETE FROM fueling_entries 
-      WHERE athlete_id = ${data.athleteId}
+      WHERE athlete_id = ${athleteId}
       RETURNING id
     `;
     

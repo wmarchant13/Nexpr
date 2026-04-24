@@ -6,12 +6,13 @@
  */
 
 import { createFileRoute, redirect, Outlet } from "@tanstack/react-router";
+import { getViewerSession } from "../api/auth";
 import AppLayout from "../components/AppLayout";
 
 export const Route = createFileRoute("/_app")({
-  beforeLoad: () => {
-    // Redirect to login if not authenticated
-    if (typeof window !== "undefined" && !localStorage.getItem("accessToken")) {
+  beforeLoad: async () => {
+    const session = await getViewerSession();
+    if (!session.authenticated) {
       throw redirect({ to: "/", replace: true });
     }
   },

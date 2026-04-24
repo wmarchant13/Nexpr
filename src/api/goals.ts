@@ -1,11 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
-import { neon } from "@neondatabase/serverless";
+import { getDb } from "../utils/server/env";
+import { requireEnumValue, requireNumber, requireString } from "../utils/server/validation";
 
-function getDb() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) throw new Error("DATABASE_URL is not set");
-  return neon(databaseUrl);
-}
+const GOAL_DISTANCES = ["5K", "10K", "Half Marathon", "Marathon"] as const;
 
 export interface GoalRow {
   id: string;
@@ -27,9 +24,10 @@ export const getGoals = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
     const rows = await sql`
       SELECT * FROM distance_goals
-      WHERE athlete_id = ${data.athleteId}
+      WHERE athlete_id = ${athleteId}
       ORDER BY created_at ASC
     `;
     return (rows as GoalRow[]).map((r) => ({
@@ -44,9 +42,17 @@ export const saveGoal = createServerFn({ method: "POST" })
   .inputValidator((input: GoalInput) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
+    const distance = requireEnumValue(data.distance, "distance", GOAL_DISTANCES);
+    const targetSeconds = requireNumber(data.targetSeconds, "targetSeconds", {
+      integer: true,
+      min: 1,
+      max: 60 * 60 * 24,
+    });
+    const year = requireNumber(data.year, "year", { integer: true, min: 2020, max: 2100 });
     const rows = await sql`
       INSERT INTO distance_goals (athlete_id, distance, target_seconds, year)
-      VALUES (${data.athleteId}, ${data.distance}, ${data.targetSeconds}, ${data.year})
+      VALUES (${athleteId}, ${distance}, ${targetSeconds}, ${year})
       RETURNING id
     `;
     return { id: (rows[0] as { id: string }).id };
@@ -56,9 +62,11 @@ export const deleteGoal = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string; athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const id = requireString(data.id, "id", { minLength: 1, maxLength: 64 });
+    const athleteId = requireNumber(data.athleteId, "athleteId", { integer: true, min: 1 });
     await sql`
       DELETE FROM distance_goals
-      WHERE id = ${data.id} AND athlete_id = ${data.athleteId}
+      WHERE id = ${id} AND athlete_id = ${athleteId}
     `;
     return { success: true };
   });

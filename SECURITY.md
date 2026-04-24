@@ -1,7 +1,8 @@
 # Security Policy
 
-This document outlines how Apex Performance Lab handles authentication tokens,
-user data, and our obligations under the Strava API agreement (v2026).
+This document outlines the current security posture of the app, the Strava API
+constraints it follows today, and the remaining gaps before a full production
+security sign-off.
 
 ---
 
@@ -9,13 +10,11 @@ user data, and our obligations under the Strava API agreement (v2026).
 
 ### Storage
 
-- Access tokens and refresh tokens are **never stored in `localStorage` or
-  `sessionStorage`** — both are accessible to any script on the page (XSS risk).
-- Tokens are held **server-side only**, encrypted at rest in the Neon PostgreSQL
-  database using AES-256-GCM via a `TOKEN_ENCRYPTION_KEY` env variable (not
-  committed to source control, never in `.env.example`).
-- The client receives a **short-lived session cookie** (`HttpOnly`, `Secure`,
-  `SameSite=Lax`) that maps to the server-side token record.
+- Current implementation: access tokens and refresh tokens are stored in the
+  `strava_sessions` table server-side.
+- The browser only receives an opaque `HttpOnly` session cookie
+  (`nexpr_strava_session`), so Strava OAuth tokens are never exposed to client
+  JavaScript.
 
 ### Rotation
 
@@ -24,15 +23,14 @@ user data, and our obligations under the Strava API agreement (v2026).
 - If expired, call `https://www.strava.com/api/v3/oauth/token` with
   `grant_type=refresh_token` to obtain a new pair **before** making the
   intended request.
-- Persist the new `access_token`, `refresh_token`, and `expires_at` to the
-  database atomically (single UPDATE statement) to prevent race conditions on
-  concurrent requests.
+- Current implementation persists refreshed values back to `strava_sessions`
+  and clears the session cookie if refresh fails.
 
 ### Transmission
 
 - All API calls to Strava use HTTPS. Never construct Strava API URLs over HTTP.
-- The `Authorization: Bearer <token>` header is set server-side; tokens are
-  never included in client-side fetch calls or URL query strings.
+- The `Authorization: Bearer <token>` header is set server-side by TanStack
+  Start server functions; tokens are not placed in URL query strings.
 
 ---
 
@@ -55,8 +53,10 @@ user data, and our obligations under the Strava API agreement (v2026).
 
 ## 3. Strava Deauthorisation — User Data Deletion
 
-Per Strava API Agreement § Data Deletion: if a user revokes access, **all**
-their data must be deleted promptly.
+Per Strava API Agreement § Data Deletion: if a user revokes access, Strava data
+must be deleted promptly. This app currently does **not** persist Strava
+activity data in Neon; only app-authored data such as fueling, symptom, and
+journal entries are stored in the database.
 
 ### Trigger
 
@@ -69,18 +69,15 @@ The following must be hard-deleted (not soft-deleted) within 24 hours:
 
 | Table / Store            | Deletion method                       |
 | ------------------------ | ------------------------------------- |
-| `strava_tokens`          | DELETE WHERE athlete_uuid = ?         |
-| `activities`             | DELETE WHERE athlete_uuid = ?         |
 | `symptom_entries`        | DELETE WHERE athlete_uuid = ?         |
 | `fueling_data`           | DELETE WHERE athlete_uuid = ?         |
-| `best_efforts`           | DELETE WHERE athlete_uuid = ?         |
-| localStorage (`nexpr_*`) | Cleared client-side on next page load |
+| local caches (`nexpr_*`) | Cleared client-side on next page load |
 
 ### Implementation checklist
 
-- [ ] Webhook endpoint `POST /api/webhooks/strava` validates `STRAVA_WEBHOOK_VERIFY_TOKEN`.
-- [ ] A `DELETE /api/users/:uuid` internal route cascades deletes across all tables.
-- [ ] Deletion is idempotent — safe to call multiple times for the same UUID.
+- [x] Webhook endpoint `POST /api/strava/webhook` validates `STRAVA_WEBHOOK_VERIFY_TOKEN` during the GET handshake.
+- [x] A server-side deauthorization flow deletes app-authored records for the athlete.
+- [x] Deletion is idempotent — safe to call multiple times for the same athlete or activity.
 - [ ] A background job retries failed deletions with exponential back-off.
 - [ ] Deletion completion is logged with a timestamp (no PII in logs).
 
@@ -104,12 +101,10 @@ removed from our system in real time.
 
 ### Handler logic
 
-1. Receive `POST /api/webhooks/strava`.
+1. Receive `POST /api/strava/webhook`.
 2. Validate the hub challenge (GET requests) using `STRAVA_WEBHOOK_VERIFY_TOKEN`.
 3. For `aspect_type === "delete"` + `object_type === "activity"`:
-   - Resolve the internal UUID from `strava_activity_id = object_id`.
-   - Hard-delete the activity row and all child rows (symptom entries, fueling
-     data, best efforts) in a single transaction.
+  - Hard-delete any app-authored rows keyed to `(athlete_id, activity_id)`.
    - Return HTTP 200 immediately — Strava expects a response within 2 seconds.
 
 ---
@@ -147,7 +142,7 @@ The following are excluded from version control:
 | Risk                          | Control                                                   |
 | ----------------------------- | --------------------------------------------------------- |
 | A01 Broken Access Control     | UUID-only URLs; server validates session on every request |
-| A02 Cryptographic Failures    | Tokens encrypted at rest; HTTPS enforced                  |
+| A02 Cryptographic Failures    | Tokens stored server-side; HTTPS enforced                 |
 | A03 Injection                 | Parameterised queries only via `@neondatabase/serverless` |
 | A05 Security Misconfiguration | `.env` excluded from git; no debug output in production   |
 | A07 Auth Failures             | Token rotation; `HttpOnly` session cookies                |

@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequiredEnv } from "../utils/server/env";
+import { requireNumber } from "../utils/server/validation";
 
 
 
@@ -20,12 +22,9 @@ export interface WeatherData {
 export const getWeather = createServerFn({ method: "GET" })
   .inputValidator((input: { lat: number; lon: number }) => input)
   .handler(async ({ data }): Promise<WeatherData> => {
-    const { lat, lon } = data;
-    const apiKey = process.env.OPENWEATHER_API_KEY;
-
-    if (!apiKey) {
-      throw new Error("OPENWEATHER_API_KEY is not configured");
-    }
+    const lat = requireNumber(data.lat, "lat", { min: -90, max: 90 });
+    const lon = requireNumber(data.lon, "lon", { min: -180, max: 180 });
+    const apiKey = getRequiredEnv("OPENWEATHER_API_KEY");
 
     const [currentRes, geoRes] = await Promise.all([
       fetch(
