@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppToolsRouteImport } from './routes/_app/tools'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AppJournalRouteImport } from './routes/_app/journal'
 import { Route as AppInsightsRouteImport } from './routes/_app/insights'
 import { Route as AppGoalsRouteImport } from './routes/_app/goals'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -36,6 +37,11 @@ const AppToolsRoute = AppToolsRouteImport.update({
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJournalRoute = AppJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
   getParentRoute: () => AppRoute,
 } as any)
 const AppInsightsRoute = AppInsightsRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/goals': typeof AppGoalsRoute
   '/insights': typeof AppInsightsRoute
+  '/journal': typeof AppJournalRoute
   '/profile': typeof AppProfileRoute
   '/tools': typeof AppToolsRoute
   '/auth/strava/callback': typeof AuthStravaCallbackRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/goals': typeof AppGoalsRoute
   '/insights': typeof AppInsightsRoute
+  '/journal': typeof AppJournalRoute
   '/profile': typeof AppProfileRoute
   '/tools': typeof AppToolsRoute
   '/auth/strava/callback': typeof AuthStravaCallbackRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/goals': typeof AppGoalsRoute
   '/_app/insights': typeof AppInsightsRoute
+  '/_app/journal': typeof AppJournalRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/tools': typeof AppToolsRoute
   '/auth/strava/callback': typeof AuthStravaCallbackRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/goals'
     | '/insights'
+    | '/journal'
     | '/profile'
     | '/tools'
     | '/auth/strava/callback'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/goals'
     | '/insights'
+    | '/journal'
     | '/profile'
     | '/tools'
     | '/auth/strava/callback'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/goals'
     | '/_app/insights'
+    | '/_app/journal'
     | '/_app/profile'
     | '/_app/tools'
     | '/auth/strava/callback'
@@ -164,6 +176,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/journal': {
+      id: '/_app/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof AppJournalRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/insights': {
@@ -209,6 +228,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppGoalsRoute: typeof AppGoalsRoute
   AppInsightsRoute: typeof AppInsightsRoute
+  AppJournalRoute: typeof AppJournalRoute
   AppProfileRoute: typeof AppProfileRoute
   AppToolsRoute: typeof AppToolsRoute
 }
@@ -218,6 +238,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppGoalsRoute: AppGoalsRoute,
   AppInsightsRoute: AppInsightsRoute,
+  AppJournalRoute: AppJournalRoute,
   AppProfileRoute: AppProfileRoute,
   AppToolsRoute: AppToolsRoute,
 }

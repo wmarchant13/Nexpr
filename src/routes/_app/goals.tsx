@@ -10,10 +10,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   useActivities,
   useAthlete,
-  kmToMiles,
-  mToKm,
-  formatPace,
-  useStravaPRs,
   useGoals,
   useSaveGoal,
   useDeleteGoal,
@@ -64,7 +60,6 @@ function parseTimeInput(input: string): number | null {
 function GoalsPage() {
   const { data: athlete } = useAthlete();
   const { data: activities, isLoading } = useActivities(1, 100);
-  const { data: stravaPRs, isLoading: prsLoading } = useStravaPRs(activities);
   const { data: dbGoals = [] } = useGoals(athlete?.id);
   const saveGoalMutation = useSaveGoal();
   const deleteGoalMutation = useDeleteGoal();
@@ -146,7 +141,7 @@ function GoalsPage() {
     <div className={styles.page}>
       <div className={styles.container}>
         <header className={styles.header}>
-          <span className={styles.kicker}>Race Goals</span>
+          <span className={styles.kicker}>Training Goals</span>
           <h1 className={styles.title}>{currentYear} Targets</h1>
           <p className={styles.subtitle}>
             Set a goal, and we'll mark it done when Strava logs your PR.
@@ -275,53 +270,50 @@ function GoalsPage() {
           </section>
         )}
 
-        {/* Personal Records */}
-        <section className={styles.prsSection}>
-          <h2 className={styles.sectionTitle}>Personal Records</h2>
-          <p className={styles.sectionSubtitle}>
-            Pulled from your Strava best efforts
-          </p>
-
-          {prsLoading ? (
-            <div className={styles.prsLoading}>
-              <div className={styles.spinner} />
-              <span>Fetching from Strava...</span>
-            </div>
-          ) : stravaPRs && stravaPRs.length > 0 ? (
-            <div className={styles.prsGrid}>
-              {[...stravaPRs]
-                .sort(
-                  (a, b) =>
-                    DISTANCE_ORDER.indexOf(a.distance as RaceDistanceKey) -
-                    DISTANCE_ORDER.indexOf(b.distance as RaceDistanceKey),
-                )
-                .map((pr) => (
-                  <div key={pr.distance} className={styles.prCard}>
-                    <span className={styles.prDistance}>{pr.distance}</span>
-                    <span className={styles.prTime}>{formatTime(pr.time)}</span>
-                    <span className={styles.prPace}>
-                      {formatPace(pr.pace)}/mi
-                    </span>
-                    <span className={styles.prDate}>
-                      {pr.date.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
-                ))}
-            </div>
-          ) : (
-            <div className={styles.noPrs}>
-              <p>No best efforts found yet.</p>
-              <p className={styles.noPrsHint}>
-                Strava records best efforts at 5K, 10K, Half, and Marathon
-                within your runs.
+        {/* Achieved Goals */}
+        {(() => {
+          const achieved = yearGoals.filter((goal) => {
+            const bestTime = bestTimesThisYear[goal.distance];
+            return bestTime !== undefined && bestTime <= goal.targetSeconds;
+          });
+          if (achieved.length === 0) return null;
+          return (
+            <section className={styles.prsSection}>
+              <h2 className={styles.sectionTitle}>Achieved Goals</h2>
+              <p className={styles.sectionSubtitle}>
+                Targets you set and hit this year
               </p>
-            </div>
-          )}
-        </section>
+              <div className={styles.prsGrid}>
+                {achieved
+                  .sort(
+                    (a, b) =>
+                      DISTANCE_ORDER.indexOf(a.distance) -
+                      DISTANCE_ORDER.indexOf(b.distance),
+                  )
+                  .map((goal) => {
+                    const bestTime = bestTimesThisYear[goal.distance]!;
+                    const underBy = goal.targetSeconds - bestTime;
+                    return (
+                      <div key={goal.id} className={styles.prCard}>
+                        <span className={styles.prDistance}>
+                          {goal.distance}
+                        </span>
+                        <span className={styles.prTime}>
+                          {formatTime(bestTime)}
+                        </span>
+                        <span className={styles.prPace}>
+                          Target: {formatTime(goal.targetSeconds)}
+                        </span>
+                        <span className={styles.prDate}>
+                          {formatTime(underBy)} under
+                        </span>
+                      </div>
+                    );
+                  })}
+              </div>
+            </section>
+          );
+        })()}
       </div>
     </div>
   );

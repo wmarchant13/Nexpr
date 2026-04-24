@@ -12,8 +12,9 @@ const TABS: Tab[] = [
   { path: "/dashboard", label: "Log", shortLabel: "Log" },
   { path: "/activities", label: "Miles", shortLabel: "Miles" },
   { path: "/insights", label: "Breakdown", shortLabel: "Break" },
-  { path: "/goals", label: "Race Day", shortLabel: "Race" },
+  { path: "/goals", label: "Goals", shortLabel: "Goals" },
   { path: "/tools", label: "Kit", shortLabel: "Kit" },
+  { path: "/journal", label: "Journal", shortLabel: "Notes" },
   { path: "/profile", label: "Profile", shortLabel: "Me" },
 ];
 

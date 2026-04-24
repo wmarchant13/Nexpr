@@ -181,38 +181,38 @@ function InsightsPage() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="0%" stopColor="#111111" stopOpacity={0.15} />
-                      <stop offset="100%" stopColor="#111111" stopOpacity={0} />
+                      <stop offset="0%" stopColor="#C4A668" stopOpacity={0.30} />
+                      <stop offset="100%" stopColor="#C4A668" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(17,17,17,0.08)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
                   <XAxis
                     dataKey="week"
-                    stroke="rgba(17,17,17,0.35)"
-                    fontSize={11}
+                    stroke="rgba(255,255,255,0.3)"
+                    tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
                     tickLine={false}
                   />
                   <YAxis
-                    stroke="rgba(17,17,17,0.35)"
-                    fontSize={11}
+                    stroke="rgba(255,255,255,0.3)"
+                    tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
                     tickLine={false}
                     axisLine={false}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#F5F2EB",
-                      border: "1px solid rgba(17,17,17,0.15)",
+                      backgroundColor: "#1A1A1A",
+                      border: "1px solid rgba(255,255,255,0.12)",
                       borderRadius: "3px",
                       fontSize: "0.8125rem",
-                      color: "#111111",
+                      color: "#FFFFFF",
                     }}
-                    labelStyle={{ color: "#111111" }}
+                    labelStyle={{ color: "rgba(255,255,255,0.6)" }}
                   />
                   <Area
                     type="monotone"
                     dataKey="load"
-                    stroke="#111111"
-                    strokeWidth={1.5}
+                    stroke="#C4A668"
+                    strokeWidth={2}
                     fill="url(#loadGradient)"
                     name="Training Load"
                   />
@@ -232,45 +232,45 @@ function InsightsPage() {
             <div className={styles.chartContainer}>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={longRunChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(17,17,17,0.08)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
                   <XAxis
                     dataKey="week"
-                    stroke="rgba(17,17,17,0.35)"
-                    fontSize={11}
+                    stroke="rgba(255,255,255,0.3)"
+                    tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
                     tickLine={false}
                   />
                   <YAxis
-                    stroke="rgba(17,17,17,0.35)"
-                    fontSize={11}
+                    stroke="rgba(255,255,255,0.3)"
+                    tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
                     tickLine={false}
                     axisLine={false}
                     label={{
                       value: "miles",
                       angle: -90,
                       position: "insideLeft",
-                      fill: "rgba(17,17,17,0.4)",
+                      fill: "rgba(255,255,255,0.35)",
                       fontSize: 11,
                     }}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#F5F2EB",
-                      border: "1px solid rgba(17,17,17,0.15)",
+                      backgroundColor: "#1A1A1A",
+                      border: "1px solid rgba(255,255,255,0.12)",
                       borderRadius: "3px",
                       fontSize: "0.8125rem",
-                      color: "#111111",
+                      color: "#FFFFFF",
                     }}
-                    labelStyle={{ color: "#111111" }}
+                    labelStyle={{ color: "rgba(255,255,255,0.6)" }}
                   />
                   <Bar
                     dataKey="miles"
-                    fill="rgba(17,17,17,0.15)"
+                    fill="rgba(255,255,255,0.14)"
                     radius={[2, 2, 0, 0]}
                     name="Total Miles"
                   />
                   <Bar
                     dataKey="longRun"
-                    fill="#111111"
+                    fill="#C4A668"
                     radius={[2, 2, 0, 0]}
                     name="Long Run"
                   />
