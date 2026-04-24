@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import {
   getStravaAuthUrl,
   exchangeStravaCode,
@@ -9,6 +10,7 @@ import {
   getAthlete,
   getActivities,
   getStats,
+  getActivityWebhookSignal,
   getActivityDetails,
   getActivityBestEfforts,
 } from "../api/strava";
@@ -253,6 +255,42 @@ export const useActivities = (page: number = 1, perPage: number = 30) => {
     refetchOnMount: false,
     retry: false,
   });
+};
+
+// Polls only a lightweight webhook signal and refetches activities when it changes.
+export const useActivityWebhookSync = () => {
+  const queryClient = useQueryClient();
+  const previousSignalRef = useRef<number | null | undefined>(undefined);
+
+  const { data: signal } = useQuery({
+    queryKey: ["activityWebhookSignal"],
+    queryFn: async () => getActivityWebhookSignal(),
+    enabled: typeof window !== "undefined",
+    staleTime: 0,
+    gcTime: 60 * 1000,
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (previousSignalRef.current === undefined) {
+      previousSignalRef.current = signal ?? null;
+      return;
+    }
+
+    if (signal !== null && signal !== previousSignalRef.current) {
+      previousSignalRef.current = signal;
+      clearCache();
+      void queryClient.invalidateQueries({ queryKey: ["activities"] });
+      void queryClient.invalidateQueries({ queryKey: ["stats"] });
+      return;
+    }
+
+    if (signal === null) {
+      previousSignalRef.current = null;
+    }
+  }, [queryClient, signal]);
 };
 
 // Query hook: fetches lifetime stats with local cache

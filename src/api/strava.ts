@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { fetchStrava } from "../utils/server/strava";
-import { requireStravaAccess } from "../utils/server/stravaSession";
+import { getCurrentStravaSession, requireStravaAccess } from "../utils/server/stravaSession";
 import { requireNumber } from "../utils/server/validation";
+import { firstRow, getDb } from "../utils/server/env";
 
 type JsonValue =
   | string
@@ -113,6 +114,25 @@ export const getStats = createServerFn({ method: "GET" }).handler(
         ttlMs: 5 * 60 * 1000,
       },
     );
+  },
+);
+
+// Returns the latest in-memory webhook signal for the signed-in athlete
+export const getActivityWebhookSignal = createServerFn({ method: "GET" }).handler(
+  async (): Promise<number | null> => {
+    const session = await getCurrentStravaSession();
+    if (!session) return null;
+    const db = getDb();
+    const row = firstRow<{ updated_at: string | Date }>(await db`
+      SELECT updated_at
+      FROM strava_sessions
+      WHERE id = ${session.id}
+      LIMIT 1
+    `);
+
+    if (!row?.updated_at) return null;
+    const ts = row.updated_at instanceof Date ? row.updated_at.getTime() : Date.parse(row.updated_at);
+    return Number.isFinite(ts) ? ts : null;
   },
 );
 

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   deleteAthleteActivityData,
   deleteAthleteAppData,
+  markAthleteWebhookHit,
 } from "../utils/server/stravaSession";
 
 type StravaWebhookEvent = {
@@ -40,10 +41,15 @@ export const Route = createFileRoute("/api/strava/webhook")({
         const verifyToken = url.searchParams.get("hub.verify_token");
         const challenge = url.searchParams.get("hub.challenge");
 
+        const expectedToken =
+          process.env.STRAVA_WEBHOOK_VERIFY_TOKEN ??
+          (globalThis as Record<string, any>).__env__?.STRAVA_WEBHOOK_VERIFY_TOKEN;
+
         if (
           mode !== "subscribe" ||
           !challenge ||
-          verifyToken !== process.env.STRAVA_WEBHOOK_VERIFY_TOKEN
+          !expectedToken ||
+          verifyToken !== expectedToken
         ) {
           return jsonResponse({ error: "Invalid webhook verification request" }, 403);
         }
@@ -62,17 +68,23 @@ export const Route = createFileRoute("/api/strava/webhook")({
         const isAthleteDeauth =
           payload.object_type === "athlete" &&
           (payload.aspect_type === "delete" || payload.updates?.authorized === "false");
+        const isActivityEvent =
+          payload.object_type === "activity" &&
+          Number.isFinite(athleteId) &&
+          athleteId > 0;
         const isActivityDelete =
-          payload.object_type === "activity" && payload.aspect_type === "delete";
+          isActivityEvent && payload.aspect_type === "delete";
 
         if (isAthleteDeauth && Number.isFinite(athleteId) && athleteId > 0) {
           await deleteAthleteAppData(athleteId);
         }
 
+        if (isActivityEvent) {
+          markAthleteWebhookHit(athleteId);
+        }
+
         if (
           isActivityDelete &&
-          Number.isFinite(athleteId) &&
-          athleteId > 0 &&
           Number.isFinite(activityId) &&
           activityId > 0
         ) {

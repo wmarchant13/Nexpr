@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   useActivities,
+  useActivityWebhookSync,
   useAthlete,
   formatPace,
   kmToMiles,
@@ -31,6 +32,7 @@ function ActivitiesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openSymptomId, setOpenSymptomId] = useState<number | null>(null);
   const { data: athlete } = useAthlete();
+  useActivityWebhookSync();
   const { data: activities, isLoading } = useActivities(page, 100);
   const { data: symptomEntries = [] } = useSymptomEntries(athlete?.id);
   const saveSymptomMutation = useSaveSymptomEntry();
