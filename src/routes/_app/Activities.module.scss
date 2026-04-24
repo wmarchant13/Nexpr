@@ -1,5 +1,19 @@
 /* ── Activities — Editorial run list ── */
 
+.deviceBadge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
 .page {
   background: transparent;
   min-height: 100vh;

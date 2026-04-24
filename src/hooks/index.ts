@@ -66,6 +66,7 @@ export interface Activity {
   achievement_count?: number;
   kudos_count?: number;
   suffer_score?: number;
+  device_name?: string;
 }
 
 export interface ActivityTotals {

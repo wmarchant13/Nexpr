@@ -40,6 +40,7 @@ type StravaActivity = {
   achievement_count?: number;
   kudos_count?: number;
   suffer_score?: number;
+  device_name?: string;
 };
 
 type StravaActivityTotals = {

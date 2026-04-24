@@ -192,6 +192,9 @@ function ActivitiesPage() {
                     </span>
                     <div className={styles.cardInfo}>
                       <h3 className={styles.activityName}>{activity.name}</h3>
+                      {/garmin/i.test(activity.device_name ?? "") && (
+                        <span className={styles.deviceBadge}>Garmin</span>
+                      )}
                     </div>
                   </div>
 
