@@ -57,6 +57,18 @@ export const Route = createFileRoute("/api/strava/webhook")({
         return jsonResponse({ "hub.challenge": challenge });
       },
       POST: async ({ request }) => {
+        const url = new URL(request.url);
+        const expectedToken =
+          process.env.STRAVA_WEBHOOK_VERIFY_TOKEN ??
+          (globalThis as Record<string, any>).__env__?.STRAVA_WEBHOOK_VERIFY_TOKEN;
+        const postToken =
+          url.searchParams.get("verify_token") ??
+          url.searchParams.get("hub.verify_token");
+
+        if (!expectedToken || postToken !== expectedToken) {
+          return jsonResponse({ error: "Unauthorized webhook request" }, 403);
+        }
+
         // Payload
         const payload = (await request.json().catch(() => null)) as StravaWebhookEvent | null;
         if (!payload) {

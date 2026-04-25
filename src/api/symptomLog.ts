@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { SymptomTrigger, WarmUpBehavior } from "../store/symptomLog";
 import { getDb } from "../utils/server/env";
+import { requireCurrentStravaSession } from "../utils/server/stravaSession";
 import {
   optionalString,
   requireDateKey,
@@ -43,10 +44,14 @@ export const getSymptomEntries = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     const rows = await sql`
       SELECT * FROM symptom_log
       WHERE athlete_id = ${athleteId}
@@ -69,11 +74,15 @@ export const saveSymptomEntry = createServerFn({ method: "POST" })
   .inputValidator((input: SymptomInput) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const id = requireUuidLike(data.id, "id");
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     const activityId = requireNumber(data.activityId, "activityId", {
       integer: true,
       min: 1,
@@ -111,11 +120,15 @@ export const deleteSymptomEntry = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string; athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const id = requireUuidLike(data.id, "id");
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     await sql`
       DELETE FROM symptom_log
       WHERE id = ${id} AND athlete_id = ${athleteId}

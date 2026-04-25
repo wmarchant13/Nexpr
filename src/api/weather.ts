@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequiredEnv } from "../utils/server/env";
+import { requireCurrentStravaSession } from "../utils/server/stravaSession";
 import { requireNumber } from "../utils/server/validation";
 
 // Converts wind bearing degrees to a compass direction string
@@ -22,6 +23,7 @@ export interface WeatherData {
 export const getWeather = createServerFn({ method: "GET" })
   .inputValidator((input: { lat: number; lon: number }) => input)
   .handler(async ({ data }): Promise<WeatherData> => {
+    await requireCurrentStravaSession();
     const lat = requireNumber(data.lat, "lat", { min: -90, max: 90 });
     const lon = requireNumber(data.lon, "lon", { min: -180, max: 180 });
     const apiKey = getRequiredEnv("OPENWEATHER_API_KEY");

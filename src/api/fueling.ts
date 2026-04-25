@@ -2,6 +2,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { getDb, toRows } from "../utils/server/env";
+import { requireCurrentStravaSession } from "../utils/server/stravaSession";
 import {
   optionalString,
   requireEnumValue,
@@ -44,6 +45,7 @@ export const getFuelingEntry = createServerFn({ method: "GET" })
   .inputValidator((input: { activityId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const activityId = requireNumber(data.activityId, "activityId", {
       integer: true,
       min: 1,
@@ -53,6 +55,7 @@ export const getFuelingEntry = createServerFn({ method: "GET" })
       await sql`
       SELECT * FROM fueling_entries 
       WHERE activity_id = ${activityId}
+        AND athlete_id = ${session.athleteId}
       LIMIT 1
     `,
     );
@@ -84,10 +87,14 @@ export const getAllFuelingEntries = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
 
     const rows = toRows<FuelingEntryRow>(
       await sql`
@@ -119,10 +126,14 @@ export const saveFuelingEntry = createServerFn({ method: "POST" })
   .inputValidator((input: FuelingEntryInput) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     const activityId = requireNumber(data.activityId, "activityId", {
       integer: true,
       min: 1,
@@ -223,10 +234,14 @@ export const deleteFuelingEntry = createServerFn({ method: "POST" })
   .inputValidator((input: { athleteId: number; activityId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     const activityId = requireNumber(data.activityId, "activityId", {
       integer: true,
       min: 1,

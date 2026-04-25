@@ -221,6 +221,26 @@
   padding-top: 4px;
 }
 
+.stravaActivityLink {
+  justify-self: end;
+  align-self: start;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+  padding-top: 4px;
+
+  &:hover {
+    color: var(--ink);
+    border-color: var(--ink-20);
+  }
+}
+
 /* ── Stat Row inside card ── */
 .statsGrid {
   display: flex;

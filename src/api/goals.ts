@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getDb, firstRow, toRows } from "../utils/server/env";
+import { requireCurrentStravaSession } from "../utils/server/stravaSession";
 import {
   requireEnumValue,
   requireNumber,
@@ -29,10 +30,14 @@ export const getGoals = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     const rows = toRows<GoalRow>(
       await sql`
       SELECT * FROM distance_goals
@@ -53,10 +58,14 @@ export const saveGoal = createServerFn({ method: "POST" })
   .inputValidator((input: GoalInput) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     const distance = requireEnumValue(
       data.distance,
       "distance",
@@ -90,11 +99,15 @@ export const deleteGoal = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string; athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const id = requireString(data.id, "id", { minLength: 1, maxLength: 64 });
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     await sql`
       DELETE FROM distance_goals
       WHERE id = ${id} AND athlete_id = ${athleteId}

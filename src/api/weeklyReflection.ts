@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { normalizeWeekStart } from "../store/weeklyReflection";
 import { getDb } from "../utils/server/env";
+import { requireCurrentStravaSession } from "../utils/server/stravaSession";
 import {
   requireDateKey,
   requireNumber,
@@ -35,10 +36,14 @@ export const getReflections = createServerFn({ method: "GET" })
   .inputValidator((input: { athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     const rows = await sql`
       SELECT * FROM weekly_reflections
       WHERE athlete_id = ${athleteId}
@@ -60,12 +65,16 @@ export const saveReflection = createServerFn({ method: "POST" })
   .inputValidator((input: ReflectionInput) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const now = new Date().toISOString();
     const id = requireUuidLike(data.id, "id");
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     const weekStart = normalizeWeekStart(
       requireDateKey(data.weekStart, "weekStart"),
     );
@@ -110,10 +119,14 @@ export const deleteReflection = createServerFn({ method: "POST" })
   .inputValidator((input: { weekStart: string; athleteId: number }) => input)
   .handler(async ({ data }) => {
     const sql = getDb();
+    const session = await requireCurrentStravaSession();
     const athleteId = requireNumber(data.athleteId, "athleteId", {
       integer: true,
       min: 1,
     });
+    if (athleteId !== session.athleteId) {
+      throw new Error("Forbidden");
+    }
     const weekStart = normalizeWeekStart(
       requireDateKey(data.weekStart, "weekStart"),
     );

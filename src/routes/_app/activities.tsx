@@ -182,6 +182,7 @@ function ActivitiesPage() {
               const pace = activity.moving_time / 60 / miles;
               const elevation = metersToFeet(activity.total_elevation_gain);
               const duration = Math.round(activity.moving_time / 60);
+              const stravaUrl = `https://www.strava.com/activities/${activity.id}`;
 
               return (
                 <article key={activity.id} className={styles.activityCard}>
@@ -198,6 +199,14 @@ function ActivitiesPage() {
                         <span className={styles.deviceBadge}>Garmin</span>
                       )}
                     </div>
+                    <a
+                      href={stravaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.stravaActivityLink}
+                    >
+                      View on Strava
+                    </a>
                   </div>
 
                   <div className={styles.statsGrid}>
