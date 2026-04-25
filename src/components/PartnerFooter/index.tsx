@@ -14,7 +14,7 @@ function PartnerFooter(_props: PartnerFooterProps) {
         aria-label="Powered by Strava"
       >
         <img
-          src="/assets/pwrdBy_strava_white/api_logo_pwrdBy_strava_horiz_white.png"
+          src="/assets/strava/pwrdBy_strava_white/api_logo_pwrdBy_strava_horiz_white.png"
           alt="Powered by Strava"
           className={styles.stravaLogo}
           width={193}

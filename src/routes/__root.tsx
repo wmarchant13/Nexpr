@@ -233,9 +233,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
           a { color: inherit; text-decoration: none; }
 
-          /* Crosshair cursor on all interactive elements */
+          /* Use standard hover cursor on interactive elements */
           a, button, [role="button"], input, select, label[for] {
-            cursor: crosshair;
+            cursor: pointer;
           }
 
           /* Scroll fade-up animation classes */

@@ -190,7 +190,10 @@ export async function getCurrentStravaSession(): Promise<StravaSession | null> {
 export async function requireCurrentStravaSession(): Promise<StravaSession> {
   const session = await getCurrentStravaSession();
   if (!session) {
-    throw new Error("Not authenticated with Strava");
+    throw new Response("Unauthorized", {
+      status: 401,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   }
   return session;
 }

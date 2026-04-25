@@ -1,13 +1,16 @@
 import { createMiddleware, createStart } from "@tanstack/react-start";
 import { isbot } from "isbot";
-import { checkRateLimit, getClientIp, limitForPath } from "./utils/server/rateLimit";
+import {
+  checkRateLimit,
+  getClientIp,
+  getRateLimitKey,
+  limitForPath,
+} from "./utils/server/rateLimit";
 
-// Rate limit middleware: 300 req/min per IP, 20/min on auth paths; skips /_server RPC and assets
+// Rate limit middleware for all dynamic routes, including /_server RPC.
 const rateLimitMiddleware = createMiddleware({ type: "request" }).server(
   async ({ next, pathname, request }) => {
-    // /_server calls are React Query RPCs — already session-gated, skip rate limit
     if (
-      pathname.startsWith("/_server") ||
       pathname.startsWith("/assets/") ||
       pathname === "/favicon.ico"
     ) {
@@ -15,8 +18,9 @@ const rateLimitMiddleware = createMiddleware({ type: "request" }).server(
     }
 
     const ip = getClientIp(request);
+    const key = getRateLimitKey(request, pathname, ip);
     const limit = limitForPath(pathname);
-    const { allowed, remaining, resetAt } = checkRateLimit(ip, limit);
+    const { allowed, remaining, resetAt } = checkRateLimit(key, limit);
 
     if (!allowed) {
       return new Response("Too Many Requests", {
@@ -36,6 +40,44 @@ const rateLimitMiddleware = createMiddleware({ type: "request" }).server(
       response.headers.set("X-RateLimit-Remaining", String(remaining));
     }
     return response;
+  },
+);
+
+// Mutation guard for /_server writes to reduce cross-site and scripted abuse.
+const mutationGuardMiddleware = createMiddleware({ type: "request" }).server(
+  async ({ next, pathname, request }) => {
+    const method = request.method.toUpperCase();
+    const isMutation = method === "POST" || method === "PUT" || method === "PATCH" || method === "DELETE";
+
+    if (!pathname.startsWith("/_server") || !isMutation) {
+      return next();
+    }
+
+    const expectedOrigin = new URL(request.url).origin;
+    const origin = request.headers.get("origin");
+    const secFetchSite = request.headers.get("sec-fetch-site");
+
+    if (!origin || origin !== expectedOrigin) {
+      return new Response("Forbidden", {
+        status: 403,
+        headers: {
+          "Cache-Control": "no-store",
+          "Content-Type": "text/plain; charset=utf-8",
+        },
+      });
+    }
+
+    if (secFetchSite && secFetchSite !== "same-origin" && secFetchSite !== "none") {
+      return new Response("Forbidden", {
+        status: 403,
+        headers: {
+          "Cache-Control": "no-store",
+          "Content-Type": "text/plain; charset=utf-8",
+        },
+      });
+    }
+
+    return next();
   },
 );
 
@@ -69,7 +111,6 @@ function shouldInspectRequest(pathname: string, request: Request) {
   }
 
   if (
-    pathname.startsWith("/_server") ||
     pathname.startsWith("/api/strava/webhook") ||
     pathname.startsWith("/assets/") ||
     pathname.startsWith("/.well-known/") ||
@@ -108,5 +149,5 @@ function isBlockedBot(userAgent: string) {
 }
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [rateLimitMiddleware, botProtectionMiddleware],
+  requestMiddleware: [rateLimitMiddleware, mutationGuardMiddleware, botProtectionMiddleware],
 }));

@@ -1,6 +1,7 @@
 const WINDOW_MS = 60_000;
 
-const DEFAULT_LIMIT = 300;
+const DEFAULT_LIMIT = 240;
+const SERVER_LIMIT = 120;
 const AUTH_LIMIT = 20;
 
 interface RateLimitEntry {
@@ -29,9 +30,30 @@ export function getClientIp(request: Request): string {
   );
 }
 
+// Returns a deterministic rate-limit key with per-session isolation for RPC routes.
+export function getRateLimitKey(
+  request: Request,
+  pathname: string,
+  ip: string,
+): string {
+  if (!pathname.startsWith("/_server")) {
+    return `ip:${ip}`;
+  }
+
+  const cookie = request.headers.get("cookie") ?? "";
+  const match = cookie.match(/(?:^|;\s*)nexpr_strava_session=([^;]+)/);
+  const session = match?.[1];
+
+  if (!session) {
+    return `ip:${ip}:anon-rpc`;
+  }
+
+  return `ip:${ip}:session:${session}`;
+}
+
 // Checks and increments the rate limit counter for a given IP
 export function checkRateLimit(
-  ip: string,
+  key: string,
   limit = DEFAULT_LIMIT,
 ): { allowed: boolean; remaining: number; resetAt: number } {
   const now = Date.now();
@@ -41,11 +63,11 @@ export function checkRateLimit(
     lastPurge = now;
   }
 
-  let entry = store.get(ip);
+  let entry = store.get(key);
 
   if (!entry || entry.resetAt <= now) {
     entry = { count: 1, resetAt: now + WINDOW_MS };
-    store.set(ip, entry);
+    store.set(key, entry);
     return { allowed: true, remaining: limit - 1, resetAt: entry.resetAt };
   }
 
@@ -62,5 +84,10 @@ export function limitForPath(pathname: string): number {
   ) {
     return AUTH_LIMIT;
   }
+
+  if (pathname.startsWith("/_server")) {
+    return SERVER_LIMIT;
+  }
+
   return DEFAULT_LIMIT;
 }

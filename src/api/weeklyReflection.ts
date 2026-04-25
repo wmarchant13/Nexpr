@@ -42,7 +42,10 @@ export const getReflections = createServerFn({ method: "GET" })
       min: 1,
     });
     if (athleteId !== session.athleteId) {
-      throw new Error("Forbidden");
+      throw new Response("Forbidden", {
+        status: 403,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
     const rows = await sql`
       SELECT * FROM weekly_reflections
@@ -73,7 +76,10 @@ export const saveReflection = createServerFn({ method: "POST" })
       min: 1,
     });
     if (athleteId !== session.athleteId) {
-      throw new Error("Forbidden");
+      throw new Response("Forbidden", {
+        status: 403,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
     const weekStart = normalizeWeekStart(
       requireDateKey(data.weekStart, "weekStart"),
@@ -125,7 +131,10 @@ export const deleteReflection = createServerFn({ method: "POST" })
       min: 1,
     });
     if (athleteId !== session.athleteId) {
-      throw new Error("Forbidden");
+      throw new Response("Forbidden", {
+        status: 403,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
     const weekStart = normalizeWeekStart(
       requireDateKey(data.weekStart, "weekStart"),

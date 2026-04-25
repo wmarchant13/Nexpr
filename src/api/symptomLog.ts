@@ -50,7 +50,10 @@ export const getSymptomEntries = createServerFn({ method: "GET" })
       min: 1,
     });
     if (athleteId !== session.athleteId) {
-      throw new Error("Forbidden");
+      throw new Response("Forbidden", {
+        status: 403,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
     const rows = await sql`
       SELECT * FROM symptom_log
@@ -81,7 +84,10 @@ export const saveSymptomEntry = createServerFn({ method: "POST" })
       min: 1,
     });
     if (athleteId !== session.athleteId) {
-      throw new Error("Forbidden");
+      throw new Response("Forbidden", {
+        status: 403,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
     const activityId = requireNumber(data.activityId, "activityId", {
       integer: true,
@@ -127,7 +133,10 @@ export const deleteSymptomEntry = createServerFn({ method: "POST" })
       min: 1,
     });
     if (athleteId !== session.athleteId) {
-      throw new Error("Forbidden");
+      throw new Response("Forbidden", {
+        status: 403,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
     await sql`
       DELETE FROM symptom_log

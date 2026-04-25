@@ -15,22 +15,22 @@ export default function AppLayout() {
     <div className={styles.layout}>
       <div className={styles.backgroundLayer} aria-hidden="true">
         <img
-          src="/assets/duo-running.jpg"
+          src="/assets/running-media/duo-running.jpg"
           alt=""
           className={`${styles.backgroundTile} ${styles.tileNorthwest}`}
         />
         <img
-          src="/assets/man-running.jpg"
+          src="/assets/running-media/man-running.jpg"
           alt=""
           className={`${styles.backgroundTile} ${styles.tileNorth}`}
         />
         <img
-          src="/assets/man-running-2.jpg"
+          src="/assets/running-media/man-running-2.jpg"
           alt=""
           className={`${styles.backgroundTile} ${styles.tileEast}`}
         />
         <img
-          src="/assets/track-running.jpg"
+          src="/assets/running-media/track-running.jpg"
           alt=""
           className={`${styles.backgroundTile} ${styles.tileSouthwest}`}
         />
@@ -40,7 +40,7 @@ export default function AppLayout() {
         <div className={styles.headerInner}>
           <div className={styles.brand}>
             <img
-              src="/assets/nexpr_logo.png"
+              src="/assets/branding/nexpr_logo.png"
               alt="Nexpr"
               className={styles.wordmarkLogo}
             />

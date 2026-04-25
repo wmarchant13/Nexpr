@@ -221,7 +221,7 @@ function ProfilePage() {
         <section className={styles.appInfo}>
           <div className={styles.appBrand}>
             <img
-              src="/assets/nexpr_logo.png"
+              src="/assets/branding/nexpr_logo.png"
               alt="Nexpr"
               className={styles.appLogo}
             />

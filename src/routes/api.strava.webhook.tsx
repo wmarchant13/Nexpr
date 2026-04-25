@@ -69,14 +69,28 @@ export const Route = createFileRoute("/api/strava/webhook")({
           return jsonResponse({ error: "Unauthorized webhook request" }, 403);
         }
 
+        const contentType = request.headers.get("content-type") ?? "";
+        if (!contentType.toLowerCase().includes("application/json")) {
+          return jsonResponse({ error: "Unsupported webhook content type" }, 415);
+        }
+
         // Payload
         const payload = (await request.json().catch(() => null)) as StravaWebhookEvent | null;
         if (!payload) {
           return jsonResponse({ error: "Invalid webhook payload" }, 400);
         }
 
+        if (payload.object_type !== "activity" && payload.object_type !== "athlete") {
+          return jsonResponse({ error: "Unsupported webhook object type" }, 400);
+        }
+
         const athleteId = Number(payload.owner_id ?? payload.object_id ?? 0);
         const activityId = Number(payload.object_id ?? 0);
+
+        if (!Number.isFinite(athleteId) || athleteId <= 0) {
+          return jsonResponse({ error: "Invalid webhook owner id" }, 400);
+        }
+
         const isAthleteDeauth =
           payload.object_type === "athlete" &&
           (payload.aspect_type === "delete" || payload.updates?.authorized === "false");

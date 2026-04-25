@@ -36,7 +36,10 @@ export const getGoals = createServerFn({ method: "GET" })
       min: 1,
     });
     if (athleteId !== session.athleteId) {
-      throw new Error("Forbidden");
+      throw new Response("Forbidden", {
+        status: 403,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
     const rows = toRows<GoalRow>(
       await sql`
@@ -64,7 +67,10 @@ export const saveGoal = createServerFn({ method: "POST" })
       min: 1,
     });
     if (athleteId !== session.athleteId) {
-      throw new Error("Forbidden");
+      throw new Response("Forbidden", {
+        status: 403,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
     const distance = requireEnumValue(
       data.distance,
@@ -106,7 +112,10 @@ export const deleteGoal = createServerFn({ method: "POST" })
       min: 1,
     });
     if (athleteId !== session.athleteId) {
-      throw new Error("Forbidden");
+      throw new Response("Forbidden", {
+        status: 403,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
     await sql`
       DELETE FROM distance_goals

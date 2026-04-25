@@ -11,7 +11,7 @@ export default function LoginPage() {
         <div className={styles.box}>
           <div className={styles.brandBlock}>
             <img
-              src="/assets/nexpr_logo.png"
+              src="/assets/branding/nexpr_logo.png"
               alt="Nexpr"
               className={styles.brandLogo}
             />
@@ -33,7 +33,7 @@ export default function LoginPage() {
             aria-label="Connect with Strava"
           >
             <img
-              src="/assets/btn_strava_connect_with_orange.png"
+              src="/assets/strava/btn_strava_connect_with_orange.png"
               alt="Connect with Strava"
               className={styles.ctaImage}
               width={280}
@@ -56,7 +56,7 @@ export default function LoginPage() {
         <aside className={styles.videoPane} aria-hidden="true">
           <video
             className={styles.videoBg}
-            src="/assets/running-video.mp4"
+            src="/assets/running-media/running-video.mp4"
             autoPlay
             muted
             loop
