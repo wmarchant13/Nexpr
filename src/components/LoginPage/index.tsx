@@ -20,8 +20,9 @@ export default function LoginPage() {
               <p className={styles.kicker}>Training Journal</p>
               <h1 className={styles.headline}>Run smarter. Recover better.</h1>
               <p className={styles.tagline}>
-                Connect Strava to track your training, fueling, and recovery in one
-                clean place.
+                Connect Strava with your physical training journal to bring your
+                runs, fueling, and recovery notes together in one clean, unified
+                place.
               </p>
             </div>
           </div>
@@ -48,7 +49,9 @@ export default function LoginPage() {
 
           {error && (
             <p className={styles.errorNote}>
-              {error instanceof Error ? error.message : "Something went wrong. Please try again."}
+              {error instanceof Error
+                ? error.message
+                : "Something went wrong. Please try again."}
             </p>
           )}
         </div>

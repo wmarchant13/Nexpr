@@ -230,7 +230,17 @@ function ActivitiesPage() {
                     <div className={styles.cardInfo}>
                       <h3 className={styles.activityName}>{activity.name}</h3>
                       {/garmin/i.test(activity.device_name ?? "") && (
-                        <span className={styles.deviceBadge}>Garmin</span>
+                        <span className={styles.deviceBadge}>
+                          <img
+                            src="/assets/garmin/garmin.png"
+                            alt="Garmin"
+                            className={styles.deviceBadgeLogo}
+                            loading="lazy"
+                          />
+                          <span className={styles.deviceBadgeText}>
+                            {activity.device_name}
+                          </span>
+                        </span>
                       )}
                     </div>
                     <a
