@@ -1,6 +1,4 @@
-
-
-import React, { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   useActivities,
@@ -69,7 +67,6 @@ function GoalsPage() {
 
   const goals = dbGoals as DistanceGoal[];
 
-  
   const bestTimesThisYear = useMemo<
     Record<RaceDistanceKey, number | undefined>
   >(() => {
@@ -139,9 +136,9 @@ function GoalsPage() {
       <div className={styles.container}>
         <header className={styles.header}>
           <span className={styles.kicker}>Training Goals</span>
-          <h1 className={styles.title}>{currentYear} Targets</h1>
+          <h1 className={styles.title}>{currentYear} Target PRs</h1>
           <p className={styles.subtitle}>
-            Set a goal, and we'll mark it done when Strava logs your PR.
+            Set a goal, and we'll mark it done when Strava logs your new PR.
           </p>
         </header>
 
@@ -192,7 +189,7 @@ function GoalsPage() {
         {/* Goals List */}
         {yearGoals.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>No goals yet for {currentYear}.</p>
+            <p>No goal PRs yet for {currentYear}.</p>
             <p className={styles.emptyHint}>
               Pick a distance and target time above.
             </p>
