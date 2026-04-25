@@ -450,10 +450,10 @@ export function InsightsPage() {
             );
           })()}
 
-        {activities && activities.length > 0 && athlete && (
+        {athlete && (
           <section className={styles.fuelingSection}>
             <FuelingProfileCard
-              activities={activities}
+              activities={activities ?? []}
               effortMap={effortMap as Map<number, { score: number }>}
               athleteId={athlete.id}
             />

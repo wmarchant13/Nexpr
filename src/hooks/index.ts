@@ -410,6 +410,61 @@ export const useAllFuelingEntries = (athleteId: number | null) => {
   });
 };
 
+// Query hook: fetches activities by ID for fueling-insights backfill
+export const useActivitiesByIds = (activityIds: number[]) => {
+  const normalizedIds = Array.from(
+    new Set(
+      activityIds.filter(
+        (id): id is number => Number.isInteger(id) && id > 0,
+      ),
+    ),
+  ).sort((a, b) => a - b);
+
+  return useQuery({
+    queryKey: ["activities-by-ids", normalizedIds.join(",")],
+    queryFn: async (): Promise<Activity[]> => {
+      if (normalizedIds.length === 0) return [];
+
+      const results = await Promise.all(
+        normalizedIds.map((activityId) =>
+          getActivityDetails({ data: { activityId } }),
+        ),
+      );
+
+      return results
+        .map((raw): Activity | null => {
+          const rec = raw as Record<string, unknown>;
+          const id = Number(rec.id);
+          const distance = Number(rec.distance ?? 0);
+          const movingTime = Number(rec.moving_time ?? 0);
+          if (!Number.isFinite(id) || id <= 0) return null;
+          if (!Number.isFinite(distance) || !Number.isFinite(movingTime)) return null;
+
+          const type = String(rec.type ?? "Run");
+          const sportType = String(rec.sport_type ?? type);
+          const startDate = String(rec.start_date ?? "");
+          const startDateLocal = String(rec.start_date_local ?? startDate);
+
+          return {
+            id,
+            name: String(rec.name ?? "Run"),
+            distance,
+            moving_time: movingTime,
+            elapsed_time: Number(rec.elapsed_time ?? movingTime),
+            total_elevation_gain: Number(rec.total_elevation_gain ?? 0),
+            type,
+            sport_type: sportType,
+            start_date: startDate,
+            start_date_local: startDateLocal,
+          };
+        })
+        .filter((activity): activity is Activity => activity !== null);
+    },
+    enabled: normalizedIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
 // Mutation hook: upserts a fueling entry
 export const useSaveFuelingEntry = () => {
   const queryClient = useQueryClient();

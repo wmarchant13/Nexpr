@@ -2,7 +2,11 @@
 
 import React, { useMemo } from "react";
 import type { Activity } from "../../../hooks";
-import { useFuelingEntry, useAllFuelingEntries } from "../../../hooks";
+import {
+  useFuelingEntry,
+  useAllFuelingEntries,
+  useActivitiesByIds,
+} from "../../../hooks";
 import type { FuelingInsight } from "../../../store/fueling";
 import {
   analyzeFueledRun,
@@ -129,14 +133,81 @@ export function FuelingProfileCard({
   effortMap,
   athleteId,
 }: FuelingProfileCardProps) {
-  const { data: fuelingEntries = [], isLoading } =
+  const { data: fuelingEntries = [], isLoading: isFuelingLoading } =
     useAllFuelingEntries(athleteId);
 
-  const profile = useMemo(() => {
-    return buildFuelingProfile(activities, effortMap, fuelingEntries);
-  }, [activities, effortMap, fuelingEntries]);
+  const normalizedFuelingEntries = useMemo(
+    () =>
+      fuelingEntries
+        .map((entry) => ({
+          ...entry,
+          activityId: Number(entry.activityId),
+        }))
+        .filter((entry) => Number.isInteger(entry.activityId) && entry.activityId > 0),
+    [fuelingEntries],
+  );
 
-  if (isLoading) {
+  const missingActivityIds = useMemo(() => {
+    const existingIds = new Set(activities.map((a) => a.id));
+    return normalizedFuelingEntries
+      .map((entry) => entry.activityId)
+      .filter((id) => !existingIds.has(id));
+  }, [activities, normalizedFuelingEntries]);
+
+  const {
+    data: backfilledActivities = [],
+    isLoading: isBackfillLoading,
+  } = useActivitiesByIds(missingActivityIds);
+
+  const mergedActivities = useMemo(() => {
+    if (backfilledActivities.length === 0) return activities;
+    const byId = new Map<number, Activity>();
+    activities.forEach((a) => byId.set(a.id, a));
+    backfilledActivities.forEach((a) => byId.set(a.id, a));
+    return Array.from(byId.values());
+  }, [activities, backfilledActivities]);
+
+  const profile = useMemo(() => {
+    return buildFuelingProfile(mergedActivities, effortMap, normalizedFuelingEntries);
+  }, [mergedActivities, effortMap, normalizedFuelingEntries]);
+
+  const unresolvedEntries = useMemo(() => {
+    const availableActivityIds = new Set(mergedActivities.map((a) => a.id));
+    return normalizedFuelingEntries.filter(
+      (entry) => !availableActivityIds.has(entry.activityId),
+    );
+  }, [mergedActivities, normalizedFuelingEntries]);
+
+  const loggedFuelingRows = useMemo(() => {
+    const activityById = new Map(mergedActivities.map((activity) => [activity.id, activity]));
+
+    return normalizedFuelingEntries
+      .slice()
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .slice(0, 8)
+      .map((entry) => {
+        const activity = activityById.get(entry.activityId);
+        const carbs =
+          entry.carbsGrams ??
+          (entry.gelsCount ? entry.gelsCount * 25 : undefined);
+
+        return {
+          id: entry.activityId,
+          activityLabel: activity?.name ?? `Activity #${entry.activityId}`,
+          stravaUrl: `https://www.strava.com/activities/${entry.activityId}`,
+          dateLabel: activity?.start_date_local
+            ? new Date(activity.start_date_local).toLocaleDateString()
+            : null,
+          carbs,
+          gelsCount: entry.gelsCount,
+          hydrationMl: entry.hydrationMl,
+          caffeineCount: entry.caffeineCount,
+          note: entry.note?.trim() || null,
+        };
+      });
+  }, [mergedActivities, normalizedFuelingEntries]);
+
+  if (isFuelingLoading || isBackfillLoading) {
     return (
       <div className={styles.profileCard}>
         <div className={styles.profileHeader}>
@@ -158,11 +229,66 @@ export function FuelingProfileCard({
           <h3 className={styles.profileTitle}>Fueling Insights</h3>
         </div>
         <div className={styles.emptyState}>
-          <p>No fueling data logged yet.</p>
-          <p className={styles.emptyHint}>
-            Log fueling on your long runs to discover what strategies work best
-            for you.
-          </p>
+          {normalizedFuelingEntries.length === 0 ? (
+            <>
+              <p>No fueling data logged yet.</p>
+              <p className={styles.emptyHint}>
+                Log fueling on your long runs to discover what strategies work
+                best for you.
+              </p>
+            </>
+          ) : (
+            <>
+              <p>
+                {normalizedFuelingEntries.length} fueling entries found in your
+                logs.
+              </p>
+              <p className={styles.emptyHint}>
+                Showing saved entries from your database while activity details
+                sync.
+              </p>
+              <div className={styles.entryList}>
+                {normalizedFuelingEntries.slice(0, 8).map((entry) => {
+                  const carbs =
+                    entry.carbsGrams ??
+                    (entry.gelsCount ? entry.gelsCount * 25 : undefined);
+                  const stravaUrl = `https://www.strava.com/activities/${entry.activityId}`;
+
+                  return (
+                    <div key={entry.activityId} className={styles.entryRow}>
+                      <div className={styles.entryHeader}>
+                        <span className={styles.entryId}>
+                          Activity #{entry.activityId}
+                        </span>
+                        <a
+                          className={styles.entryLink}
+                          href={stravaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View on Strava
+                        </a>
+                      </div>
+                      <span className={styles.entryMeta}>
+                        {carbs != null ? `${carbs}g carbs` : "No carbs logged"}
+                      </span>
+                      <span className={styles.entryMeta}>
+                        {entry.hydrationMl != null
+                          ? `${entry.hydrationMl}ml hydration`
+                          : "No hydration logged"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              {unresolvedEntries.length > 0 && (
+                <p className={styles.emptyHint}>
+                  {unresolvedEntries.length} entries are waiting on activity
+                  details from Strava.
+                </p>
+              )}
+            </>
+          )}
         </div>
       </div>
     );
@@ -177,6 +303,62 @@ export function FuelingProfileCard({
           {profile.totalFueledRuns} runs logged
         </span>
       </div>
+
+      {loggedFuelingRows.length > 0 && (
+        <div className={styles.logSection}>
+          <h4 className={styles.sectionTitle}>Logged Fueling</h4>
+          <div className={styles.logList}>
+            {loggedFuelingRows.map((row) => (
+              <div key={row.id} className={styles.logItem}>
+                <div className={styles.logItemHeader}>
+                  <div className={styles.logMainInfo}>
+                    <a
+                      className={styles.logTitleLink}
+                      href={row.stravaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className={styles.logTitle}>{row.activityLabel}</span>
+                    </a>
+                    {row.dateLabel && (
+                      <span className={styles.logDate}>{row.dateLabel}</span>
+                    )}
+                  </div>
+                  <a
+                    className={styles.logStravaLink}
+                    href={row.stravaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View on Strava
+                  </a>
+                </div>
+
+                <div className={styles.logMetrics}>
+                  <span className={styles.logMetric}>
+                    {row.carbs != null ? `${row.carbs}g carbs` : "No carbs"}
+                  </span>
+                  <span className={styles.logMetric}>
+                    {row.gelsCount != null ? `${row.gelsCount} gels` : "No gels"}
+                  </span>
+                  <span className={styles.logMetric}>
+                    {row.hydrationMl != null
+                      ? `${row.hydrationMl}ml hydration`
+                      : "No hydration"}
+                  </span>
+                  <span className={styles.logMetric}>
+                    {row.caffeineCount != null
+                      ? `${row.caffeineCount} caffeine`
+                      : "No caffeine"}
+                  </span>
+                </div>
+
+                {row.note && <div className={styles.logNote}>{row.note}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {}
       {(profile.optimalCarbRange || profile.optimalHydrationRange) && (
