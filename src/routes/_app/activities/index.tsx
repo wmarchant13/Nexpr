@@ -13,13 +13,13 @@ import {
   useSymptomEntries,
   useSaveSymptomEntry,
   useDeleteSymptomEntry,
-} from "../../hooks";
-import { FuelingInput, FuelingCard } from "../../components/Fueling";
-import SymptomLog from "../../components/SymptomLog";
-import type { SymptomEntry } from "../../store/symptomLog";
+} from "../../../hooks";
+import { FuelingInput, FuelingCard } from "../../../components/Fueling";
+import SymptomLog from "../../../components/SymptomLog";
+import type { SymptomEntry } from "../../../store/symptomLog";
 import styles from "./Activities.module.scss";
 
-export const Route = createFileRoute("/_app/activities")({
+export const Route = createFileRoute("/_app/activities/")({
   component: ActivitiesPage,
 });
 

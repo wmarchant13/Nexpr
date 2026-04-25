@@ -10,10 +10,10 @@ import {
   kmToMiles,
   calculateRunnerBlockStats,
   buildLifetimeRunSnapshot,
-} from "../../hooks";
+} from "../../../hooks";
 import styles from "./Dashboard.module.scss";
 
-export const Route = createFileRoute("/_app/dashboard")({
+export const Route = createFileRoute("/_app/dashboard/")({
   component: DashboardPage,
 });
 

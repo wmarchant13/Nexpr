@@ -1,5 +1,3 @@
-
-
 import React, { useMemo } from "react";
 import {
   ResponsiveContainer,
@@ -20,14 +18,14 @@ import {
   formatPace,
   analyzeWeeklyTraining,
   classifyEfforts,
-} from "../../hooks";
+} from "../../../hooks";
 import {
   calculateFitnessMetrics,
   calculateInjuryRiskWarnings,
   calculateWeeklyLoads,
-} from "../../store/predictions";
-import { analyzeVolumeProgression } from "../../store/MarathonDiagnostics";
-import { FuelingProfileCard } from "../../components/Fueling";
+} from "../../../store/predictions";
+import { analyzeVolumeProgression } from "../../../store/MarathonDiagnostics";
+import { FuelingProfileCard } from "../../../components/Fueling";
 import styles from "./Insights.module.scss";
 
 const CHART_ACCENT = "#86A7C8";
@@ -130,7 +128,9 @@ export function InsightsPage() {
                 {fitnessMetrics.freshness > 0 ? "+" : ""}
                 {fitnessMetrics.freshness}%
               </span>
-              <span className={styles.metricCaption}>7d miles vs 28d baseline</span>
+              <span className={styles.metricCaption}>
+                7d miles vs 28d baseline
+              </span>
             </div>
             <div className={styles.metricCard}>
               <span className={styles.metricLabel}>Readiness</span>
@@ -139,7 +139,9 @@ export function InsightsPage() {
               >
                 {fitnessMetrics.readiness}
               </span>
-              <span className={styles.metricCaption}>7d load score vs 28d average</span>
+              <span className={styles.metricCaption}>
+                7d load score vs 28d average
+              </span>
             </div>
             <div className={styles.metricCard}>
               <span className={styles.metricLabel}>Trend</span>
@@ -178,12 +180,16 @@ export function InsightsPage() {
                     <p className={styles.flagMessage}>{warning.message}</p>
                     <div className={styles.flagStats}>
                       <div className={styles.flagStat}>
-                        <span className={styles.flagStatVal}>{warning.value}%</span>
+                        <span className={styles.flagStatVal}>
+                          {warning.value}%
+                        </span>
                         <span className={styles.flagStatKey}>Change</span>
                       </div>
                       {warning.context && (
                         <div className={styles.flagStat}>
-                          <span className={styles.flagStatVal}>{warning.context}</span>
+                          <span className={styles.flagStatVal}>
+                            {warning.context}
+                          </span>
                           <span className={styles.flagStatKey}>Context</span>
                         </div>
                       )}
@@ -204,7 +210,10 @@ export function InsightsPage() {
             <div className={styles.chartContainer}>
               <ResponsiveContainer width="100%" height={280}>
                 <AreaChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.07)"
+                  />
                   <XAxis
                     dataKey="week"
                     stroke="rgba(255,255,255,0.3)"
@@ -250,7 +259,10 @@ export function InsightsPage() {
             <div className={styles.chartContainer}>
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.07)"
+                  />
                   <XAxis
                     dataKey="week"
                     stroke="rgba(255,255,255,0.3)"
@@ -274,7 +286,10 @@ export function InsightsPage() {
                       color: "#FFFFFF",
                     }}
                     labelStyle={{ color: "rgba(255,255,255,0.6)" }}
-                    formatter={(value) => [formatPace(Number(value)), "Avg Pace"]}
+                    formatter={(value) => [
+                      formatPace(Number(value)),
+                      "Avg Pace",
+                    ]}
                   />
                   <Line
                     type="monotone"
@@ -301,7 +316,10 @@ export function InsightsPage() {
             <div className={styles.chartContainer}>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={longRunChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.07)"
+                  />
                   <XAxis
                     dataKey="week"
                     stroke="rgba(255,255,255,0.3)"
@@ -349,66 +367,88 @@ export function InsightsPage() {
           </section>
         )}
 
-        {volumeAnalysis && volumeAnalysis.weeks.length >= 1 && (() => {
-          const lastWeek = volumeAnalysis.weeks.length >= 2
-            ? volumeAnalysis.weeks[volumeAnalysis.weeks.length - 2]
-            : volumeAnalysis.weeks[0];
-          if (!lastWeek || lastWeek.totalMiles === 0) return null;
-          const longRunPct = Math.round((lastWeek.longRunMiles / lastWeek.totalMiles) * 100);
-          const status = longRunPct > 33 ? "high" : longRunPct >= 20 ? "optimal" : "low";
-          return (
-            <section className={styles.volumeSection}>
-              <div className={styles.volumeHeader}>
-                <span className={styles.volumeTag}>Long Run Analysis</span>
-                <h2 className={styles.volumeTitle}>Last Week's Long Run</h2>
-              </div>
-              <div className={styles.flagStats} style={{ marginBottom: 16 }}>
-                <div className={styles.flagStat}>
-                  <span className={styles.flagStatVal}>{lastWeek.longRunMiles.toFixed(1)} mi</span>
-                  <span className={styles.flagStatKey}>Long run</span>
+        {volumeAnalysis &&
+          volumeAnalysis.weeks.length >= 1 &&
+          (() => {
+            const lastWeek =
+              volumeAnalysis.weeks.length >= 2
+                ? volumeAnalysis.weeks[volumeAnalysis.weeks.length - 2]
+                : volumeAnalysis.weeks[0];
+            if (!lastWeek || lastWeek.totalMiles === 0) return null;
+            const longRunPct = Math.round(
+              (lastWeek.longRunMiles / lastWeek.totalMiles) * 100,
+            );
+            const status =
+              longRunPct > 33 ? "high" : longRunPct >= 20 ? "optimal" : "low";
+            return (
+              <section className={styles.volumeSection}>
+                <div className={styles.volumeHeader}>
+                  <span className={styles.volumeTag}>Long Run Analysis</span>
+                  <h2 className={styles.volumeTitle}>Last Week's Long Run</h2>
                 </div>
-                <div className={styles.flagStat}>
-                  <span className={styles.flagStatVal}>{lastWeek.totalMiles.toFixed(1)} mi</span>
-                  <span className={styles.flagStatKey}>Weekly total</span>
+                <div className={styles.flagStats} style={{ marginBottom: 16 }}>
+                  <div className={styles.flagStat}>
+                    <span className={styles.flagStatVal}>
+                      {lastWeek.longRunMiles.toFixed(1)} mi
+                    </span>
+                    <span className={styles.flagStatKey}>Long run</span>
+                  </div>
+                  <div className={styles.flagStat}>
+                    <span className={styles.flagStatVal}>
+                      {lastWeek.totalMiles.toFixed(1)} mi
+                    </span>
+                    <span className={styles.flagStatKey}>Weekly total</span>
+                  </div>
+                  <div className={styles.flagStat}>
+                    <span className={styles.flagStatVal}>{longRunPct}%</span>
+                    <span className={styles.flagStatKey}>Of weekly volume</span>
+                  </div>
+                  <div className={styles.flagStat}>
+                    <span
+                      className={styles.flagStatVal}
+                      style={{
+                        color:
+                          status === "optimal"
+                            ? "var(--success)"
+                            : "var(--warning)",
+                      }}
+                    >
+                      {status === "optimal"
+                        ? "Optimal"
+                        : status === "high"
+                          ? "High %"
+                          : "Low %"}
+                    </span>
+                    <span className={styles.flagStatKey}>Assessment</span>
+                  </div>
                 </div>
-                <div className={styles.flagStat}>
-                  <span className={styles.flagStatVal}>{longRunPct}%</span>
-                  <span className={styles.flagStatKey}>Of weekly volume</span>
-                </div>
-                <div className={styles.flagStat}>
-                  <span
-                    className={styles.flagStatVal}
-                    style={{
-                      color: status === "optimal" ? "var(--success)" : "var(--warning)",
-                    }}
-                  >
-                    {status === "optimal" ? "Optimal" : status === "high" ? "High %" : "Low %"}
-                  </span>
-                  <span className={styles.flagStatKey}>Assessment</span>
-                </div>
-              </div>
-              {longRunPct > 33 && (
-                <div className={`${styles.volumeFlag} ${styles.warning}`}>
-                  <p className={styles.flagMessage}>
-                    Long run is {longRunPct}% of weekly volume — above the recommended 25–33%. Consider distributing more mileage across other days to reduce injury risk.
-                  </p>
-                </div>
-              )}
-              {longRunPct < 20 && lastWeek.longRunMiles > 0 && (
-                <div className={`${styles.volumeFlag} ${styles.warning}`}>
-                  <p className={styles.flagMessage}>
-                    Long run is only {longRunPct}% of weekly volume. A dedicated long run of 25–33% of total mileage builds aerobic base more effectively.
-                  </p>
-                </div>
-              )}
-              {status === "optimal" && (
-                <div className={styles.volumeClean}>
-                  Long run ratio is within the optimal 20–33% range — good balance between endurance stimulus and recovery.
-                </div>
-              )}
-            </section>
-          );
-        })()}
+                {longRunPct > 33 && (
+                  <div className={`${styles.volumeFlag} ${styles.warning}`}>
+                    <p className={styles.flagMessage}>
+                      Long run is {longRunPct}% of weekly volume — above the
+                      recommended 25–33%. Consider distributing more mileage
+                      across other days to reduce injury risk.
+                    </p>
+                  </div>
+                )}
+                {longRunPct < 20 && lastWeek.longRunMiles > 0 && (
+                  <div className={`${styles.volumeFlag} ${styles.warning}`}>
+                    <p className={styles.flagMessage}>
+                      Long run is only {longRunPct}% of weekly volume. A
+                      dedicated long run of 25–33% of total mileage builds
+                      aerobic base more effectively.
+                    </p>
+                  </div>
+                )}
+                {status === "optimal" && (
+                  <div className={styles.volumeClean}>
+                    Long run ratio is within the optimal 20–33% range — good
+                    balance between endurance stimulus and recovery.
+                  </div>
+                )}
+              </section>
+            );
+          })()}
 
         {activities && activities.length > 0 && athlete && (
           <section className={styles.fuelingSection}>

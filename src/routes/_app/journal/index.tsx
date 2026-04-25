@@ -4,16 +4,16 @@ import {
   getCurrentWeekStart,
   formatWeekLabel,
   newReflectionId,
-} from "../../store/weeklyReflection";
+} from "../../../store/weeklyReflection";
 import {
   useAthlete,
   useReflections,
   useSaveReflection,
   useDeleteReflection,
-} from "../../hooks";
+} from "../../../hooks";
 import styles from "./Journal.module.scss";
 
-export const Route = createFileRoute("/_app/journal")({
+export const Route = createFileRoute("/_app/journal/")({
   component: JournalPage,
 });
 

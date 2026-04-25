@@ -6,11 +6,11 @@ import {
   useLogout,
   useDeleteMyData,
   buildLifetimeRunSnapshot,
-} from "../../hooks";
-import { getCacheStatus, clearCache } from "../../store/cache";
+} from "../../../hooks";
+import { getCacheStatus, clearCache } from "../../../store/cache";
 import styles from "./Profile.module.scss";
 
-export const Route = createFileRoute("/_app/profile")({
+export const Route = createFileRoute("/_app/profile/")({
   component: ProfilePage,
 });
 

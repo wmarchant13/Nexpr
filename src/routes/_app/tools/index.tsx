@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useActivities, useAthlete, useStravaPRs } from "../../hooks";
-import { OraclePanel } from "../../components/Oracle";
+import { useActivities, useAthlete, useStravaPRs } from "../../../hooks";
+import { OraclePanel } from "../../../components/Oracle";
 import {
   calculateVDOT,
   parseVDOTTimeInput,
@@ -13,7 +13,7 @@ import {
   TRAINING_ZONE_INFO,
   type VDOTResult,
   type TrainingZone,
-} from "../../store/vdot";
+} from "../../../store/vdot";
 import styles from "./Tools.module.scss";
 
 const ZONE_ORDER: TrainingZone[] = ["E", "M", "T", "I", "R"];
@@ -291,6 +291,6 @@ function ToolsPage() {
   );
 }
 
-export const Route = createFileRoute("/_app/tools")({
+export const Route = createFileRoute("/_app/tools/")({
   component: ToolsPage,
 });

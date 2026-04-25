@@ -14,13 +14,22 @@ import {
   deleteAthleteAppData,
 } from "../utils/server/stravaSession";
 
+//STATIC STRAVA VARIABLES
 const STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize";
 const STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token";
 const STRAVA_REQUESTED_SCOPE = "read,activity:read_all,profile:read_all";
 const STRAVA_OAUTH_STATE_COOKIE = "nexpr_strava_oauth_state";
 
+type StateCookie = {
+  httpOnly: boolean;
+  sameSite: "lax" | "strict" | "none";
+  secure: boolean;
+  path: string;
+  maxAge: number;
+};
+
 // Returns cookie config for the OAuth CSRF state token
-function oauthStateCookieOptions() {
+function oauthStateCookieOptions(): StateCookie {
   return {
     httpOnly: true,
     sameSite: "lax" as const,

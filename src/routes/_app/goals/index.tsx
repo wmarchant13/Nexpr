@@ -8,11 +8,11 @@ import {
   useGoals,
   useSaveGoal,
   useDeleteGoal,
-} from "../../hooks";
-import { formatTime } from "../../store/predictions";
+} from "../../../hooks";
+import { formatTime } from "../../../store/predictions";
 import styles from "./Goals.module.scss";
 
-export const Route = createFileRoute("/_app/goals")({
+export const Route = createFileRoute("/_app/goals/")({
   component: GoalsPage,
 });
 
