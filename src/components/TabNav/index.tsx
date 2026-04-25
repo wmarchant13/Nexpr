@@ -9,7 +9,7 @@ interface Tab {
 
 const TABS: Tab[] = [
   { path: "/dashboard", label: "Log", shortLabel: "Log" },
-  { path: "/activities", label: "Miles", shortLabel: "Miles" },
+  { path: "/activities", label: "Activities", shortLabel: "Acts" },
   { path: "/insights", label: "Breakdown", shortLabel: "Break" },
   { path: "/goals", label: "Goals", shortLabel: "Goals" },
   { path: "/tools", label: "Kit", shortLabel: "Kit" },

@@ -99,7 +99,9 @@
 
 .wordmarkLogo {
   display: block;
-  width: 112px;
+  width: 90px;
+  position: relative;
+  top: 5px;
   height: auto;
   filter: brightness(0) invert(1);
 }
@@ -200,7 +202,11 @@
   .backgroundScrim {
     background:
       linear-gradient(to bottom, rgba(5, 5, 5, 0.34), rgba(5, 5, 5, 0.56)),
-      radial-gradient(circle at center, rgba(5, 5, 5, 0.05), rgba(5, 5, 5, 0.44));
+      radial-gradient(
+        circle at center,
+        rgba(5, 5, 5, 0.05),
+        rgba(5, 5, 5, 0.44)
+      );
   }
 
   .backgroundTile {

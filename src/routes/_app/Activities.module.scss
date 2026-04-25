@@ -546,7 +546,7 @@
 .activityList {
   display: grid;
   gap: 0.875rem;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
   grid-auto-rows: 1fr;
 }
@@ -622,7 +622,7 @@
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
 }
 
@@ -883,6 +883,12 @@
 
 /* ── Responsive ── */
 
+@media (max-width: 900px) {
+  .activityList {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (min-width: 768px) {
   .controls {
     flex-direction: row;
@@ -900,6 +906,6 @@
 
 @media (min-width: 1024px) {
   .activityList {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

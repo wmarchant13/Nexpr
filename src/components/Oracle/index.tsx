@@ -240,9 +240,9 @@ export function OraclePanel({ activities, stravaPRs }: OraclePanelProps) {
               aria-label="Target finish time"
               spellCheck={false}
             />
-            {inputError && (
-              <span className={styles.errorText}>{inputError}</span>
-            )}
+            <span className={styles.errorText} aria-live="polite">
+              {inputError || "\u00a0"}
+            </span>
           </div>
 
           <div className={styles.inputField}>

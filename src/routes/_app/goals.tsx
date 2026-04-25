@@ -177,13 +177,15 @@ function GoalsPage() {
                 }}
                 onKeyDown={(e) => e.key === "Enter" && handleAddGoal()}
               />
-              {timeError && (
-                <span className={styles.timeError}>{timeError}</span>
-              )}
             </div>
-            <button className={styles.addButton} onClick={handleAddGoal}>
-              Add Goal
-            </button>
+            <div className={styles.formActions}>
+              <button className={styles.addButton} onClick={handleAddGoal}>
+                Add Goal
+              </button>
+              <span className={styles.formError} aria-live="polite">
+                {timeError || "\u00a0"}
+              </span>
+            </div>
           </div>
         </section>
 

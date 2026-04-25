@@ -35,7 +35,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .retryBtn {
@@ -50,7 +52,9 @@
   color: var(--ink-60);
   padding: 8px 16px;
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
 
   &:hover {
     color: var(--ink);
@@ -149,7 +153,6 @@
 /* ── Recent Work ── */
 .recentSection {
   padding-bottom: 56px;
-  border-bottom: 1px solid var(--border);
   margin-bottom: 56px;
 }
 
@@ -179,21 +182,28 @@
   text-underline-offset: 3px;
   transition: color 0.2s;
 
-  &:hover { color: var(--ink); }
+  &:hover {
+    color: var(--ink);
+  }
 }
 
 /* Run table */
-.runList { display: flex; flex-direction: column; }
+.runList {
+  display: flex;
+  flex-direction: column;
+}
 
 .runRow {
   display: grid;
-  grid-template-columns: 180px 1fr 72px 72px;
+  grid-template-columns: 180px 1fr 72px 72px auto;
   align-items: center;
   gap: 16px;
   padding: 14px 0;
   border-bottom: 1px solid var(--border);
 
-  &:first-child { border-top: 1px solid var(--border); }
+  &:first-child {
+    border-top: 1px solid var(--border);
+  }
 }
 
 .runDate {
@@ -213,6 +223,37 @@
   text-overflow: ellipsis;
 }
 
+.runNameLink {
+  min-width: 0;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-bottom-color: var(--ink-20);
+  }
+}
+
+.runStravaLink {
+  justify-self: end;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-40);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--ink);
+    border-color: var(--ink-20);
+  }
+}
+
 .runMiles {
   font-family: var(--font-mono);
   font-size: 13px;
@@ -221,7 +262,7 @@
   white-space: nowrap;
 
   &::after {
-    content: ' mi';
+    content: " mi";
     font-size: 10px;
     color: var(--ink-40);
   }
@@ -235,7 +276,7 @@
   white-space: nowrap;
 
   &::after {
-    content: '/mi';
+    content: "/mi";
     font-size: 10px;
     color: var(--ink-40);
   }
@@ -250,7 +291,9 @@
 }
 
 /* ── All Time ── */
-.lifetimeSection { padding-bottom: 48px; }
+.lifetimeSection {
+  padding-bottom: 48px;
+}
 
 .lifetimeRow {
   display: flex;
@@ -304,19 +347,40 @@
 }
 
 @media (max-width: 640px) {
-  .container { padding: 40px 20px 80px; }
+  .container {
+    padding: 40px 20px 80px;
+  }
 
   .runRow {
     grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
   }
 
-  .runDate { grid-column: 1; grid-row: 2; }
-  .runName { grid-column: 1; grid-row: 1; }
-  .runMiles { grid-column: 2; grid-row: 1; }
-  .runPace { grid-column: 2; grid-row: 2; }
+  .runNameLink {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .runDate {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .runMiles {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .runPace {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .runStravaLink {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: start;
+  }
 
-  .lifetimeRow { gap: 32px; }
+  .lifetimeRow {
+    gap: 32px;
+  }
 }
 
 .container {
@@ -325,7 +389,6 @@
 }
 
 /* ── Loading / Error ── */
-
 
 /* Thick-thin rule under page header */
 .header {
@@ -365,7 +428,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Hero ── */
@@ -434,9 +499,13 @@
   font-weight: 800;
   font-family: var(--font-mono);
   letter-spacing: -0.02em;
-  
-  &.positive { color: var(--success); }
-  &.negative { color: var(--danger); }
+
+  &.positive {
+    color: var(--success);
+  }
+  &.negative {
+    color: var(--danger);
+  }
 }
 
 /* ── Today's Training Card ── */
@@ -471,11 +540,23 @@
   font-weight: 700;
   text-transform: none;
   letter-spacing: 0.06em;
-  
-  &.push { background: rgba(217, 119, 6, 0.1); color: var(--warning); }
-  &.maintain { background: var(--accent-subtle); color: var(--accent); }
-  &.recover { background: rgba(220, 38, 38, 0.1); color: var(--danger); }
-  &.easy { background: var(--success-subtle); color: var(--success); }
+
+  &.push {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--warning);
+  }
+  &.maintain {
+    background: var(--accent-subtle);
+    color: var(--accent);
+  }
+  &.recover {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--danger);
+  }
+  &.easy {
+    background: var(--success-subtle);
+    color: var(--success);
+  }
 }
 
 .todayRationale {
@@ -577,7 +658,7 @@
   font-weight: 600;
   color: var(--accent);
   text-decoration: none;
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -607,11 +688,11 @@
   align-items: center;
   padding: 0.75rem 1rem;
   transition: background 0.1s ease;
-  
+
   &:not(:last-child) {
     border-bottom: 2px solid var(--border);
   }
-  
+
   &:hover {
     background: var(--bg-subtle);
   }

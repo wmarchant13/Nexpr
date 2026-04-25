@@ -7,61 +7,63 @@ export default function LoginPage() {
 
   return (
     <div className={styles.page}>
-      {}
-      <video
-        className={styles.videoBg}
-        src="/assets/running-video.mp4"
-        autoPlay
-        muted
-        loop
-        playsInline
-        aria-hidden="true"
-      />
+      <div className={styles.layout}>
+        <div className={styles.box}>
+          <div className={styles.brandBlock}>
+            <img
+              src="/assets/nexpr_logo.png"
+              alt="Nexpr"
+              className={styles.brandLogo}
+            />
 
-      {}
-      <div className={styles.scrim} aria-hidden="true" />
+            <div className={styles.copyBlock}>
+              <p className={styles.kicker}>Training Journal</p>
+              <h1 className={styles.headline}>Run smarter. Recover better.</h1>
+              <p className={styles.tagline}>
+                Connect Strava to track your training, fueling, and recovery in one
+                clean place.
+              </p>
+            </div>
+          </div>
 
-      {}
-      <div className={styles.grain} aria-hidden="true" />
+          <button
+            className={styles.ctaButton}
+            onClick={() => login()}
+            disabled={isPending}
+            aria-label="Connect with Strava"
+          >
+            <img
+              src="/assets/btn_strava_connect_with_orange.png"
+              alt="Connect with Strava"
+              className={styles.ctaImage}
+              width={280}
+              height={80}
+              loading="eager"
+            />
+          </button>
 
-      {}
-      <div className={styles.box}>
-        <div className={styles.wordmark}>
-          <img
-            src="/assets/nexpr_logo.png"
-            alt="Nexpr"
-            className={styles.wordmarkLogo}
-          />
-          <span className={styles.wordmarkSub}>EST. 2026 · BUFFALO, NY</span>
+          <p className={styles.legalNote}>
+            We only read your activity data. We never post on your behalf.
+          </p>
+
+          {error && (
+            <p className={styles.errorNote}>
+              {error instanceof Error ? error.message : "Something went wrong. Please try again."}
+            </p>
+          )}
         </div>
 
-        <p className={styles.tagline}>Powering your next PR</p>
-
-        <button
-          className={styles.ctaButton}
-          onClick={() => login()}
-          disabled={isPending}
-          aria-label="Connect with Strava"
-        >
-          <img
-            src="/assets/btn_strava_connect_with_orange.png"
-            alt="Connect with Strava"
-            className={styles.ctaImage}
-            width={280}
-            height={80}
-            loading="eager"
+        <aside className={styles.videoPane} aria-hidden="true">
+          <video
+            className={styles.videoBg}
+            src="/assets/running-video.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
           />
-        </button>
-
-        <p className={styles.legalNote}>
-          We only read your activity data. We never post on your behalf.
-        </p>
-
-        {error && (
-          <p className={styles.errorNote}>
-            {error instanceof Error ? error.message : "Something went wrong. Please try again."}
-          </p>
-        )}
+          <div className={styles.scrim} />
+        </aside>
       </div>
     </div>
   );

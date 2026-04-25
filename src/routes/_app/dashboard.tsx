@@ -140,6 +140,7 @@ function DashboardPage() {
             {recentRuns.map((activity) => {
               const miles = kmToMiles(activity.distance / 1000);
               const pace = activity.moving_time / 60 / miles;
+              const stravaUrl = `https://www.strava.com/activities/${activity.id}`;
               const date = new Date(activity.start_date).toLocaleDateString("en-US", {
                 weekday: "short",
                 month: "short",
@@ -148,9 +149,24 @@ function DashboardPage() {
               return (
                 <div key={activity.id} className={styles.runRow}>
                   <span className={styles.runDate}>{date}</span>
-                  <span className={styles.runName}>{activity.name}</span>
+                  <a
+                    href={stravaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.runNameLink}
+                  >
+                    <span className={styles.runName}>{activity.name}</span>
+                  </a>
                   <span className={styles.runMiles}>{miles.toFixed(1)}</span>
                   <span className={styles.runPace}>{formatPace(pace)}</span>
+                  <a
+                    href={stravaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.runStravaLink}
+                  >
+                    View on Strava
+                  </a>
                 </div>
               );
             })}

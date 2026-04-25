@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// LoginPage — Video background, simple sign-in box
-// ─────────────────────────────────────────────────────────────────────────────
-
 .page {
   position: fixed;
   inset: 0;
@@ -9,103 +5,85 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #000;
+  background: var(--bg);
+  color: var(--ink);
 }
 
-// ── Video background ─────────────────────────────────────────────────────────
-
-.videoBg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 30%;
-  // Desaturate + slight contrast boost for editorial feel
-  filter: grayscale(100%) contrast(1.1);
-  pointer-events: none;
-  user-select: none;
+.layout {
+  position: relative;
+  width: min(1240px, calc(100vw - 36px));
+  height: min(760px, calc(100vh - 36px));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
-
-// ── Dark scrim ───────────────────────────────────────────────────────────────
-
-.scrim {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.62);
-  pointer-events: none;
-}
-
-// ── Grain overlay ────────────────────────────────────────────────────────────
-
-.grain {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.08;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 300px 300px;
-}
-
-// ── Sign-in box ──────────────────────────────────────────────────────────────
 
 .box {
-  position: relative;
-  z-index: 10;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  padding: 48px 56px;
-  background: rgba(0, 0, 0, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  // Subtle frosted-glass backdrop on supported browsers
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  min-width: 320px;
-  max-width: 420px;
-  text-align: center;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 26px;
+  padding: clamp(84px, 10vh, 122px) clamp(28px, 5vw, 72px) clamp(34px, 7vh, 68px);
+  border-right: 1px solid var(--border);
+  background: var(--paper);
+  text-align: left;
 }
 
-// ── Wordmark ─────────────────────────────────────────────────────────────────
-
-.wordmark {
+.brandBlock {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 4px;
+  gap: 0;
 }
 
-.wordmarkLogo {
-  display: block;
-  width: min(220px, 62vw);
+.brandLogo {
+  width: min(220px, 38vw);
   height: auto;
+  display: block;
   filter: brightness(0) invert(1);
-  transform: scale(1.1);
+  opacity: 0.96;
 }
 
-.wordmarkSub {
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.14em;
+.copyBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 500px;
+}
+
+.kicker {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.14em;
+  color: var(--ink-40);
 }
 
-// ── Tagline ──────────────────────────────────────────────────────────────────
+.headline {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 5vw, 3.85rem);
+  font-weight: 400;
+  line-height: 1.03;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
 
 .tagline {
-  font-family: var(--font-body-serif);
-  font-style: italic;
-  font-size: 14px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.55);
   margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.58;
+  color: var(--ink-60);
+  max-width: 440px;
 }
-
-// ── CTA Button ───────────────────────────────────────────────────────────────
 
 .ctaButton {
   display: block;
@@ -114,7 +92,7 @@
   padding: 0;
   cursor: pointer;
   transition:
-    transform 180ms,
+    transform 160ms,
     opacity 200ms;
 
   &:hover:not(:disabled) {
@@ -122,32 +100,90 @@
   }
 
   &:disabled {
-    opacity: 0.72;
+    opacity: 0.7;
     cursor: not-allowed;
   }
 }
 
 .ctaImage {
   display: block;
-  width: min(200px, 60vw);
+  width: min(290px, 74vw);
   height: auto;
+  border-radius: 4px;
+  box-shadow: 0 7px 16px rgba(0, 0, 0, 0.12);
 }
 
-// ── Legal note ───────────────────────────────────────────────────────────────
-
 .legalNote {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.25);
   margin: 0;
-  line-height: 1.6;
+  max-width: 430px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.045em;
+  line-height: 1.45;
+  color: var(--ink-40);
 }
 
 .errorNote {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: #ff4d4d;
-  margin: 4px 0 0;
-  text-align: center;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  color: #ff9288;
+}
+
+.videoPane {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.videoBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 54% 42%;
+  filter: contrast(1) brightness(0.72);
+  pointer-events: none;
+  user-select: none;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.46);
+  pointer-events: none;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    width: min(760px, calc(100vw - 20px));
+    height: min(860px, calc(100vh - 20px));
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .box {
+    gap: 22px;
+    padding: 72px 22px 24px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brandLogo {
+    width: min(170px, 48vw);
+  }
+
+  .headline {
+    font-size: clamp(1.85rem, 8vw, 2.7rem);
+  }
+
+  .tagline {
+    font-size: 0.92rem;
+  }
+
+  .ctaImage {
+    width: min(258px, 80vw);
+  }
 }

@@ -115,9 +115,9 @@ function ActivitiesPage() {
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
-            <span className={styles.kicker}>Run Log</span>
-            <h1 className={styles.title}>Your Runs</h1>
-            <p className={styles.subtitle}>{runCount} runs</p>
+            <span className={styles.kicker}>Activities</span>
+            <h1 className={styles.title}>Your Activities</h1>
+            <p className={styles.subtitle}>{runCount} activities</p>
           </div>
         </header>
 
