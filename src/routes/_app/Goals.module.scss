@@ -5,25 +5,25 @@
 .container {
   max-width: var(--max-w);
   margin: 0 auto;
-  padding: var(--page-py) var(--page-px) 80px;
+  padding: var(--page-py) var(--page-px) 5rem;
 }
 
 /* ── Page Header ── */
 .header {
-  padding-bottom: 32px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 48px;
+  padding-bottom: 2rem;
+  border-bottom: 0.0625rem solid var(--border);
+  margin-bottom: 3rem;
 }
 
 .kicker {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-40);
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .title {
@@ -40,7 +40,7 @@
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   color: var(--ink-60);
-  margin: 8px 0 0;
+  margin: 0.5rem 0 0;
   line-height: 1.6;
 }
 
@@ -51,16 +51,16 @@
   align-items: center;
   justify-content: center;
   min-height: 50vh;
-  gap: 12px;
+  gap: 0.75rem;
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--ink-60);
 }
 
 .spinner {
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid var(--ink-15);
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 0.0938rem solid var(--ink-15);
   border-top-color: var(--ink);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
@@ -70,24 +70,24 @@
 
 /* ── Add Goal Form ── */
 .formSection {
-  margin-bottom: 48px;
-  padding: 32px;
-  border: 1px solid var(--border);
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius-md);
   background: var(--paper);
 }
 
 .goalForm {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
   align-items: flex-start;
   flex-wrap: wrap;
 }
 
 .distanceSelect {
-  padding: 10px 14px;
+  padding: 0.625rem 0.875rem;
   background: var(--cream);
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: var(--radius);
   color: var(--ink);
   font-family: var(--font-sans);
@@ -95,20 +95,20 @@
   font-weight: 500;
   cursor: pointer;
   outline: none;
-  min-width: 140px;
+  min-width: 8.75rem;
   appearance: none;
 
   option { background: var(--cream); color: var(--ink); }
   &:focus { border-color: var(--ink); }
 }
 
-.timeInputWrapper { display: flex; flex-direction: column; gap: 4px; }
+.timeInputWrapper { display: flex; flex-direction: column; gap: 0.25rem; }
 
 .timeInput {
-  width: 120px;
-  padding: 10px 12px;
+  width: 7.5rem;
+  padding: 0.625rem 0.75rem;
   background: var(--cream);
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: var(--radius);
   color: var(--ink);
   font-family: var(--font-mono);
@@ -124,19 +124,19 @@
 
 .timeError {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--accent);
   letter-spacing: 0.04em;
 }
 
 .addButton {
-  padding: 10px 24px;
+  padding: 0.625rem 1.5rem;
   background: var(--ink);
   color: var(--cream);
-  border: 1px solid var(--ink);
+  border: 0.0625rem solid var(--ink);
   border-radius: var(--radius);
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -149,32 +149,32 @@
 }
 
 /* ── Goals ── */
-.goalsSection { margin-bottom: 56px; }
+.goalsSection { margin-bottom: 3.5rem; }
 
 .sectionTitle {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-40);
-  margin: 0 0 24px;
+  margin: 0 0 1.5rem;
 }
 
 .sectionSubtitle {
   font-family: var(--font-sans);
   font-size: 0.875rem;
   color: var(--ink-60);
-  margin: -16px 0 24px;
+  margin: -1rem 0 1.5rem;
 }
 
 .goalsGrid { display: flex; flex-direction: column; }
 
 .goalCard {
-  border-bottom: 1px solid var(--border);
-  padding: 20px 0;
+  border-bottom: 0.0625rem solid var(--border);
+  padding: 1.25rem 0;
 
-  &:first-child { border-top: 1px solid var(--border); }
+  &:first-child { border-top: 0.0625rem solid var(--border); }
 }
 
 .goalCard.complete .goalDistance { color: var(--success); }
@@ -183,12 +183,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
 }
 
 .goalDistance {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -198,18 +198,18 @@
 .goalActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .completeBadge {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--success);
-  border: 1px solid rgba(42,96,73,0.25);
-  padding: 3px 10px;
+  border: 0.0625rem solid rgba(42,96,73,0.25);
+  padding: 0.1875rem 0.625rem;
   border-radius: var(--radius);
 }
 
@@ -220,7 +220,7 @@
   font-size: 1.125rem;
   line-height: 1;
   cursor: pointer;
-  padding: 0 4px;
+  padding: 0 0.25rem;
   transition: color 0.2s;
 
   &:hover { color: var(--accent); }
@@ -228,15 +228,15 @@
 
 .goalBody {
   display: flex;
-  gap: 48px;
+  gap: 3rem;
   flex-wrap: wrap;
 }
 
-.timeStat { display: flex; flex-direction: column; gap: 4px; }
+.timeStat { display: flex; flex-direction: column; gap: 0.25rem; }
 
 .timeLabel {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: 0.625rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-40);
@@ -254,12 +254,12 @@
 .gapChip {
   display: inline-flex;
   align-items: center;
-  margin-top: 12px;
-  padding: 3px 10px;
-  border: 1px solid var(--border);
+  margin-top: 0.75rem;
+  padding: 0.1875rem 0.625rem;
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--ink-60);
   letter-spacing: 0.04em;
 }
@@ -277,7 +277,7 @@
 }
 
 .emptyState {
-  padding: 48px 0;
+  padding: 3rem 0;
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   color: var(--ink-60);
@@ -290,38 +290,38 @@
   font-style: normal;
   color: var(--ink-40);
   font-size: 0.875rem;
-  margin-top: 6px !important;
+  margin-top: 0.375rem !important;
 }
 
 /* ── PRs ── */
-.prsSection { margin-bottom: 56px; }
+.prsSection { margin-bottom: 3.5rem; }
 
 .prsLoading {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
   color: var(--ink-60);
   font-family: var(--font-sans);
-  font-size: 13px;
-  padding: 16px 0;
+  font-size: 0.8125rem;
+  padding: 1rem 0;
 }
 
 .prsGrid { display: flex; flex-direction: column; }
 
 .prCard {
   display: grid;
-  grid-template-columns: 140px 1fr 120px 120px;
+  grid-template-columns: 8.75rem 1fr 7.5rem 7.5rem;
   align-items: center;
-  gap: 16px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 0.0625rem solid var(--border);
 
-  &:first-child { border-top: 1px solid var(--border); }
+  &:first-child { border-top: 0.0625rem solid var(--border); }
 }
 
 .prDistance {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -337,14 +337,14 @@
 
 .prPace {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--ink-60);
   text-align: right;
 }
 
 .prDate {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--ink-40);
   text-align: right;
   letter-spacing: 0.03em;
@@ -354,7 +354,7 @@
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   color: var(--ink-60);
-  padding: 32px 0;
+  padding: 2rem 0;
   font-style: italic;
 
   p { margin: 0; }
@@ -364,13 +364,13 @@
   font-style: normal;
   color: var(--ink-40);
   font-size: 0.875rem;
-  margin-top: 4px !important;
+  margin-top: 0.25rem !important;
 }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
-  .container { padding: 40px 20px 80px; }
-  .goalBody { gap: 24px; }
+@media (max-width: 48rem) {
+  .container { padding: 2.5rem 1.25rem 5rem; }
+  .goalBody { gap: 1.5rem; }
   .prCard { grid-template-columns: 1fr auto; }
   .prPace, .prDate { display: none; }
 }
@@ -415,16 +415,16 @@
 .header {
   padding-bottom: 1.5rem;
   margin-bottom: 2rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 0.0625rem solid var(--border);
   position: relative;
 
   &::after {
     content: "";
     position: absolute;
-    bottom: -1px;
+    bottom: -0.0625rem;
     left: 0;
     right: 0;
-    height: 1px;
+    height: 0.0625rem;
     background: transparent;
   }
 }
@@ -442,7 +442,7 @@
   width: 2rem;
   height: 2rem;
   margin-bottom: 0.75rem;
-  border: 3px solid var(--border);
+  border: 0.1875rem solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -458,7 +458,7 @@
   margin-bottom: 2.5rem;
   padding: 2rem;
   background: var(--bg);
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: var(--radius);
 }
 
@@ -470,10 +470,10 @@
 }
 
 .distanceSelect {
-  height: 40px;
+  height: 2.5rem;
   padding: 0 0.875rem;
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius);
   color: var(--fg);
   font-size: 0.9rem;
@@ -516,10 +516,10 @@
 
 .timeInput {
   width: 9rem;
-  height: 40px;
+  height: 2.5rem;
   padding: 0 0.75rem;
   background: var(--bg);
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: var(--radius);
   color: var(--fg);
   font-size: 0.95rem;
@@ -538,8 +538,8 @@
 }
 
 .timeError {
-  min-height: 14px;
-  line-height: 14px;
+  min-height: 0.875rem;
+  line-height: 0.875rem;
   font-size: 0.78rem;
   color: var(--danger);
 }
@@ -551,8 +551,8 @@
 }
 
 .formError {
-  min-height: 14px;
-  line-height: 14px;
+  min-height: 0.875rem;
+  line-height: 0.875rem;
   font-size: 0.78rem;
   color: var(--danger);
   white-space: nowrap;
@@ -565,7 +565,7 @@
 }
 
 .addButton {
-  height: 40px;
+  height: 2.5rem;
   padding: 0 1.5rem;
   background: var(--accent);
   border: none;
@@ -621,7 +621,7 @@
   gap: 0.9rem;
   padding: 1.25rem 1.5rem;
   background: var(--bg);
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: var(--radius);
   transition: border-color 0.12s ease;
   
@@ -644,7 +644,7 @@
 }
 
 .completeBadge {
-  border: 1px solid rgba(21, 115, 71, 0.35);
+  border: 0.0625rem solid rgba(21, 115, 71, 0.35);
   background: var(--success-subtle);
   color: var(--success);
   font-size: 0.72rem;
@@ -682,10 +682,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   background: transparent;
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: var(--radius);
   color: var(--fg-subtle);
   font-size: 1rem;
@@ -760,10 +760,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   background: transparent;
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: var(--radius);
   color: var(--fg-subtle);
   font-size: 1rem;
@@ -779,7 +779,7 @@
 
 .emptyState {
   padding: 2rem;
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   border-radius: var(--radius);
   background: var(--bg);
   color: var(--fg-muted);
@@ -823,7 +823,7 @@
   gap: 1rem;
   padding: 1rem 1.5rem;
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius);
 }
 
@@ -860,7 +860,7 @@
   text-align: center;
   color: var(--fg-muted);
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius);
   
   p {
@@ -875,4 +875,20 @@
 
 .timeComplete {
   color: var(--success);
+}
+
+/* ── Rounded treatment parity with Oracle ── */
+.formSection,
+.distanceSelect,
+.timeInput,
+.addButton,
+.goalCard,
+.deleteButton,
+.deleteGoalBtn,
+.gapChip,
+.completeBadge,
+.prCard,
+.emptyState,
+.noPrs {
+  border-radius: var(--radius-md);
 }

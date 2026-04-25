@@ -55,15 +55,15 @@ function RootNotFound() {
         minHeight: "100vh",
         display: "grid",
         placeItems: "center",
-        padding: "48px 24px",
+        padding: "3rem 1.5rem",
       }}
     >
       <div
         style={{
-          width: "min(100%, 540px)",
-          border: "1px solid var(--border)",
+          width: "min(100%, 33.75rem)",
+          border: "0.0625rem solid var(--border)",
           background: "var(--bg-subtle)",
-          padding: "32px",
+          padding: "2rem",
           textAlign: "center",
         }}
       >
@@ -79,10 +79,10 @@ function RootNotFound() {
         >
           Page Not Found
         </p>
-        <h1 style={{ margin: "12px 0 0", fontSize: "clamp(2rem, 6vw, 3.5rem)" }}>
+        <h1 style={{ margin: "0.75rem 0 0", fontSize: "clamp(2rem, 6vw, 3.5rem)" }}>
           Nothing lives here.
         </h1>
-        <p style={{ margin: "16px 0 0", color: "var(--fg-secondary)" }}>
+        <p style={{ margin: "1rem 0 0", color: "var(--fg-secondary)" }}>
           The route you requested does not exist anymore or was moved during the recent app
           cleanup.
         </p>
@@ -90,9 +90,9 @@ function RootNotFound() {
           to="/"
           style={{
             display: "inline-flex",
-            marginTop: "24px",
-            padding: "12px 18px",
-            border: "1px solid var(--border-strong)",
+            marginTop: "1.5rem",
+            padding: "0.75rem 1.125rem",
+            border: "0.0625rem solid var(--border-strong)",
             textTransform: "uppercase",
             letterSpacing: "0.12em",
             fontSize: "0.75rem",
@@ -163,16 +163,16 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             --danger-subtle: rgba(255,255,255,0.10);
 
             /* ── Radius ── */
-            --radius-sm: 2px;
-            --radius:    3px;
-            --radius-md: 4px;
-            --radius-lg: 4px;
+            --radius-sm: 0.125rem;
+            --radius:    0.1875rem;
+            --radius-md: 0.25rem;
+            --radius-lg: 0.25rem;
 
             /* ── Layout ── */
-            --header-h: 60px;
-            --max-w:    1280px;
-            --page-px:  48px;
-            --page-py:  72px;
+            --header-h: 3.75rem;
+            --max-w:    80rem;
+            --page-px:  3rem;
+            --page-py:  4.5rem;
 
             /* ── Legacy aliases ── */
             --fg:          #FFFFFF;
@@ -219,7 +219,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             opacity: 0.04;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
             background-repeat: repeat;
-            background-size: 300px 300px;
+            background-size: 18.75rem 18.75rem;
           }
 
           h1, h2, h3, h4 {
@@ -241,12 +241,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           /* Scroll fade-up animation classes */
           .fade-up {
             opacity: 0;
-            transform: translateY(12px);
+            transform: translateY(0.75rem);
             transition: opacity 500ms ease-out, transform 500ms ease-out;
           }
           .fade-up-slow {
             opacity: 0;
-            transform: translateY(12px);
+            transform: translateY(0.75rem);
             transition: opacity 800ms ease-out, transform 800ms ease-out;
           }
           .fade-up.in-view,

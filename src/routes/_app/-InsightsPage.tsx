@@ -220,8 +220,8 @@ export function InsightsPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1A1A1A",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      borderRadius: "3px",
+                      border: "0.0625rem solid rgba(255,255,255,0.12)",
+                      borderRadius: "0.1875rem",
                       fontSize: "0.8125rem",
                       color: "#FFFFFF",
                     }}
@@ -268,8 +268,8 @@ export function InsightsPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1A1A1A",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      borderRadius: "3px",
+                      border: "0.0625rem solid rgba(255,255,255,0.12)",
+                      borderRadius: "0.1875rem",
                       fontSize: "0.8125rem",
                       color: "#FFFFFF",
                     }}
@@ -324,8 +324,8 @@ export function InsightsPage() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1A1A1A",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      borderRadius: "3px",
+                      border: "0.0625rem solid rgba(255,255,255,0.12)",
+                      borderRadius: "0.1875rem",
                       fontSize: "0.8125rem",
                       color: "#FFFFFF",
                     }}

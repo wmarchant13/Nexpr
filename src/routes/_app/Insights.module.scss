@@ -5,25 +5,25 @@
 .container {
   max-width: var(--max-w);
   margin: 0 auto;
-  padding: var(--page-py) var(--page-px) 80px;
+  padding: var(--page-py) var(--page-px) 5rem;
 }
 
 /* ── Page Header ── */
 .header {
-  padding-bottom: 32px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 48px;
+  padding-bottom: 2rem;
+  border-bottom: 0.0625rem solid var(--border);
+  margin-bottom: 3rem;
 }
 
 .kicker {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-40);
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .title {
@@ -40,7 +40,7 @@
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   color: var(--ink-60);
-  margin: 8px 0 0;
+  margin: 0.5rem 0 0;
   line-height: 1.65;
   max-width: 52ch;
 }
@@ -52,16 +52,16 @@
   align-items: center;
   justify-content: center;
   min-height: 50vh;
-  gap: 12px;
+  gap: 0.75rem;
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--ink-60);
 }
 
 .spinner {
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid var(--ink-15);
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 0.0938rem solid var(--ink-15);
   border-top-color: var(--ink);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
@@ -70,28 +70,28 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── Oracle ── */
-.oracleSection { margin-bottom: 48px; }
+.oracleSection { margin-bottom: 3rem; }
 
 /* ── Metrics Grid ── */
 .metricsGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
-  margin-bottom: 56px;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 32px 0;
+  margin-bottom: 3.5rem;
+  border-top: 0.0625rem solid var(--border);
+  border-bottom: 0.0625rem solid var(--border);
+  padding: 2rem 0;
 }
 
 .metricCard {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 0 32px 0 0;
+  gap: 0.375rem;
+  padding: 0 2rem 0 0;
 
   & + & {
-    border-left: 1px solid var(--border);
-    padding-left: 32px;
+    border-left: 0.0625rem solid var(--border);
+    padding-left: 2rem;
   }
 
   &:last-child { padding-right: 0; }
@@ -99,7 +99,7 @@
 
 .metricLabel {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -116,7 +116,7 @@
 
 .metricCaption {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--ink-40);
 }
 
@@ -126,20 +126,20 @@
 
 /* ── Charts ── */
 .chartSection {
-  margin-bottom: 48px;
+  margin-bottom: 3rem;
 }
 
-.chartHeader { margin-bottom: 20px; }
+.chartHeader { margin-bottom: 1.25rem; }
 
 .chartTag {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-40);
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 0.375rem;
 }
 
 .chartTitle {
@@ -151,33 +151,33 @@
 }
 
 .chartContainer {
-  border: 1px solid var(--border);
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius-md);
-  padding: 24px 16px 16px;
+  padding: 1.5rem 1rem 1rem;
   background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(0px);
+  backdrop-filter: blur(0);
 }
 
 /* ── Volume Diagnostics ── */
 .volumeSection {
-  margin-bottom: 48px;
-  padding: 32px;
-  border: 1px solid var(--border);
+  margin-bottom: 3rem;
+  padding: 2rem;
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius-md);
   background: rgba(255,255,255,0.04);
 }
 
-.volumeHeader { margin-bottom: 20px; }
+.volumeHeader { margin-bottom: 1.25rem; }
 
 .volumeTag {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-40);
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 0.375rem;
 }
 
 .volumeTitle {
@@ -192,16 +192,16 @@
   font-family: var(--font-sans);
   font-size: 0.875rem;
   color: var(--success);
-  padding: 12px 0;
-  border-top: 1px solid var(--border);
+  padding: 0.75rem 0;
+  border-top: 0.0625rem solid var(--border);
 }
 
-.volumeFlags { display: flex; flex-direction: column; gap: 12px; }
+.volumeFlags { display: flex; flex-direction: column; gap: 0.75rem; }
 
 .volumeFlag {
-  padding: 16px 20px;
+  padding: 1rem 1.25rem;
   border-radius: var(--radius);
-  border: 1px solid;
+  border: 0.0625rem solid;
 
   &.warning {
     background: var(--warning-bg);
@@ -214,15 +214,15 @@
   }
 }
 
-.flagLabel { margin-bottom: 6px; }
+.flagLabel { margin-bottom: 0.375rem; }
 
 .flagBadge {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 2px 8px;
+  padding: 0.125rem 0.5rem;
   border-radius: var(--radius);
 
   .warning & { background: rgba(122,85,0,0.1); color: var(--warning); }
@@ -234,18 +234,18 @@
   font-size: 0.875rem;
   line-height: 1.6;
   color: var(--ink-80);
-  margin: 0 0 12px;
+  margin: 0 0 0.75rem;
 }
 
 .flagStats {
   display: flex;
-  gap: 32px;
+  gap: 2rem;
   flex-wrap: wrap;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+  border-top: 0.0625rem solid var(--border);
 }
 
-.flagStat { display: flex; flex-direction: column; gap: 2px; }
+.flagStat { display: flex; flex-direction: column; gap: 0.125rem; }
 
 .flagStatVal {
   font-family: var(--font-mono);
@@ -255,24 +255,24 @@
 
 .flagStatKey {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: 0.625rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-40);
 }
 
 /* ── Fueling + Reflection ── */
-.fuelingSection { margin-bottom: 48px; }
-.reflectionSection { margin-bottom: 48px; }
+.fuelingSection { margin-bottom: 3rem; }
+.reflectionSection { margin-bottom: 3rem; }
 
 /* ── Responsive ── */
-@media (max-width: 900px) {
-  .metricsGrid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+@media (max-width: 56.25rem) {
+  .metricsGrid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
   .metricCard { padding: 0 !important; border-left: none !important; }
 }
 
-@media (max-width: 640px) {
-  .container { padding: 40px 20px 80px; }
+@media (max-width: 40rem) {
+  .container { padding: 2.5rem 1.25rem 5rem; }
   .metricsGrid { grid-template-columns: 1fr 1fr; }
-  .volumeSection { padding: 20px; }
+  .volumeSection { padding: 1.25rem; }
 }

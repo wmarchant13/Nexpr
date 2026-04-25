@@ -1,9 +1,9 @@
 .widget {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 0.4375rem;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -16,7 +16,7 @@
 }
 
 .icon {
-  font-size: 20px;
+  font-size: 1.25rem;
   line-height: 1;
   color: var(--ink);
   transform: none;
@@ -25,10 +25,10 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  top: -5px;
+  top: -0.3125rem;
 }
 
 .dot {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--ink-40);
 }

@@ -6,9 +6,9 @@
 }
 
 .container {
-  max-width: 800px;
+  max-width: 50rem;
   margin: 0 auto;
-  padding: var(--page-py) var(--page-px) 80px;
+  padding: var(--page-py) var(--page-px) 5rem;
 }
 
 /* ── Loading ── */
@@ -19,16 +19,16 @@
   align-items: center;
   justify-content: center;
   min-height: 50vh;
-  gap: 12px;
+  gap: 0.75rem;
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--ink-60);
 }
 
 .spinner {
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid var(--ink-15);
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 0.0938rem solid var(--ink-15);
   border-top-color: var(--ink);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
@@ -44,25 +44,25 @@
 .profileHeader {
   display: flex;
   align-items: center;
-  gap: 32px;
-  padding-bottom: 48px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 48px;
+  gap: 2rem;
+  padding-bottom: 3rem;
+  border-bottom: 0.0625rem solid var(--border);
+  margin-bottom: 3rem;
 }
 
 .avatarWrapper {
   position: relative;
   flex-shrink: 0;
-  width: 72px;
-  height: 72px;
+  width: 4.5rem;
+  height: 4.5rem;
 }
 
 .avatar {
-  width: 72px;
-  height: 72px;
+  width: 4.5rem;
+  height: 4.5rem;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   display: block;
 }
 
@@ -70,10 +70,10 @@
   display: none;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
+  width: 4.5rem;
+  height: 4.5rem;
   border-radius: 50%;
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   background: var(--paper);
   font-family: var(--font-serif);
   font-size: 1.75rem;
@@ -82,19 +82,19 @@
 
 .statusDot {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 12px;
-  height: 12px;
+  bottom: 0.125rem;
+  right: 0.125rem;
+  width: 0.75rem;
+  height: 0.75rem;
   background: var(--success);
-  border: 2px solid var(--cream);
+  border: 0.125rem solid var(--cream);
   border-radius: 50%;
 }
 
 .profileInfo {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .name {
@@ -108,7 +108,7 @@
 
 .username {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--ink-40);
   letter-spacing: 0.04em;
   margin: 0;
@@ -118,23 +118,23 @@
   font-family: var(--font-sans);
   font-size: 0.875rem;
   color: var(--ink-60);
-  margin: 4px 0 0;
+  margin: 0.25rem 0 0;
 }
 
 /* ── Sections ── */
 .statsSection,
 .settingsSection {
-  margin-bottom: 48px;
+  margin-bottom: 3rem;
 }
 
 .sectionTitle {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-40);
-  margin: 0 0 24px;
+  margin: 0 0 1.5rem;
 }
 
 /* ── Stats Grid ── */
@@ -142,17 +142,17 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 24px 0;
+  border-top: 0.0625rem solid var(--border);
+  border-bottom: 0.0625rem solid var(--border);
+  padding: 1.5rem 0;
 }
 
 .statCard {
-  padding-right: 24px;
+  padding-right: 1.5rem;
 
   & + & {
-    border-left: 1px solid var(--border);
-    padding-left: 24px;
+    border-left: 0.0625rem solid var(--border);
+    padding-left: 1.5rem;
   }
 
   &:last-child {
@@ -167,12 +167,12 @@
   line-height: 1;
   color: var(--ink);
   letter-spacing: -0.02em;
-  margin-bottom: 6px;
+  margin-bottom: 0.375rem;
 }
 
 .statLabel {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: 0.625rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-40);
@@ -180,7 +180,7 @@
 
 /* ── Settings Card ── */
 .settingsCard {
-  border: 1px solid var(--border);
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--paper);
@@ -190,14 +190,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  border-bottom: 0.0625rem solid var(--border);
 }
 
 .settingInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.125rem;
 }
 
 .settingLabel {
@@ -209,20 +209,20 @@
 
 .settingValue {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--ink-40);
   letter-spacing: 0.04em;
 }
 
 .settingStatus {
   font-family: var(--font-sans);
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-40);
-  border: 1px solid var(--border);
-  padding: 3px 10px;
+  border: 0.0625rem solid var(--border);
+  padding: 0.1875rem 0.625rem;
   border-radius: var(--radius);
 
   &.active {
@@ -234,7 +234,7 @@
 .settingButton {
   display: block;
   width: 100%;
-  padding: 14px 20px;
+  padding: 0.875rem 1.25rem;
   background: transparent;
   border: none;
   color: var(--ink-80);
@@ -260,13 +260,13 @@
 }
 
 .revokeHelp {
-  padding: 16px 20px 20px;
-  border-top: 1px solid var(--border);
+  padding: 1rem 1.25rem 1.25rem;
+  border-top: 0.0625rem solid var(--border);
   background: rgba(17, 17, 17, 0.02);
 }
 
 .revokeHelpTitle {
-  margin: 0 0 8px;
+  margin: 0 0 0.5rem;
   font-family: var(--font-sans);
   font-size: 0.875rem;
   font-weight: 600;
@@ -274,7 +274,7 @@
 }
 
 .revokeList {
-  margin: 0 0 10px 18px;
+  margin: 0 0 0.625rem 1.125rem;
   padding: 0;
   color: var(--ink-60);
   font-family: var(--font-sans);
@@ -285,11 +285,11 @@
 .revokeLink {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 0.6875rem;
   letter-spacing: 0.04em;
   color: var(--ink);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 0.125rem;
 
   &:hover {
     color: var(--accent);
@@ -298,22 +298,22 @@
 
 /* ── App Info ── */
 .appInfo {
-  padding-top: 48px;
-  border-top: 1px solid var(--border);
+  padding-top: 3rem;
+  border-top: 0.0625rem solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .appBrand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .appLogo {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -334,38 +334,38 @@
 
 .appVersion {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--ink-40);
   margin: 0;
   letter-spacing: 0.04em;
 }
 
 /* ── Responsive ── */
-@media (max-width: 640px) {
+@media (max-width: 40rem) {
   .container {
-    padding: 40px 20px 80px;
+    padding: 2.5rem 1.25rem 5rem;
   }
   .profileHeader {
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: 1.25rem;
   }
   .statsGrid {
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 1.25rem;
   }
   .statCard {
     border-left: none !important;
     padding: 0 !important;
   }
   .statCard:nth-child(even) {
-    border-left: 1px solid var(--border) !important;
-    padding-left: 20px !important;
+    border-left: 0.0625rem solid var(--border) !important;
+    padding-left: 1.25rem !important;
   }
 }
 
 .container {
-  max-width: 640px;
+  max-width: 40rem;
   margin: 0 auto;
 }
 
@@ -373,16 +373,16 @@
 .header {
   padding-bottom: 1.5rem;
   margin-bottom: 2rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 0.0625rem solid var(--border);
   position: relative;
 
   &::after {
     content: "";
     position: absolute;
-    bottom: -1px;
+    bottom: -0.0625rem;
     left: 0;
     right: 0;
-    height: 1px;
+    height: 0.0625rem;
     background: transparent;
   }
 }
@@ -401,7 +401,7 @@
   width: 2.5rem;
   height: 2.5rem;
   margin-bottom: 1rem;
-  border: 3px solid var(--border);
+  border: 0.1875rem solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -423,15 +423,15 @@
   padding: 3rem 2rem;
   margin-bottom: 2rem;
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius);
 }
 
 .avatarWrapper {
   position: relative;
   margin-bottom: 1rem;
-  width: 88px;
-  height: 88px;
+  width: 5.5rem;
+  height: 5.5rem;
 
   &.avatarFallbackVisible .avatarFallback {
     display: flex;
@@ -439,10 +439,10 @@
 }
 
 .avatar {
-  width: 88px;
-  height: 88px;
+  width: 5.5rem;
+  height: 5.5rem;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border: 0.0625rem solid var(--border);
   object-fit: cover;
 }
 
@@ -450,10 +450,10 @@
   display: none;
   align-items: center;
   justify-content: center;
-  width: 88px;
-  height: 88px;
+  width: 5.5rem;
+  height: 5.5rem;
   border-radius: var(--radius);
-  border: 1px solid var(--border-strong);
+  border: 0.0625rem solid var(--border-strong);
   background: var(--bg-muted);
   color: var(--fg-secondary);
   font-size: 1.8rem;
@@ -462,12 +462,12 @@
 
 .statusDot {
   position: absolute;
-  bottom: 3px;
-  right: 3px;
-  width: 14px;
-  height: 14px;
+  bottom: 0.1875rem;
+  right: 0.1875rem;
+  width: 0.875rem;
+  height: 0.875rem;
   background: var(--success);
-  border: 2px solid var(--bg);
+  border: 0.125rem solid var(--bg);
   border-radius: 50%;
 }
 
@@ -503,7 +503,7 @@
 .settingsSection {
   margin-bottom: 2rem;
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 0.0625rem solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
 }
@@ -516,7 +516,7 @@
   text-transform: none;
   letter-spacing: 0.1em;
   color: var(--fg-muted);
-  border-bottom: 2px solid var(--border);
+  border-bottom: 0.125rem solid var(--border);
   background: var(--bg-subtle);
 }
 
@@ -535,8 +535,8 @@
   text-align: center;
 
   &:not(:last-child) {
-    border-right: 2px solid var(--border);
-    border-bottom: 2px solid var(--border);
+    border-right: 0.125rem solid var(--border);
+    border-bottom: 0.125rem solid var(--border);
   }
 }
 
@@ -567,7 +567,7 @@
   padding: 0.875rem 1.25rem;
 
   &:not(:last-child) {
-    border-bottom: 2px solid var(--border);
+    border-bottom: 0.125rem solid var(--border);
   }
 }
 
@@ -599,7 +599,7 @@
   padding: 0.875rem 1.25rem;
   background: transparent;
   border: none;
-  border-top: 2px solid var(--border);
+  border-top: 0.125rem solid var(--border);
   color: var(--fg);
   font-size: 0.88rem;
   font-weight: 600;
@@ -639,7 +639,7 @@
 
 .appLogo {
   display: block;
-  width: 60px;
+  width: 3.75rem;
   height: auto;
   filter: brightness(0) invert(1);
 }
@@ -663,7 +663,7 @@
   font-size: 0.72rem;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 48rem) {
   .statsGrid {
     grid-template-columns: repeat(4, 1fr);
   }

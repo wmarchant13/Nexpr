@@ -14,7 +14,7 @@
   align-items: flex-start;
   padding: 0.9rem 1rem;
   background: var(--danger-subtle);
-  border: 2px solid rgba(220, 38, 38, 0.25);
+  border: 0.125rem solid rgba(220, 38, 38, 0.25);
   border-radius: 0;
 }
 
@@ -62,7 +62,7 @@
   gap: 1rem;
   padding: 1.5rem;
   background: var(--bg);
-  border: 2px solid var(--border-strong);
+  border: 0.125rem solid var(--border-strong);
   border-radius: 0;
 }
 
@@ -71,7 +71,7 @@
   flex-direction: column;
   gap: 0.2rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 0.125rem solid var(--border);
 }
 
 .formKicker {
@@ -116,7 +116,7 @@
 .textarea {
   padding: 0.55rem 0.75rem;
   background: var(--bg);
-  border: 2px solid var(--border-strong);
+  border: 0.125rem solid var(--border-strong);
   border-radius: 0;
   color: var(--fg);
   font-size: 0.88rem;
@@ -162,7 +162,7 @@
   width: 2rem;
   height: 2rem;
   background: var(--bg);
-  border: 2px solid var(--border);
+  border: 0.125rem solid var(--border);
   border-radius: 0;
   color: var(--fg-muted);
   font-size: 0.82rem;
@@ -241,7 +241,7 @@
   gap: 0.12rem;
   padding: 0.6rem 0.875rem;
   background: var(--bg);
-  border: 2px solid var(--border);
+  border: 0.125rem solid var(--border);
   border-radius: 0;
   transition: border-color 0.12s ease;
 
@@ -266,7 +266,7 @@
   height: 1.5rem;
   padding: 0;
   background: transparent;
-  border: 2px solid var(--border);
+  border: 0.125rem solid var(--border);
   border-radius: 0;
   color: var(--fg-muted);
   font-size: 0.85rem;

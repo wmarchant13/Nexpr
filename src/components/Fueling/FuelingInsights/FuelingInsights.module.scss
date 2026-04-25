@@ -9,7 +9,7 @@
 .card {
   padding: 1.25rem;
   background: var(--bg);
-  border: 2px solid var(--border-strong);
+  border: 0.125rem solid var(--border-strong);
   border-radius: 0;
   margin-top: 0.75rem;
 }
@@ -49,7 +49,7 @@
   gap: 1rem;
   margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 0.125rem solid var(--border);
 }
 
 .statItem {
@@ -96,12 +96,12 @@
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--fg-muted);
-  min-width: 50px;
+  min-width: 3.125rem;
 }
 
 .perfBar {
   flex: 1;
-  height: 4px;
+  height: 0.25rem;
   background: var(--bg-muted);
   border-radius: 0;
   overflow: hidden;
@@ -119,7 +119,7 @@
   font-weight: 700;
   font-family: var(--font-mono);
   color: var(--fg);
-  min-width: 40px;
+  min-width: 2.5rem;
   text-align: right;
 
   &.positive { color: var(--success); }
@@ -136,7 +136,7 @@
   padding: 0.6rem 0.75rem;
   background: var(--bg-subtle);
   border-radius: 0;
-  border-left: 2px solid;
+  border-left: 0.125rem solid;
 
   &.correlation    { border-left-color: var(--success); }
   &.pattern        { border-left-color: var(--warning); }
@@ -163,8 +163,8 @@
 .profileCard {
   padding: 2rem;
   background: var(--bg);
-  border: 2px solid var(--border-strong);
-  border-top: 3px solid var(--accent);
+  border: 0.125rem solid var(--border-strong);
+  border-top: 0.1875rem solid var(--accent);
   border-radius: 0;
 }
 
@@ -219,7 +219,7 @@
 .optimalSection {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 0.125rem solid var(--border);
 }
 
 .errorNote {
@@ -255,7 +255,7 @@
 .clusterSection {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 0.125rem solid var(--border);
 }
 
 .clusterGrid {
@@ -267,7 +267,7 @@
 .clusterCard {
   padding: 0.875rem 1rem;
   background: var(--bg-subtle);
-  border: 2px solid var(--border);
+  border: 0.125rem solid var(--border);
   border-radius: 0;
 }
 
@@ -323,7 +323,7 @@
   padding: 0.75rem;
   background: var(--bg-subtle);
   border-radius: 0;
-  border-left: 2px solid;
+  border-left: 0.125rem solid;
 
   &.correlation    { border-left-color: var(--success); }
   &.pattern        { border-left-color: var(--warning); }
@@ -350,7 +350,7 @@
 
 .profileFooter {
   padding-top: 1rem;
-  border-top: 2px solid var(--border);
+  border-top: 0.125rem solid var(--border);
 }
 
 .disclaimer {
@@ -360,7 +360,7 @@
   line-height: 1.5;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 48rem) {
   .clusterGrid {
     grid-template-columns: repeat(3, 1fr);
   }

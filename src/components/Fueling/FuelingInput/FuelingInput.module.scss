@@ -11,7 +11,7 @@
   width: 100%;
   padding: 0.75rem 1rem;
   background: var(--bg-subtle);
-  border: 2px dashed var(--border-strong);
+  border: 0.125rem dashed var(--border-strong);
   border-radius: 0;
   color: var(--fg-muted);
   font-size: 0.85rem;
@@ -48,13 +48,13 @@
   margin-top: 0.75rem;
   padding: 1.5rem;
   background: var(--bg);
-  border: 2px solid var(--border-strong);
+  border: 0.125rem solid var(--border-strong);
   border-radius: 0;
   animation: slideDown 0.2s ease;
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
+  from { opacity: 0; transform: translateY(-0.5rem); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -117,10 +117,10 @@
 }
 
 .input {
-  width: 60px;
+  width: 3.75rem;
   padding: 0.5rem 0.6rem;
   background: var(--bg);
-  border: 2px solid var(--border-strong);
+  border: 0.125rem solid var(--border-strong);
   border-radius: 0;
   color: var(--fg);
   font-size: 0.9rem;
@@ -161,7 +161,7 @@
 .quickBtn {
   padding: 0.35rem 0.6rem;
   background: var(--bg-subtle);
-  border: 2px solid var(--border);
+  border: 0.125rem solid var(--border);
   border-radius: 0;
   color: var(--fg-muted);
   font-size: 0.7rem;
@@ -213,7 +213,7 @@
 .timingSelect {
   padding: 0.4rem 0.5rem;
   background: var(--bg);
-  border: 2px solid var(--border);
+  border: 0.125rem solid var(--border);
   border-radius: 0;
   color: var(--fg);
   font-size: 0.75rem;
@@ -235,7 +235,7 @@
   width: 100%;
   padding: 0.6rem 0.75rem;
   background: var(--bg);
-  border: 2px solid var(--border);
+  border: 0.125rem solid var(--border);
   border-radius: 0;
   color: var(--fg);
   font-size: 0.85rem;
@@ -259,7 +259,7 @@
 .deleteBtn {
   padding: 0.5rem 1rem;
   background: transparent;
-  border: 2px solid rgba(220, 38, 38, 0.3);
+  border: 0.125rem solid rgba(220, 38, 38, 0.3);
   border-radius: 0;
   color: var(--danger);
   font-size: 0.78rem;
@@ -292,7 +292,7 @@
   &.saved { background: var(--success); }
 }
 
-@media (min-width: 640px) {
+@media (min-width: 40rem) {
   .inputGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

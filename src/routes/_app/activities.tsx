@@ -6,6 +6,7 @@ import {
   useActivities,
   useActivityWebhookSync,
   useAthlete,
+  useStats,
   formatPace,
   kmToMiles,
   metersToFeet,
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_app/activities")({
 });
 
 type SortField = "date" | "distance" | "pace" | "elevation";
+const PAGE_SIZE = 10;
 
 // Activities list page with fueling and symptom log per run
 function ActivitiesPage() {
@@ -32,8 +34,13 @@ function ActivitiesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openSymptomId, setOpenSymptomId] = useState<number | null>(null);
   const { data: athlete } = useAthlete();
+  const { data: stats } = useStats(athlete?.id ?? null);
   useActivityWebhookSync();
-  const { data: activities, isLoading } = useActivities(page, 100);
+  const { data: activities, isLoading } = useActivities(page, PAGE_SIZE);
+  const { data: nextPageActivities, isLoading: isLoadingNextPage } = useActivities(
+    page + 1,
+    PAGE_SIZE,
+  );
   const { data: symptomEntries = [] } = useSymptomEntries(athlete?.id);
   const saveSymptomMutation = useSaveSymptomEntry();
   const deleteSymptomMutation = useDeleteSymptomEntry();
@@ -109,6 +116,33 @@ function ActivitiesPage() {
   );
 
   const runCount = filteredAndSorted.length;
+  const totalActivities =
+    stats?.all_run_totals?.count ?? stats?.recent_run_totals?.count ?? runCount;
+  const totalPages = Math.max(1, Math.ceil(totalActivities / PAGE_SIZE));
+  const pageOptions = useMemo(
+    () => Array.from({ length: totalPages }, (_, i) => i + 1),
+    [totalPages],
+  );
+  const nextPageVisibleCount = useMemo(() => {
+    if (!nextPageActivities) return 0;
+
+    let result = nextPageActivities.filter(
+      (a) => a.type === "Run" || a.sport_type === "Run",
+    );
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((a) => a.name.toLowerCase().includes(query));
+    }
+
+    return result.length;
+  }, [nextPageActivities, searchQuery]);
+
+  const canGoNext =
+    !isLoading &&
+    !isLoadingNextPage &&
+    page < totalPages &&
+    nextPageVisibleCount > 0;
 
   return (
     <div className={styles.page}>
@@ -117,7 +151,7 @@ function ActivitiesPage() {
           <div>
             <span className={styles.kicker}>Activities</span>
             <h1 className={styles.title}>Your Activities</h1>
-            <p className={styles.subtitle}>{runCount} activities</p>
+            <p className={styles.subtitle}>{totalActivities} total activities</p>
           </div>
         </header>
 
@@ -295,10 +329,27 @@ function ActivitiesPage() {
           >
             ← Previous
           </button>
-          <span className={styles.pageInfo}>Page {page}</span>
+
+          <div className={styles.pageInfo}>
+            <span>Page</span>
+            <select
+              className={styles.pageSelect}
+              value={page}
+              onChange={(e) => setPage(Number(e.target.value))}
+              aria-label="Select activities page"
+            >
+              {pageOptions.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+            <span>of {totalPages}</span>
+          </div>
+
           <button
             onClick={() => setPage(page + 1)}
-            disabled={!activities || activities.length < 100}
+            disabled={!canGoNext}
             className={styles.pageButton}
           >
             Next →

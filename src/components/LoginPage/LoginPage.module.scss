@@ -11,15 +11,15 @@
 
 .layout {
   position: relative;
-  width: min(1240px, calc(100vw - 36px));
-  height: min(760px, calc(100vh - 36px));
+  width: min(77.5rem, calc(100vw - 2.25rem));
+  height: min(47.5rem, calc(100vh - 2.25rem));
   display: grid;
   grid-template-columns: 1fr 1fr;
   background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 0.0625rem solid var(--border);
+  border-radius: 0.5rem;
   overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+  box-shadow: 0 1.5rem 3.75rem rgba(0, 0, 0, 0.34);
 }
 
 .box {
@@ -28,9 +28,9 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 26px;
-  padding: clamp(84px, 10vh, 122px) clamp(28px, 5vw, 72px) clamp(34px, 7vh, 68px);
-  border-right: 1px solid var(--border);
+  gap: 1.625rem;
+  padding: clamp(5.25rem, 10vh, 7.625rem) clamp(1.75rem, 5vw, 4.5rem) clamp(2.125rem, 7vh, 4.25rem);
+  border-right: 0.0625rem solid var(--border);
   background: var(--paper);
   text-align: left;
 }
@@ -42,7 +42,7 @@
 }
 
 .brandLogo {
-  width: min(220px, 38vw);
+  width: min(13.75rem, 38vw);
   height: auto;
   display: block;
   filter: brightness(0) invert(1);
@@ -52,14 +52,14 @@
 .copyBlock {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 500px;
+  gap: 0.625rem;
+  max-width: 31.25rem;
 }
 
 .kicker {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -82,7 +82,7 @@
   font-size: 1rem;
   line-height: 1.58;
   color: var(--ink-60);
-  max-width: 440px;
+  max-width: 27.5rem;
 }
 
 .ctaButton {
@@ -96,7 +96,7 @@
     opacity 200ms;
 
   &:hover:not(:disabled) {
-    transform: translateY(-1px);
+    transform: translateY(-0.0625rem);
   }
 
   &:disabled {
@@ -107,17 +107,17 @@
 
 .ctaImage {
   display: block;
-  width: min(290px, 74vw);
+  width: min(18.125rem, 74vw);
   height: auto;
-  border-radius: 4px;
-  box-shadow: 0 7px 16px rgba(0, 0, 0, 0.12);
+  border-radius: 0.25rem;
+  box-shadow: 0 0.4375rem 1rem rgba(0, 0, 0, 0.12);
 }
 
 .legalNote {
   margin: 0;
-  max-width: 430px;
+  max-width: 26.875rem;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 0.625rem;
   letter-spacing: 0.045em;
   line-height: 1.45;
   color: var(--ink-40);
@@ -156,23 +156,23 @@
   pointer-events: none;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 60rem) {
   .layout {
-    width: min(760px, calc(100vw - 20px));
-    height: min(860px, calc(100vh - 20px));
+    width: min(47.5rem, calc(100vw - 1.25rem));
+    height: min(53.75rem, calc(100vh - 1.25rem));
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 1fr;
   }
 
   .box {
-    gap: 22px;
-    padding: 72px 22px 24px;
+    gap: 1.375rem;
+    padding: 4.5rem 1.375rem 1.5rem;
     border-right: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 0.0625rem solid var(--border);
   }
 
   .brandLogo {
-    width: min(170px, 48vw);
+    width: min(10.625rem, 48vw);
   }
 
   .headline {
@@ -184,6 +184,6 @@
   }
 
   .ctaImage {
-    width: min(258px, 80vw);
+    width: min(16.125rem, 80vw);
   }
 }

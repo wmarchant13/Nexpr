@@ -1,7 +1,7 @@
 /* ── Partner Footer ──────────────────────────────────────────────────────────
  *
  * Renders mandatory Strava attribution + optional Garmin attribution.
- * Style Guide: Technical Minimalist — #050505 bg, 1px solid #1A1A1A borders.
+ * Style Guide: Technical Minimalist — #050505 bg, 0.0625rem solid #1A1A1A borders.
  * ────────────────────────────────────────────────────────────────────────── */
 
 .root {
@@ -10,7 +10,7 @@
   align-items: flex-start;
   gap: 0.5rem;
   padding: 1rem 0 0.5rem;
-  border-top: 1px solid var(--border);
+  border-top: 0.0625rem solid var(--border);
 }
 
 /* Garmin attribution line */
@@ -33,15 +33,15 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
+    outline: 0.125rem solid var(--accent);
+    outline-offset: 0.1875rem;
     border-radius: 0;
   }
 }
 
 .stravaLogo {
   display: block;
-  /* Minimum height per Strava brand guidelines — do not reduce below 24px */
+  /* Minimum height per Strava brand guidelines — do not reduce below 1.5rem */
   height: 2rem;
   width: auto;
   max-width: 100%;
