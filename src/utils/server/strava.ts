@@ -38,6 +38,18 @@ function getCacheKey(endpoint: string, accessToken: string) {
   return `${accessToken}:${endpoint}`;
 }
 
+function getCacheKeyParts(cacheKey: string) {
+  const separatorIndex = cacheKey.indexOf(":");
+  if (separatorIndex === -1) {
+    return null;
+  }
+
+  return {
+    accessToken: cacheKey.slice(0, separatorIndex),
+    endpoint: cacheKey.slice(separatorIndex + 1),
+  };
+}
+
 // Extracts a human-readable message from a failed response
 async function parseError(response: Response): Promise<string> {
   try {
@@ -114,4 +126,31 @@ export async function fetchStrava<T>(
 
   inFlightRequests.set(cacheKey, request);
   return request;
+}
+
+export function clearStravaResponseCache(options: {
+  accessTokens?: string[];
+  endpointPrefixes?: string[];
+}) {
+  const allowedTokens = options.accessTokens ? new Set(options.accessTokens) : null;
+  const endpointPrefixes = options.endpointPrefixes ?? [];
+
+  for (const cacheKey of responseCache.keys()) {
+    const parts = getCacheKeyParts(cacheKey);
+    if (!parts) continue;
+
+    if (allowedTokens && !allowedTokens.has(parts.accessToken)) {
+      continue;
+    }
+
+    if (
+      endpointPrefixes.length > 0 &&
+      !endpointPrefixes.some((prefix) => parts.endpoint.startsWith(prefix))
+    ) {
+      continue;
+    }
+
+    responseCache.delete(cacheKey);
+    inFlightRequests.delete(cacheKey);
+  }
 }

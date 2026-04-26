@@ -99,7 +99,6 @@ export const getActivities = createServerFn({ method: "GET" })
     return fetchStrava<StravaActivity[]>(
       `/athlete/activities?page=${page}&per_page=${perPage}`,
       accessToken,
-      { ttlMs: 60_000 },
     );
   });
 
@@ -110,9 +109,6 @@ export const getStats = createServerFn({ method: "GET" }).handler(
     return fetchStrava<StravaStats>(
       `/athletes/${athleteId}/stats`,
       accessToken,
-      {
-        ttlMs: 5 * 60 * 1000,
-      },
     );
   },
 );

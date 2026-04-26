@@ -4,7 +4,6 @@ import React, { useState, useMemo, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   useActivities,
-  useActivityWebhookSync,
   useAthlete,
   useStats,
   formatPace,
@@ -35,7 +34,6 @@ function ActivitiesPage() {
   const [openSymptomId, setOpenSymptomId] = useState<number | null>(null);
   const { data: athlete } = useAthlete();
   const { data: stats } = useStats(athlete?.id ?? null);
-  useActivityWebhookSync();
   const { data: activities, isLoading } = useActivities(page, PAGE_SIZE);
   const { data: nextPageActivities, isLoading: isLoadingNextPage } = useActivities(
     page + 1,

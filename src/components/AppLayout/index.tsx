@@ -2,11 +2,12 @@ import { Outlet, useNavigate } from "@tanstack/react-router";
 import TabNav from "../TabNav";
 import PartnerFooter from "../PartnerFooter";
 import WeatherWidget from "../WeatherWidget";
-import { useAthlete, useLogout } from "../../hooks";
+import { useActivityWebhookSync, useAthlete, useLogout } from "../../hooks";
 import styles from "./AppLayout.module.scss";
 
 // Root layout shell with header, nav, and main content area
 export default function AppLayout() {
+  useActivityWebhookSync();
   const { data: athlete } = useAthlete();
   const { mutate: logout } = useLogout();
   const navigate = useNavigate();

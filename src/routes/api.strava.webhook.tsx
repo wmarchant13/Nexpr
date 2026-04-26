@@ -106,7 +106,7 @@ export const Route = createFileRoute("/api/strava/webhook")({
         }
 
         if (isActivityEvent) {
-          markAthleteWebhookHit(athleteId);
+          await markAthleteWebhookHit(athleteId);
         }
 
         if (

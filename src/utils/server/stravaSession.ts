@@ -3,7 +3,8 @@ import {
   getCookie,
   setCookie,
 } from "@tanstack/react-start/server";
-import { firstRow, getDb, getRequiredEnv } from "./env";
+import { firstRow, getDb, getRequiredEnv, toRows } from "./env";
+import { clearStravaResponseCache } from "./strava";
 
 const STRAVA_SESSION_COOKIE = "nexpr_strava_session";
 const SESSION_REFRESH_WINDOW_MS = 5 * 60 * 1000;
@@ -293,9 +294,24 @@ export async function deleteAthleteActivityData(
 // Marks all sessions for an athlete as updated so clients can detect webhook events.
 export async function markAthleteWebhookHit(athleteId: number) {
   const db = getDb();
+  const sessions = toRows<{ access_token: string }>(await db`
+    SELECT access_token
+    FROM strava_sessions
+    WHERE athlete_id = ${athleteId}
+  `);
+
   await db`
     UPDATE strava_sessions
     SET updated_at = NOW()
     WHERE athlete_id = ${athleteId}
   `;
+
+  clearStravaResponseCache({
+    accessTokens: sessions.map((session) => session.access_token),
+    endpointPrefixes: [
+      "/athlete/activities",
+      `/athletes/${athleteId}/stats`,
+      "/activities/",
+    ],
+  });
 }

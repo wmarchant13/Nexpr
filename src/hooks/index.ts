@@ -279,6 +279,8 @@ export const useActivities = (page: number = 1, perPage: number = 30) => {
   });
 };
 
+const ACTIVITY_WEBHOOK_POLL_INTERVAL_MS = 5_000;
+
 // Polls only a lightweight webhook signal and refetches activities when it changes.
 export const useActivityWebhookSync = () => {
   const queryClient = useQueryClient();
@@ -290,7 +292,8 @@ export const useActivityWebhookSync = () => {
     enabled: typeof window !== "undefined",
     staleTime: 0,
     gcTime: 60 * 1000,
-    refetchInterval: 15_000,
+    refetchInterval: ACTIVITY_WEBHOOK_POLL_INTERVAL_MS,
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: true,
     retry: false,
   });

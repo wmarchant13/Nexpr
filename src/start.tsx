@@ -38,6 +38,10 @@ const rateLimitMiddleware = createMiddleware({ type: "request" }).server(
     if (response instanceof Response) {
       response.headers.set("X-RateLimit-Limit", String(limit));
       response.headers.set("X-RateLimit-Remaining", String(remaining));
+
+      if (pathname.startsWith("/_server")) {
+        response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+      }
     }
     return response;
   },
