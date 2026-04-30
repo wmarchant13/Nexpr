@@ -36,3 +36,12 @@
   width: auto;
   max-width: 100%;
 }
+
+.openWeatherAttribution {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  color: var(--ink-40);
+  margin-left: 0.75rem;
+  align-self: center;
+  white-space: nowrap;
+}

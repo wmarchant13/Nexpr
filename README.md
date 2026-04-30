@@ -38,3 +38,16 @@ Nexpr is a data-driven running platform that helps athletes turn training data i
 - Bun
 - SCSS Modules
 - Recharts
+
+Thank you to these Pexels users for their media contributions:
+
+- Pressmaster
+  [https://www.pexels.com/video/a-man-running-on-the-beach-shoreline-3191899/]
+- Caique Araujo
+  [https://www.pexels.com/photo/runner-on-the-track-in-shade-15875672/]
+- kf zhou
+  [https://www.pexels.com/photo/people-on-a-running-track-19146676/]
+- Ketut Subiyanto
+  [https://www.pexels.com/photo/people-jogging-on-a-city-street-5036843/]
+- UMUT DAĞLI
+  [https://www.pexels.com/photo/man-running-on-a-street-15085825/]

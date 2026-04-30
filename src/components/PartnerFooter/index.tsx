@@ -22,6 +22,7 @@ function PartnerFooter(_props: PartnerFooterProps) {
           loading="lazy"
         />
       </a>
+      <span className={styles.openWeatherAttribution}>Weather data © OpenWeather</span>
     </footer>
   );
 }
